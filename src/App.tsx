@@ -38,6 +38,7 @@ import { ClientMasterView } from './components/workflow/ClientMasterView';
 import { WaktuPengujianView } from './components/WaktuPengujianView';
 import { FinancialAnalyticsView } from './components/FinancialAnalyticsView';
 import { MobileTechnicianApp } from './components/mobile/MobileTechnicianApp';
+import { saveStateToCloud, loadStateFromCloud, CloudDatabaseState } from './services/cloudSyncService';
 import { LoginView } from './components/LoginView';
 import { GuestBookView } from './components/guestbook/GuestBookView';
 
@@ -862,6 +863,24 @@ export function App() {
   useEffect(() => {
     localStorage.setItem('ansa_lab_personnels', JSON.stringify(personnelCatalogue));
   }, [personnelCatalogue]);
+
+  // REAL-TIME SUPABASE CLOUD DATABASE SYNC EFFECT (Pengaturan & Master + User & PO)
+  useEffect(() => {
+    const cloudState: CloudDatabaseState = {
+      users,
+      clients,
+      pos,
+      containers: containerCatalogue,
+      rings: ringCatalogue,
+      consolRings: consolRingCatalogue,
+      pycnometers: pycCatalogue,
+      molds: moldCatalogue,
+      reamers: reamerCatalogue,
+      personnels: personnelCatalogue,
+      updatedAt: new Date().toISOString(),
+    };
+    saveStateToCloud(cloudState);
+  }, [users, clients, pos, containerCatalogue, ringCatalogue, consolRingCatalogue, pycCatalogue, moldCatalogue, reamerCatalogue, personnelCatalogue]);
 
   const handleUpdatePersonnelCatalogue = (updated: PersonnelItem[]) => {
     setPersonnelCatalogue(updated);
