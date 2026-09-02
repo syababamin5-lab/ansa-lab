@@ -414,6 +414,55 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const dsAreaCm2 = numDsDia > 0 ? (Math.PI / 4) * Math.pow(numDsDia, 2) : 0;
   const dsVolumeCm3 = (dsAreaCm2 > 0 && numDsHeight > 0) ? dsAreaCm2 * numDsHeight : 0;
 
+  // FIX: Re-sync ALL test form states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft & buka ulang)
+  useEffect(() => {
+    const iv = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+
+    // SG
+    setPycNo(iv.pycNo || '');
+    setPycWaterTemp(iv.pycWaterTemp || '');
+    setPycGsVal(iv.pycGsVal || '');
+    setPycNo1(iv.pycNo1 || '');
+    setPycNo2(iv.pycNo2 || '');
+    setWtDrySoil1(iv.wtDrySoil1 || '');
+    setWtDrySoil2(iv.wtDrySoil2 || '');
+    setTemp1(iv.temp1 || '');
+    setTemp2(iv.temp2 || '');
+    setWtPycWaterSoil1(iv.wtPycWaterSoil1 || '');
+    setWtPycWaterSoil2(iv.wtPycWaterSoil2 || '');
+
+    // ATB
+    setAtbBlows(iv.atbBlows || ['', '', '', '']);
+    setAtbContainer(iv.atbContainer || ['', '', '', '']);
+    setAtbWet(iv.atbWet || ['', '', '', '']);
+    setAtbDry(iv.atbDry || ['', '', '', '']);
+    setAtbPlContainer(iv.atbPlContainer || ['', '']);
+    setAtbPlWet(iv.atbPlWet || ['', '']);
+    setAtbPlDry(iv.atbPlDry || ['', '']);
+
+    // SVE-HYD
+    setShSieveRetained(iv.shSieveRetained || Array(15).fill(''));
+    setShHydroSoilWeight(iv.shHydroSoilWeight || iv.hydroSoilWt || '');
+    setShHydroTemp(iv.shHydroTemp || iv.hydroTemp || '');
+    setShHydroMeniscus(iv.shHydroMeniscus || iv.hydroMeniscus || '');
+    setShHydroDispersant(iv.shHydroDispersant || iv.hydroDispersant || '');
+    setShHydroReadings(iv.shHydroReadings || Array(9).fill(''));
+
+    // DS-UU
+    setDsUuRingNo(iv.dsUuRingNo || iv.dsRingNo || '');
+    setDsUuRingDia(iv.dsUuRingDia || iv.dsRingDia || '');
+    setDsUuRingHeight(iv.dsUuRingHeight || iv.dsRingHeight || '');
+    setDsUuProvingCalibration(iv.dsUuProvingCalibration || iv.dsProvingCalibration || '0.12064');
+    setDsUuNormalLoads(getArrayOrFlatSync(iv, 'dsUuNormalLoads', 'dsUuNormalLoads', 3));
+    setDsUuWetSoilPlusRing(getArrayOrFlatSync(iv, 'dsUuWetSoilPlusRing', 'dsUuWetSoilPlusRing', 3));
+    setDsUuContainerNo(getArrayOrFlatSync(iv, 'dsUuContainerNo', 'dsUuContainerNo', 3));
+    setDsUuWetCanWeight(getArrayOrFlatSync(iv, 'dsUuWetCanWeight', 'dsUuWetCanWeight', 3));
+    setDsUuDryCanWeight(getArrayOrFlatSync(iv, 'dsUuDryCanWeight', 'dsUuDryCanWeight', 3));
+    setDsUuDialReadingsA(getArrayOrFlatSync(iv, 'dsUuDialReadingsA', 'dsUuDialReadingsA', 10));
+    setDsUuDialReadingsB(getArrayOrFlatSync(iv, 'dsUuDialReadingsB', 'dsUuDialReadingsB', 10));
+    setDsUuDialReadingsC(getArrayOrFlatSync(iv, 'dsUuDialReadingsC', 'dsUuDialReadingsC', 10));
+  }, [activeTest?.id, activeTestCode]);
+
   // --- SVE-HYD COMPUTATIONS FOR MOBILE ---
   const updateSieveRetained = (idx: number, val: string) => {
     setShSieveRetained(prev => {
@@ -1108,6 +1157,64 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   // 9. Unit Weight / Density (UW)
   const [uwRingNo, setUwRingNo] = useState(activeTest?.calculationData?.inputValues?.ringNo ?? '');
   const [uwRingWetWeight, setUwRingWetWeight] = useState(activeTest?.calculationData?.inputValues?.ringWetWeight || '');
+
+  // FIX: Re-sync UW, TRX, UCT, CT, CBR, PRM states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft)
+  useEffect(() => {
+    const iv = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+
+    // UW
+    setUwRingNo(iv.ringNo ?? '');
+    setUwRingWetWeight(iv.ringWetWeight || '');
+
+    // Direct Shear / Ring shared
+    setCohesionInput(iv.cohesion || '');
+    setFrictionAngleInput(iv.frictionAngle || '');
+    setSelectedRingNo(iv.ringNo ?? '');
+    setLrcInput(iv.lrc || '0.12064');
+
+    // TRX
+    setTrxUuMethod(iv.trxUuMethod || 'normal');
+    setTrxDia(iv.trxDia || '3.80');
+    setTrxHeight(iv.trxHeight || '7.60');
+    setTrxDialDiv(iv.trxDialDiv || '0.002');
+    setTrxLoadRate(iv.trxLoadRate || '0.140');
+    setTrxRingNo(iv.trxRingNo || 'GT-105 (S/N: 235669)');
+    setTrxLrc(iv.trxLrc || '0.12064');
+    setTrxCellPressures(iv.trxCellPressures || ['0.500', '1.000', '2.000']);
+    setTrxLoadReadingsA(getArrayOrFlatSync(iv, 'trxLoadReadingsA', 'trxLoadA', 20));
+    setTrxLoadReadingsB(getArrayOrFlatSync(iv, 'trxLoadReadingsB', 'trxLoadB', 20));
+    setTrxLoadReadingsC(getArrayOrFlatSync(iv, 'trxLoadReadingsC', 'trxLoadC', 20));
+
+    // UCT
+    setUctDeformRate(iv.uctDeformRate || '1.000');
+    setUctRingNo(iv.uctRingNo || 'GT-102 (100.CKAF09.25)');
+    setUctPrCalib(iv.uctPrCalib || '0.5778');
+    setUctDiaUds(iv.uctDiaUds || '38.000');
+    setUctLengthUds(iv.uctLengthUds || '76.000');
+    setUctWetMassUds(iv.uctWetMassUds || '');
+    setUctDryMassUds(iv.uctDryMassUds || '');
+    setUctDialDeformUds(iv.uctDialDeformUds || DEFAULT_UCT_DEFORM_STEPS);
+    setUctDialForceUds(iv.uctDialForceUds || Array(DEFAULT_UCT_DEFORM_STEPS.length).fill(''));
+    setUctDiaRem(iv.uctDiaRem || '38.000');
+    setUctLengthRem(iv.uctLengthRem || '76.000');
+    setUctWetMassRem(iv.uctWetMassRem || '');
+    setUctDryMassRem(iv.uctDryMassRem || '');
+    setUctDialDeformRem(iv.uctDialDeformRem || DEFAULT_UCT_DEFORM_STEPS);
+    setUctDialForceRem(iv.uctDialForceRem || Array(DEFAULT_UCT_DEFORM_STEPS.length).fill(''));
+
+    // CT
+    setConsolCc(iv.cc || '');
+    setConsolCs(iv.cs || '');
+    setConsolPc(iv.pc || '');
+
+    // CBR
+    setCbrMoldNo(iv.cbrMoldNo || 'MLD-01');
+    setCbrSwelling(iv.cbrSwelling || '0.15');
+    setCbrPctVal(iv.cbrPctVal || '');
+
+    // PRM
+    setPrmKVal(iv.prmKVal || '');
+  }, [activeTest?.id, activeTestCode]);
 
   // Unit Weight calculations
   const cleanUwRingCode = (uwRingNo || '').trim().toUpperCase();
