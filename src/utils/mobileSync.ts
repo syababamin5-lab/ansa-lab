@@ -1,4 +1,4 @@
-import { Sample, PurchaseOrder } from '../types';
+import { Sample, PurchaseOrder, SampleTest } from '../types';
 
 export interface PendingOfflineUpdate {
   id: string;
@@ -204,5 +204,114 @@ export const buildDualKeyPayload = (
     payload[`${flatPrefix}${i + 1}`] = cleanedArr[i] ?? '';
   }
   return payload;
+};
+
+export type MobileTestButtonState = {
+  statusType: 'completed' | 'draft' | 'unstarted';
+  label: string;
+  bgClass: string;
+};
+
+/**
+ * Determine dynamic button state:
+ * - 'Selesai Uji': jika form sudah terisi semua dan di klik/geser selesai uji
+ * - 'Lanjutkan': jika form sudah diisi sebagian (1 angka, tanggal, atau warna tanah)
+ * - 'Input Uji': jika form masih kosong sama sekali
+ */
+export const getMobileTestButtonState = (test: SampleTest | undefined): MobileTestButtonState => {
+  if (!test) {
+    return {
+      statusType: 'unstarted',
+      label: 'Input Uji',
+      bgClass: 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs',
+    };
+  }
+
+  // 1. KONDISI SELESAI UJI (Sudah di-klik selesai uji atau di-geser slider)
+  const isCompleted =
+    test.status === 'Selesai' ||
+    test.status === 'Completed' ||
+    Boolean(test.lockedByTechnician) ||
+    test.calculationStatus === 'Calculated';
+
+  if (isCompleted) {
+    return {
+      statusType: 'completed',
+      label: 'Selesai Uji',
+      bgClass: 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs',
+    };
+  }
+
+  // 2. KONDISI LANJUTKAN (Form sudah diisi sebagian, 1 angka, tanggal, atau pilihan warna)
+  const calcData = test.calculationData;
+  const orig = test.originalTechnicianInput;
+  const inputs: Record<string, any> = {
+    ...(typeof calcData === 'object' ? (calcData?.inputValues || calcData) : {}),
+    ...(orig?.inputValues || {}),
+  };
+
+  // Cek Tanggal
+  const hasDate = Boolean(
+    (inputs.dateStarted && String(inputs.dateStarted).trim() !== '') ||
+    (inputs.dateCompleted && String(inputs.dateCompleted).trim() !== '') ||
+    (inputs.dateTested && String(inputs.dateTested).trim() !== '') ||
+    (orig?.dateStarted && String(orig.dateStarted).trim() !== '') ||
+    (orig?.dateCompleted && String(orig.dateCompleted).trim() !== '') ||
+    (test.startTime && String(test.startTime).trim() !== '')
+  );
+
+  // Cek Pemilihan Warna Tanah
+  const hasSoilColour = Boolean(
+    (inputs.soilColourCode !== undefined && inputs.soilColourCode !== null && inputs.soilColourCode !== 0 && inputs.soilColourCode !== '0') ||
+    (inputs.soilColourName && String(inputs.soilColourName).trim() !== '')
+  );
+
+  // Cek Foto
+  const photos = test.photos || inputs.photos || orig?.photos || [];
+  const hasPhotos = Array.isArray(photos) && photos.length > 0;
+
+  // Cek Status Sedang Diuji
+  const isDraftStatus = test.status === 'Sedang Diuji' || test.calculationStatus === 'Draft Data';
+
+  // Cek Nilai Parameter Input apapun (bahkan 1 angka sekalipun)
+  const metadataKeys = new Set([
+    'testedBy', 'technicianName', 'assignedTechnician', 'status',
+    'dateStarted', 'dateCompleted', 'dateTested', 'dateTestedEnd',
+    'soilColourCode', 'soilColourName', 'soilColourNameEn', 'photos',
+    'testCode', 'testTypeCode', 'testTypeId'
+  ]);
+
+  let hasAnyInputData = false;
+  for (const [k, v] of Object.entries(inputs)) {
+    if (metadataKeys.has(k)) continue;
+    if (v === undefined || v === null) continue;
+    if (typeof v === 'string' && v.trim() !== '' && v.trim() !== '-') {
+      hasAnyInputData = true;
+      break;
+    }
+    if (typeof v === 'number' && v > 0) {
+      hasAnyInputData = true;
+      break;
+    }
+    if (Array.isArray(v) && v.some(item => item !== undefined && item !== null && String(item).trim() !== '' && String(item) !== '0' && String(item) !== '-')) {
+      hasAnyInputData = true;
+      break;
+    }
+  }
+
+  if (hasDate || hasSoilColour || hasPhotos || isDraftStatus || hasAnyInputData) {
+    return {
+      statusType: 'draft',
+      label: 'Lanjutkan',
+      bgClass: 'bg-amber-500 hover:bg-amber-600 text-white shadow-xs',
+    };
+  }
+
+  // 3. JIKA BELUM KEDUANYA: INPUT UJI
+  return {
+    statusType: 'unstarted',
+    label: 'Input Uji',
+    bgClass: 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs',
+  };
 };
 

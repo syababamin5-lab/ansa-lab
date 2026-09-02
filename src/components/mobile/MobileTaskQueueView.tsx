@@ -13,11 +13,14 @@ import {
   FileSpreadsheet,
   Filter,
   UserCheck,
-  User
+  User,
+  Play,
+  Plus
 } from 'lucide-react';
 
 import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
+import { getMobileTestButtonState } from '../../utils/mobileSync';
 
 interface MobileTaskQueueViewProps {
   pos: PurchaseOrder[];
@@ -137,8 +140,7 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
   });
 
   const getCardCategory = (test: any) => {
-    const statusObj = getTestStatus3State(test);
-    return statusObj.state;
+    return getMobileTestButtonState(test).statusType;
   };
 
   const unstartedCount = allTaskCards.filter(({ test }) => getCardCategory(test) === 'unstarted').length;
@@ -314,9 +316,17 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
                     </div>
                   </div>
 
-                  <button className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1 shrink-0 shadow-xs">
-                    <span>Input Uji {testCode}</span>
-                  </button>
+                  {(() => {
+                    const btn = getMobileTestButtonState(test);
+                    return (
+                      <button className={`px-3 py-1.5 rounded-xl ${btn.bgClass} text-xs font-extrabold flex items-center gap-1 shrink-0 shadow-xs transition active:scale-95`}>
+                        {btn.statusType === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                        {btn.statusType === 'draft' && <Play className="w-3 h-3 fill-current" />}
+                        {btn.statusType === 'unstarted' && <Plus className="w-3.5 h-3.5" />}
+                        <span>{btn.label}</span>
+                      </button>
+                    );
+                  })()}
                 </div>
 
                 <div className="bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100 flex items-center justify-between gap-2 text-xs">

@@ -16,11 +16,14 @@ import {
   WifiOff,
   RefreshCw,
   UserCheck,
-  User
+  User,
+  Play,
+  Plus
 } from 'lucide-react';
 
 import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
+import { getMobileTestButtonState } from '../../utils/mobileSync';
 
 interface MobileDashboardViewProps {
   pos: PurchaseOrder[];
@@ -415,9 +418,17 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
                       </div>
                     </div>
 
-                    <button className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shrink-0 shadow-2xs">
-                      Input Uji
-                    </button>
+                    {(() => {
+                      const btn = getMobileTestButtonState(test);
+                      return (
+                        <button className={`px-3 py-1.5 rounded-xl ${btn.bgClass} text-xs font-extrabold flex items-center gap-1 shrink-0 shadow-2xs transition active:scale-95`}>
+                          {btn.statusType === 'completed' && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                          {btn.statusType === 'draft' && <Play className="w-3 h-3 fill-current" />}
+                          {btn.statusType === 'unstarted' && <Plus className="w-3.5 h-3.5" />}
+                          <span>{btn.label}</span>
+                        </button>
+                      );
+                    })()}
                   </div>
 
                   <div className="flex items-center justify-between text-xs pt-1">

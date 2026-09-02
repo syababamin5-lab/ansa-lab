@@ -139,6 +139,16 @@ export function getTestStatus3State(testObj: SampleTest | undefined, activeState
     };
   }
 
+  // EXPLICIT COMPLETED GUARD:
+  if (testObj?.status === 'Selesai' || testObj?.status === 'Completed' || Boolean(testObj?.lockedByTechnician)) {
+    return {
+      state: 'completed',
+      label: 'Selesai',
+      bgClass: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+      iconType: 'check'
+    };
+  }
+
   // EXPLICIT DRAFT GUARD:
   // If the test has calculationStatus === 'Draft Data' or status === 'Sedang Diuji' / 'Draft Data',
   // and is NOT explicitly finalized with status === 'Selesai' or 'Completed',
