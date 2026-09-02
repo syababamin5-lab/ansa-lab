@@ -35,8 +35,8 @@ export interface CloudDatabaseState {
 export function getInitialMasterState(): CloudDatabaseState {
   return {
     users: INITIAL_USERS,
-    clients: INITIAL_CLIENTS,
-    pos: INITIAL_POS,
+    clients: [],
+    pos: [],
     containers: DEFAULT_CONTAINER_CATALOGUE,
     rings: DEFAULT_RING_CATALOGUE,
     consolRings: DEFAULT_CONSOL_RING_CATALOGUE,

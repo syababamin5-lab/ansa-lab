@@ -281,13 +281,13 @@ export function App() {
 
   // Persistent PO state with clean initial fallback
   const [pos, setPos] = useState<PurchaseOrder[]>(() => {
-    let initialList = INITIAL_POS;
+    let initialList: PurchaseOrder[] = INITIAL_POS;
     const saved = localStorage.getItem('ansa_lab_pos');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          initialList = parsed;
+          initialList = parsed.filter((p: any) => p.id !== 'po-tdk-001' && p.id !== 'po-sandbox-all-in-one');
         }
       } catch (e) { console.error(e); }
     }
