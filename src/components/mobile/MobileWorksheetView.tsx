@@ -162,7 +162,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
     setSoilColourCode(currentSubTabInputs.soilColourCode ?? activeTest?.soilColourCode ?? sample.colourCode ?? 0);
   }, [activeTestCode, activeTest, sample]);
 
-  // ????????? LOCAL TEST INPUT STATES (ALL LAB SOIL TEST TYPES) ???????????????????????????????????????
+  // ????????? LOCAL TEST INPUT STATES (ALL LAB SOIL TEST TYPES) ???????????????????????????????????????\
   // 1. Physical Properties & Moisture Content (MC - Trial 1 & Trial 2)
   const [mcContainer, setMcContainer] = useState(activeTest?.calculationData?.inputValues?.mcContainer ?? '');
   const [mcWet, setMcWet] = useState(activeTest?.calculationData?.inputValues?.mcWet || '');
@@ -177,6 +177,23 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const [mcDry2, setMcDry2] = useState(activeTest?.calculationData?.inputValues?.mcDry2 || '');
   const [mcTare1, setMcTare1] = useState(activeTest?.calculationData?.inputValues?.mcTare1 || activeTest?.calculationData?.inputValues?.mcTare || '');
   const [mcTare2, setMcTare2] = useState(activeTest?.calculationData?.inputValues?.mcTare2 || '');
+
+  // FIX: Re-sync MC state setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft & buka ulang)
+  useEffect(() => {
+    const iv = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+    setMcContainer(iv.mcContainer ?? '');
+    setMcWet(iv.mcWet || '');
+    setMcDry(iv.mcDry || '');
+    setMcTare(iv.mcTare || '');
+    setMcContainer1(iv.mcContainer1 ?? iv.mcContainer ?? '');
+    setMcContainer2(iv.mcContainer2 ?? '');
+    setMcWet1(iv.mcWet1 || iv.mcWet || '');
+    setMcWet2(iv.mcWet2 || '');
+    setMcDry1(iv.mcDry1 || iv.mcDry || '');
+    setMcDry2(iv.mcDry2 || '');
+    setMcTare1(iv.mcTare1 || iv.mcTare || '');
+    setMcTare2(iv.mcTare2 || '');
+  }, [activeTest?.id, activeTestCode]);
 
   // Auto-fill tare when container changes
   useEffect(() => {
