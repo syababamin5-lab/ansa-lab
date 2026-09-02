@@ -540,9 +540,14 @@ export function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map((c: any) => String(c.id).toUpperCase()));
+          const defaultMap = new Map(DEFAULT_CONTAINER_CATALOGUE.map(c => [String(c.id).toUpperCase(), c.weight]));
+          const updatedParsed = parsed.map((c: any) => {
+            const officialWt = defaultMap.get(String(c.id).toUpperCase());
+            return officialWt !== undefined ? { ...c, weight: officialWt } : c;
+          });
+          const existingIds = new Set(updatedParsed.map((c: any) => String(c.id).toUpperCase()));
           const missingDefaults = DEFAULT_CONTAINER_CATALOGUE.filter(c => !existingIds.has(String(c.id).toUpperCase()));
-          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+          return missingDefaults.length > 0 ? [...updatedParsed, ...missingDefaults] : updatedParsed;
         }
       } catch (e) { console.error(e); }
     }
