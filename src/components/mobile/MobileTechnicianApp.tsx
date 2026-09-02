@@ -9,6 +9,7 @@ import { MobileLabTimersView } from './MobileLabTimersView';
 import { MobileHistoryView } from './MobileHistoryView';
 import { MobileProfileView } from './MobileProfileView';
 import { getOfflineQueue, queueOfflineSampleUpdate, syncOfflineQueueToPos, PendingOfflineUpdate } from '../../utils/mobileSync';
+import { loadStateFromCloud, saveStateToCloud } from '../../services/cloudSyncService';
 import {
   LayoutDashboard,
   FileSpreadsheet,
@@ -177,6 +178,8 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
     const targetCode = (updatedSample.sampleCode || '').trim().toUpperCase();
     const targetId = (updatedSample.id || '').trim();
 
+    let computedNextPos: PurchaseOrder[] = [];
+
     // 1. Update React state locally so technician sees their inputs immediately
     setPos(prevPos => {
       const nextPos = prevPos.map(po => {
@@ -201,6 +204,8 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
           updatedAt: new Date().toISOString(),
         };
       });
+
+      computedNextPos = nextPos;
 
       try {
         localStorage.setItem('ansa_lab_pos', JSON.stringify(nextPos));
@@ -237,16 +242,32 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
       setSyncToastMsg(`🔒 Tersimpan di Mode Offline HP (${nextQueue.length} data pending sync).`);
       setTimeout(() => setSyncToastMsg(null), 4000);
     } else {
-      // 3. Mode Online: Broadcast update across tabs
+      // 3. Mode Online: Broadcast update across tabs (send BOTH pos array & sample object)
       try {
         if (typeof BroadcastChannel !== 'undefined') {
           const channel = new BroadcastChannel('ansa_lab_realtime_sync');
-          channel.postMessage({ type: 'SYNC_POS', sample: updatedSample });
+          channel.postMessage({
+            type: 'SYNC_POS',
+            pos: computedNextPos.length > 0 ? computedNextPos : undefined,
+            sample: updatedSample
+          });
           channel.close();
         }
       } catch (e) {
         console.error('Error broadcasting update:', e);
       }
+
+      // 4. Immediately sync to Cloud Database (Vercel KV REST) so Web App on desktop receives it
+      loadStateFromCloud().then(cloudState => {
+        if (cloudState && computedNextPos.length > 0) {
+          saveStateToCloud({
+            ...cloudState,
+            pos: computedNextPos,
+            updatedAt: new Date().toISOString(),
+          }).catch(err => console.error('Immediate cloud save error:', err));
+        }
+      }).catch(err => console.error('Cloud load before save error:', err));
+
       setSyncToastMsg('🌐 Berhasil Di-Posting ke Web App & Server!');
       setTimeout(() => setSyncToastMsg(null), 3500);
     }

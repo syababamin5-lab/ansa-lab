@@ -324,8 +324,26 @@ export function App() {
     if (typeof BroadcastChannel !== 'undefined') {
       channel = new BroadcastChannel('ansa_lab_realtime_sync');
       channel.onmessage = (e) => {
-        if (e.data?.type === 'SYNC_POS' && e.data?.pos) {
-          handleSync(e.data.pos);
+        if (e.data?.type === 'SYNC_POS') {
+          if (e.data?.pos && Array.isArray(e.data.pos)) {
+            handleSync(e.data.pos);
+          } else if (e.data?.sample) {
+            setPos(prev => {
+              const next = prev.map(po => ({
+                ...po,
+                samples: po.samples.map(s => {
+                  const targetCode = (e.data.sample.sampleCode || '').trim().toUpperCase();
+                  const targetId = (e.data.sample.id || '').trim();
+                  const sCode = (s.sampleCode || '').trim().toUpperCase();
+                  const sId = (s.id || '').trim();
+                  const isMatch = (targetId && sId === targetId) || (targetCode && sCode === targetCode);
+                  return isMatch ? { ...s, ...e.data.sample } : s;
+                })
+              }));
+              handleSync(next);
+              return next;
+            });
+          }
         }
       };
     }
@@ -938,7 +956,35 @@ export function App() {
       try {
         const cloudState = await loadStateFromCloud();
         if (isMounted && cloudState) {
-          if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
+          // Guard against overwriting newer local edits with older cloud snapshot
+          const localSaved = localStorage.getItem('ansa_lab_pos');
+          let localNewestTs = 0;
+          if (localSaved) {
+            try {
+              const parsed = JSON.parse(localSaved);
+              if (Array.isArray(parsed)) {
+                parsed.forEach((po: any) => {
+                  if (po.updatedAt) {
+                    const t = new Date(po.updatedAt).getTime();
+                    if (t > localNewestTs) localNewestTs = t;
+                  }
+                  (po.samples || []).forEach((s: any) => {
+                    if (s.updatedAt) {
+                      const st = new Date(s.updatedAt).getTime();
+                      if (st > localNewestTs) localNewestTs = st;
+                    }
+                  });
+                });
+              }
+            } catch (err) {}
+          }
+
+          const cloudTs = cloudState.updatedAt ? new Date(cloudState.updatedAt).getTime() : 0;
+          if (Array.isArray(cloudState.pos) && cloudState.pos.length > 0) {
+            if (localNewestTs === 0 || cloudTs >= localNewestTs) {
+              setPos(cloudState.pos);
+            }
+          }
           if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
           if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
           if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);

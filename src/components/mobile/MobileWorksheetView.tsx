@@ -133,15 +133,12 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
 
   // Get active test object
   const activeNorm = (activeTestCode || '').toUpperCase().trim();
-  const activeTest = currentSample.tests.find(t => {
-    const code = (t.testTypeCode || t.testTypeId || '').toUpperCase().trim();
-    if (code === activeNorm) return true;
-    if (['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && code === 'PP') return true;
-    if (isSieveHydroCode(activeNorm) && isSieveHydroCode(code)) return true;
-    if (['PB', 'PRM'].includes(activeNorm) && ['PB', 'PRM'].includes(code)) return true;
-    if (['CT', 'CNS'].includes(activeNorm) && ['CT', 'CNS'].includes(code)) return true;
-    return code.includes(activeNorm) || activeNorm.includes(code);
-  }) || currentSample.tests[0];
+  const activeTest =
+    currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === activeNorm) ||
+    currentSample.tests.find(t => isSieveHydroCode(activeNorm) && isSieveHydroCode(t.testTypeCode || t.testTypeId)) ||
+    currentSample.tests.find(t => ['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP') ||
+    currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP') ||
+    currentSample.tests[0];
 
   // Helper to find container tare weight (returns 0 if not found in master catalogue)
   const findContainerTare = (code: string) => {
@@ -215,18 +212,19 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const computedMcPct = drySoilWeight > 0 ? (waterWeight / drySoilWeight) * 100 : 0;
 
   // 2. Specific Gravity (SG) - Trial 1 & Trial 2
-  const [pycNo, setPycNo] = useState(activeTest?.calculationData?.inputValues?.pycNo || '');
-  const [pycWaterTemp, setPycWaterTemp] = useState(activeTest?.calculationData?.inputValues?.pycWaterTemp || '');
-  const [pycGsVal, setPycGsVal] = useState(activeTest?.calculationData?.inputValues?.pycGsVal || '');
+  const initialIv = activeTest?.originalTechnicianInput?.inputValues || activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+  const [pycNo, setPycNo] = useState(initialIv.pycNo || initialIv.pycNo1 || '');
+  const [pycWaterTemp, setPycWaterTemp] = useState(initialIv.pycWaterTemp || initialIv.temp1 || '');
+  const [pycGsVal, setPycGsVal] = useState(initialIv.pycGsVal || initialIv.gsAvg || '');
 
-  const [pycNo1, setPycNo1] = useState(activeTest?.calculationData?.inputValues?.pycNo1 || activeTest?.calculationData?.inputValues?.pycNo || '');
-  const [pycNo2, setPycNo2] = useState(activeTest?.calculationData?.inputValues?.pycNo2 || '');
-  const [wtDrySoil1, setWtDrySoil1] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil1 || (activeTest?.calculationData?.inputValues?.sgA1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgA1) : ''));
-  const [wtDrySoil2, setWtDrySoil2] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil2 || (activeTest?.calculationData?.inputValues?.sgA2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgA2) : ''));
-  const [temp1, setTemp1] = useState(activeTest?.calculationData?.inputValues?.temp1 || (activeTest?.calculationData?.inputValues?.sgT1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgT1) : ''));
-  const [temp2, setTemp2] = useState(activeTest?.calculationData?.inputValues?.temp2 || (activeTest?.calculationData?.inputValues?.sgT2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgT2) : ''));
-  const [wtPycWaterSoil1, setWtPycWaterSoil1] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil1 || (activeTest?.calculationData?.inputValues?.sgB1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgB1) : ''));
-  const [wtPycWaterSoil2, setWtPycWaterSoil2] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil2 || (activeTest?.calculationData?.inputValues?.sgB2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgB2) : ''));
+  const [pycNo1, setPycNo1] = useState(initialIv.pycNo1 || initialIv.pycNo || '');
+  const [pycNo2, setPycNo2] = useState(initialIv.pycNo2 || '');
+  const [wtDrySoil1, setWtDrySoil1] = useState(initialIv.wtDrySoil1 || (initialIv.sgA1 !== undefined && initialIv.sgA1 !== null && String(initialIv.sgA1) !== '' ? String(initialIv.sgA1) : ''));
+  const [wtDrySoil2, setWtDrySoil2] = useState(initialIv.wtDrySoil2 || (initialIv.sgA2 !== undefined && initialIv.sgA2 !== null && String(initialIv.sgA2) !== '' ? String(initialIv.sgA2) : ''));
+  const [temp1, setTemp1] = useState(initialIv.temp1 || (initialIv.sgT1 !== undefined && initialIv.sgT1 !== null && String(initialIv.sgT1) !== '' ? String(initialIv.sgT1) : ''));
+  const [temp2, setTemp2] = useState(initialIv.temp2 || (initialIv.sgT2 !== undefined && initialIv.sgT2 !== null && String(initialIv.sgT2) !== '' ? String(initialIv.sgT2) : ''));
+  const [wtPycWaterSoil1, setWtPycWaterSoil1] = useState(initialIv.wtPycWaterSoil1 || (initialIv.sgB1 !== undefined && initialIv.sgB1 !== null && String(initialIv.sgB1) !== '' ? String(initialIv.sgB1) : ''));
+  const [wtPycWaterSoil2, setWtPycWaterSoil2] = useState(initialIv.wtPycWaterSoil2 || (initialIv.sgB2 !== undefined && initialIv.sgB2 !== null && String(initialIv.sgB2) !== '' ? String(initialIv.sgB2) : ''));
 
   // Specific Gravity Live Calculations (SNI 1964:2008 / ASTM D854)
   const effectivePycCatalogue = (pycnometerCatalogue && pycnometerCatalogue.length > 0) ? pycnometerCatalogue : DEFAULT_PYCNOMETER_CATALOGUE;
@@ -451,17 +449,26 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       : (activeTest?.calculationData?.inputValues || activeTest?.calculationData || {});
 
     // SG
-    setPycNo(iv.pycNo || '');
-    setPycWaterTemp(iv.pycWaterTemp || '');
+    const valPyc1 = iv.pycNo1 || iv.pycNo || '';
+    const valPyc2 = iv.pycNo2 || '';
+    const valA1 = iv.wtDrySoil1 || (iv.sgA1 !== undefined && iv.sgA1 !== null && String(iv.sgA1) !== '' ? String(iv.sgA1) : '');
+    const valA2 = iv.wtDrySoil2 || (iv.sgA2 !== undefined && iv.sgA2 !== null && String(iv.sgA2) !== '' ? String(iv.sgA2) : '');
+    const valT1 = iv.temp1 || (iv.sgT1 !== undefined && iv.sgT1 !== null && String(iv.sgT1) !== '' ? String(iv.sgT1) : '');
+    const valT2 = iv.temp2 || (iv.sgT2 !== undefined && iv.sgT2 !== null && String(iv.sgT2) !== '' ? String(iv.sgT2) : '');
+    const valB1 = iv.wtPycWaterSoil1 || (iv.sgB1 !== undefined && iv.sgB1 !== null && String(iv.sgB1) !== '' ? String(iv.sgB1) : '');
+    const valB2 = iv.wtPycWaterSoil2 || (iv.sgB2 !== undefined && iv.sgB2 !== null && String(iv.sgB2) !== '' ? String(iv.sgB2) : '');
+
+    setPycNo(valPyc1);
+    setPycWaterTemp(valT1);
     setPycGsVal(iv.pycGsVal || iv.gsAvg || '');
-    setPycNo1(iv.pycNo1 || iv.pycNo || '');
-    setPycNo2(iv.pycNo2 || '');
-    setWtDrySoil1(iv.wtDrySoil1 || (iv.sgA1 !== undefined ? String(iv.sgA1) : ''));
-    setWtDrySoil2(iv.wtDrySoil2 || (iv.sgA2 !== undefined ? String(iv.sgA2) : ''));
-    setTemp1(iv.temp1 || (iv.sgT1 !== undefined ? String(iv.sgT1) : ''));
-    setTemp2(iv.temp2 || (iv.sgT2 !== undefined ? String(iv.sgT2) : ''));
-    setWtPycWaterSoil1(iv.wtPycWaterSoil1 || (iv.sgB1 !== undefined ? String(iv.sgB1) : ''));
-    setWtPycWaterSoil2(iv.wtPycWaterSoil2 || (iv.sgB2 !== undefined ? String(iv.sgB2) : ''));
+    setPycNo1(valPyc1);
+    setPycNo2(valPyc2);
+    setWtDrySoil1(valA1);
+    setWtDrySoil2(valA2);
+    setTemp1(valT1);
+    setTemp2(valT2);
+    setWtPycWaterSoil1(valB1);
+    setWtPycWaterSoil2(valB2);
 
     // ATB
     setAtbBlows(iv.atbBlows || ['', '', '', '']);
@@ -493,7 +500,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
     setDsUuDialReadingsA(getArrayOrFlatSync(iv, 'dsUuDialReadingsA', 'dsUuDialReadingsA', 10));
     setDsUuDialReadingsB(getArrayOrFlatSync(iv, 'dsUuDialReadingsB', 'dsUuDialReadingsB', 10));
     setDsUuDialReadingsC(getArrayOrFlatSync(iv, 'dsUuDialReadingsC', 'dsUuDialReadingsC', 10));
-  }, [activeTest?.id, activeTestCode]);
+  }, [activeTest?.id, activeTestCode, activeTest, currentSample]);
 
   // --- SVE-HYD COMPUTATIONS FOR MOBILE ---
   const updateSieveRetained = (idx: number, val: string) => {
@@ -1633,15 +1640,12 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   // Re-sync photos and test states when active test changes
   useEffect(() => {
     const activeNorm = (activeTestCode || '').toUpperCase().trim();
-    const test = currentSample.tests.find(t => {
-      const code = (t.testTypeCode || t.testTypeId || '').toUpperCase().trim();
-      if (code === activeNorm) return true;
-      if (['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && code === 'PP') return true;
-      if (isSieveHydroCode(activeNorm) && isSieveHydroCode(code)) return true;
-      if (['PB', 'PRM'].includes(activeNorm) && ['PB', 'PRM'].includes(code)) return true;
-      if (['CT', 'CNS'].includes(activeNorm) && ['CT', 'CNS'].includes(code)) return true;
-      return code.includes(activeNorm) || activeNorm.includes(code);
-    }) || currentSample.tests[0];
+    const test =
+      currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === activeNorm) ||
+      currentSample.tests.find(t => isSieveHydroCode(activeNorm) && isSieveHydroCode(t.testTypeCode || t.testTypeId)) ||
+      currentSample.tests.find(t => ['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP') ||
+      currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP') ||
+      currentSample.tests[0];
 
     if (test) {
       const origSnapshot = test.originalTechnicianInput;
@@ -1701,28 +1705,26 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       if (inputs.mcTare2 !== undefined) setMcTare2(inputs.mcTare2);
 
       // Specific Gravity SG 8 fields re-sync
-      if (inputs.pycNo1 !== undefined && inputs.pycNo1 !== '') setPycNo1(inputs.pycNo1);
-      else if (inputs.pycNo !== undefined) setPycNo1(inputs.pycNo);
+      const syncPyc1 = inputs.pycNo1 || inputs.pycNo || '';
+      const syncPyc2 = inputs.pycNo2 || '';
+      const syncA1 = inputs.wtDrySoil1 || (inputs.sgA1 !== undefined && inputs.sgA1 !== null && String(inputs.sgA1) !== '' ? String(inputs.sgA1) : '');
+      const syncA2 = inputs.wtDrySoil2 || (inputs.sgA2 !== undefined && inputs.sgA2 !== null && String(inputs.sgA2) !== '' ? String(inputs.sgA2) : '');
+      const syncT1 = inputs.temp1 || (inputs.sgT1 !== undefined && inputs.sgT1 !== null && String(inputs.sgT1) !== '' ? String(inputs.sgT1) : '');
+      const syncT2 = inputs.temp2 || (inputs.sgT2 !== undefined && inputs.sgT2 !== null && String(inputs.sgT2) !== '' ? String(inputs.sgT2) : '');
+      const syncB1 = inputs.wtPycWaterSoil1 || (inputs.sgB1 !== undefined && inputs.sgB1 !== null && String(inputs.sgB1) !== '' ? String(inputs.sgB1) : '');
+      const syncB2 = inputs.wtPycWaterSoil2 || (inputs.sgB2 !== undefined && inputs.sgB2 !== null && String(inputs.sgB2) !== '' ? String(inputs.sgB2) : '');
 
-      if (inputs.pycNo2 !== undefined && inputs.pycNo2 !== '') setPycNo2(inputs.pycNo2);
-      else if (inputs.pycNo !== undefined) setPycNo2(inputs.pycNo);
-      if (inputs.wtDrySoil1 !== undefined) setWtDrySoil1(inputs.wtDrySoil1);
-      else if (inputs.sgA1 !== undefined) setWtDrySoil1(String(inputs.sgA1));
-
-      if (inputs.wtDrySoil2 !== undefined) setWtDrySoil2(inputs.wtDrySoil2);
-      else if (inputs.sgA2 !== undefined) setWtDrySoil2(String(inputs.sgA2));
-
-      if (inputs.temp1 !== undefined) setTemp1(inputs.temp1);
-      else if (inputs.sgT1 !== undefined) setTemp1(String(inputs.sgT1));
-
-      if (inputs.temp2 !== undefined) setTemp2(inputs.temp2);
-      else if (inputs.sgT2 !== undefined) setTemp2(String(inputs.sgT2));
-
-      if (inputs.wtPycWaterSoil1 !== undefined) setWtPycWaterSoil1(inputs.wtPycWaterSoil1);
-      else if (inputs.sgB1 !== undefined) setWtPycWaterSoil1(String(inputs.sgB1));
-
-      if (inputs.wtPycWaterSoil2 !== undefined) setWtPycWaterSoil2(inputs.wtPycWaterSoil2);
-      else if (inputs.sgB2 !== undefined) setWtPycWaterSoil2(String(inputs.sgB2));
+      if (syncPyc1) setPycNo1(syncPyc1);
+      if (syncPyc2) setPycNo2(syncPyc2);
+      if (syncA1) setWtDrySoil1(syncA1);
+      if (syncA2) setWtDrySoil2(syncA2);
+      if (syncT1) {
+        setTemp1(syncT1);
+        setPycWaterTemp(syncT1);
+      }
+      if (syncT2) setTemp2(syncT2);
+      if (syncB1) setWtPycWaterSoil1(syncB1);
+      if (syncB2) setWtPycWaterSoil2(syncB2);
 
       if (inputs.cohesion) setCohesionInput(String(inputs.cohesion));
       if (inputs.frictionAngle) setFrictionAngleInput(String(inputs.frictionAngle));
@@ -2271,6 +2273,21 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         },
         inputValues: {
           ...mergedInputValues,
+          pycNo1: pycNo1 || '',
+          pycNo: pycNo1 || '',
+          pycNo2: pycNo2 || '',
+          wtDrySoil1: cleanNumStr(wtDrySoil1),
+          sgA1: cleanNumStr(wtDrySoil1),
+          wtDrySoil2: cleanNumStr(wtDrySoil2),
+          sgA2: cleanNumStr(wtDrySoil2),
+          temp1: cleanNumStr(temp1),
+          sgT1: cleanNumStr(temp1),
+          temp2: cleanNumStr(temp2),
+          sgT2: cleanNumStr(temp2),
+          wtPycWaterSoil1: cleanNumStr(wtPycWaterSoil1),
+          sgB1: cleanNumStr(wtPycWaterSoil1),
+          wtPycWaterSoil2: cleanNumStr(wtPycWaterSoil2),
+          sgB2: cleanNumStr(wtPycWaterSoil2),
           ...buildDualKeyPayload('atbPlWet', 'atbPlWet', saveAtbPlWet),
           ...buildDualKeyPayload('atbPlDry', 'atbPlDry', saveAtbPlDry),
           atbTare1: cleanNumStr(saveAtbContainer[0]),
@@ -2428,8 +2445,12 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       const hasDataEntered = (
         computedMcPct > 0 ||
         computedGsAvg > 0 ||
-        (parseIndoFloat(wtDrySoil1) > 0 && parseIndoFloat(wtPycWaterSoil1) > 0) ||
-        (parseIndoFloat(wtDrySoil2) > 0 && parseIndoFloat(wtPycWaterSoil2) > 0) ||
+        pycNo1.trim() !== '' ||
+        temp1.trim() !== '' ||
+        (parseIndoFloat(wtDrySoil1) > 0) ||
+        (parseIndoFloat(wtPycWaterSoil1) > 0) ||
+        (parseIndoFloat(wtDrySoil2) > 0) ||
+        (parseIndoFloat(wtPycWaterSoil2) > 0) ||
         (parseIndoFloat(uwRingWetWeight) > 0 && uwRingNo.trim() !== '') ||
         (parseIndoFloat(computedLl) > 0 || parseIndoFloat(computedPl) > 0 || atbWet.some(v => parseIndoFloat(v) > 0) || atbPlWet.some(v => parseIndoFloat(v) > 0)) ||
         saveDsUuWetSoilPlusRing.some(v => parseIndoFloat(v) > 0) ||
@@ -2443,6 +2464,10 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         saveTrxLoadB.some(v => parseIndoFloat(v) > 0) ||
         saveTrxLoadC.some(v => parseIndoFloat(v) > 0) ||
         cohesionInput !== '' ||
+        dateStarted !== '' ||
+        dateCompleted !== '' ||
+        soilColourCode > 0 ||
+        photos.length > 0 ||
         markAsCompleted
       );
 
@@ -2461,7 +2486,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         ...t,
         status: markAsCompleted ? ('Selesai' as const) : (hasDataEntered ? ('Sedang Diuji' as const) : t.status),
         lockedByTechnician: markAsCompleted ? true : isAlreadyLocked,
-        originalTechnicianInput: markAsCompleted || isAlreadyLocked ? origSnapshot : (t.originalTechnicianInput || undefined),
+        originalTechnicianInput: origSnapshot,
         calculationStatus: markAsCompleted ? ('Calculated' as const) : ('Draft Data' as const),
         technicianName: t.technicianName || currentUser.name,
         testedBy: t.testedBy || currentUser.name,
