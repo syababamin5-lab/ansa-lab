@@ -2,8 +2,8 @@
 // TIMES® ANSA LIMS — Realtime Cloud Database Service Engine
 // =====================================================================
 import { UserProfile, INITIAL_USERS } from '../types/userTypes';
-import { Client } from '../types/workflowTypes';
-import { PurchaseOrder, ContainerItem, RingItem, ConsolRingItem, PycnometerItem, MoldItem, ReamerItem, PersonnelItem } from '../types';
+import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice } from '../types/workflowTypes';
+import { PurchaseOrder, ContainerItem, RingItem, ConsolRingItem, PycnometerItem, MoldItem, ReamerItem, PersonnelItem, DocumentItem } from '../types';
 import {
   DEFAULT_CONTAINER_CATALOGUE,
   DEFAULT_RING_CATALOGUE,
@@ -17,12 +17,18 @@ import {
 // Dedicated Cloud Storage Object ID on HTTPS Rest API
 const CLOUD_OBJECT_ID = 'ff808181a058d43f01a0615d96ab1b61';
 const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
-const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v2';
+const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v3';
 
 export interface CloudDatabaseState {
   users: UserProfile[];
   clients: Client[];
   pos: PurchaseOrder[];
+  quotations: Quotation[];
+  sampleReceipts: SampleReceipt[];
+  prepReports: SamplePrepReport[];
+  subcontractNotices: SubcontractNotice[];
+  invoices: Invoice[];
+  documents: DocumentItem[];
   containers: ContainerItem[];
   rings: RingItem[];
   consolRings: ConsolRingItem[];
@@ -39,6 +45,12 @@ export function getInitialMasterState(): CloudDatabaseState {
     users: INITIAL_USERS,
     clients: [],
     pos: [],
+    quotations: [],
+    sampleReceipts: [],
+    prepReports: [],
+    subcontractNotices: [],
+    invoices: [],
+    documents: [],
     containers: DEFAULT_CONTAINER_CATALOGUE,
     rings: DEFAULT_RING_CATALOGUE,
     consolRings: DEFAULT_CONSOL_RING_CATALOGUE,
@@ -96,7 +108,13 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           users: mergeUsers(cloudData.users || []),
           containers: mergeContainers(cloudData.containers || []),
           pos: cloudData.pos || [],
-          clients: cloudData.clients || []
+          clients: cloudData.clients || [],
+          quotations: cloudData.quotations || [],
+          sampleReceipts: cloudData.sampleReceipts || [],
+          prepReports: cloudData.prepReports || [],
+          subcontractNotices: cloudData.subcontractNotices || [],
+          invoices: cloudData.invoices || [],
+          documents: cloudData.documents || []
         };
       }
     }
@@ -116,7 +134,13 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           users: mergeUsers(parsed.users || []),
           containers: mergeContainers(parsed.containers || []),
           pos: parsed.pos || [],
-          clients: parsed.clients || []
+          clients: parsed.clients || [],
+          quotations: parsed.quotations || [],
+          sampleReceipts: parsed.sampleReceipts || [],
+          prepReports: parsed.prepReports || [],
+          subcontractNotices: parsed.subcontractNotices || [],
+          invoices: parsed.invoices || [],
+          documents: parsed.documents || []
         };
       }
     } catch (err) {}

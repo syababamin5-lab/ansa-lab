@@ -862,16 +862,51 @@ export function App() {
 
   const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
 
-  // 1. Startup Cloud Fetch Effect: Fetch live state from HTTPS Cloud Database on app mount
+  // Manual & Instant Cloud Refresh Handler
+  const handleManualSyncCloud = async () => {
+    try {
+      const cloudState = await loadStateFromCloud();
+      if (cloudState) {
+        if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
+        if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+        if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
+        if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
+        if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
+        if (Array.isArray(cloudState.prepReports)) setPrepReports(cloudState.prepReports);
+        if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+        if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
+        if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
+        if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
+        if (Array.isArray(cloudState.rings) && cloudState.rings.length > 0) setRingCatalogue(cloudState.rings);
+        if (Array.isArray(cloudState.consolRings) && cloudState.consolRings.length > 0) setConsolRingCatalogue(cloudState.consolRings);
+        if (Array.isArray(cloudState.pycnometers) && cloudState.pycnometers.length > 0) setPycCatalogue(cloudState.pycnometers);
+        if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
+        if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
+        if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+        showGlobalToast('⚡ Data Berhasil Disinkronkan dengan Server Cloud!');
+      }
+    } catch (e) {
+      console.error('[Cloud Sync Error]:', e);
+    }
+  };
+
+  // 1. Startup & Real-time Auto-Polling Cloud Fetch Effect (Polls every 6 seconds across devices)
   useEffect(() => {
     let isMounted = true;
-    async function initCloudState() {
+
+    async function fetchCloud() {
       try {
         const cloudState = await loadStateFromCloud();
         if (isMounted && cloudState) {
           if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
           if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
           if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
+          if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
+          if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
+          if (Array.isArray(cloudState.prepReports)) setPrepReports(cloudState.prepReports);
+          if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+          if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
+          if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
           if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
           if (Array.isArray(cloudState.rings) && cloudState.rings.length > 0) setRingCatalogue(cloudState.rings);
           if (Array.isArray(cloudState.consolRings) && cloudState.consolRings.length > 0) setConsolRingCatalogue(cloudState.consolRings);
@@ -886,8 +921,19 @@ export function App() {
         if (isMounted) setIsCloudLoaded(true);
       }
     }
-    initCloudState();
-    return () => { isMounted = false; };
+
+    // Initial fetch
+    fetchCloud();
+
+    // Auto-poll cloud database every 6 seconds for multi-device live sync
+    const pollInterval = setInterval(() => {
+      fetchCloud();
+    }, 6000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(pollInterval);
+    };
   }, []);
 
   // 2. REAL-TIME CLOUD DATABASE SYNC EFFECT (Guarded: Only runs AFTER Cloud state is loaded)
@@ -898,6 +944,12 @@ export function App() {
       users,
       clients,
       pos,
+      quotations,
+      sampleReceipts,
+      prepReports,
+      subcontractNotices,
+      invoices,
+      documents,
       containers: containerCatalogue,
       rings: ringCatalogue,
       consolRings: consolRingCatalogue,
@@ -908,7 +960,25 @@ export function App() {
       updatedAt: new Date().toISOString(),
     };
     saveStateToCloud(cloudState);
-  }, [isCloudLoaded, users, clients, pos, containerCatalogue, ringCatalogue, consolRingCatalogue, pycCatalogue, moldCatalogue, reamerCatalogue, personnelCatalogue]);
+  }, [
+    isCloudLoaded,
+    users,
+    clients,
+    pos,
+    quotations,
+    sampleReceipts,
+    prepReports,
+    subcontractNotices,
+    invoices,
+    documents,
+    containerCatalogue,
+    ringCatalogue,
+    consolRingCatalogue,
+    pycCatalogue,
+    moldCatalogue,
+    reamerCatalogue,
+    personnelCatalogue
+  ]);
 
   const handleUpdatePersonnelCatalogue = (updated: PersonnelItem[]) => {
     setPersonnelCatalogue(updated);
