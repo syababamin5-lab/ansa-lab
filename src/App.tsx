@@ -860,8 +860,40 @@ export function App() {
     localStorage.setItem('ansa_lab_personnels', JSON.stringify(personnelCatalogue));
   }, [personnelCatalogue]);
 
-  // REAL-TIME SUPABASE CLOUD DATABASE SYNC EFFECT (Pengaturan & Master + User & PO)
+  const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
+
+  // 1. Startup Cloud Fetch Effect: Fetch live state from HTTPS Cloud Database on app mount
   useEffect(() => {
+    let isMounted = true;
+    async function initCloudState() {
+      try {
+        const cloudState = await loadStateFromCloud();
+        if (isMounted && cloudState) {
+          if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
+          if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+          if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
+          if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
+          if (Array.isArray(cloudState.rings) && cloudState.rings.length > 0) setRingCatalogue(cloudState.rings);
+          if (Array.isArray(cloudState.consolRings) && cloudState.consolRings.length > 0) setConsolRingCatalogue(cloudState.consolRings);
+          if (Array.isArray(cloudState.pycnometers) && cloudState.pycnometers.length > 0) setPycCatalogue(cloudState.pycnometers);
+          if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
+          if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
+          if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+        }
+      } catch (e) {
+        console.error('[Cloud DB Init Error]:', e);
+      } finally {
+        if (isMounted) setIsCloudLoaded(true);
+      }
+    }
+    initCloudState();
+    return () => { isMounted = false; };
+  }, []);
+
+  // 2. REAL-TIME CLOUD DATABASE SYNC EFFECT (Guarded: Only runs AFTER Cloud state is loaded)
+  useEffect(() => {
+    if (!isCloudLoaded) return;
+
     const cloudState: CloudDatabaseState = {
       users,
       clients,
@@ -876,7 +908,7 @@ export function App() {
       updatedAt: new Date().toISOString(),
     };
     saveStateToCloud(cloudState);
-  }, [users, clients, pos, containerCatalogue, ringCatalogue, consolRingCatalogue, pycCatalogue, moldCatalogue, reamerCatalogue, personnelCatalogue]);
+  }, [isCloudLoaded, users, clients, pos, containerCatalogue, ringCatalogue, consolRingCatalogue, pycCatalogue, moldCatalogue, reamerCatalogue, personnelCatalogue]);
 
   const handleUpdatePersonnelCatalogue = (updated: PersonnelItem[]) => {
     setPersonnelCatalogue(updated);

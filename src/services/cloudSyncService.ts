@@ -1,10 +1,10 @@
-import { supabase } from '../utils/supabaseClient';
+// =====================================================================
+// TIMES® ANSA LIMS — Realtime Cloud Database Service Engine
+// =====================================================================
 import { UserProfile, INITIAL_USERS } from '../types/userTypes';
 import { Client } from '../types/workflowTypes';
 import { PurchaseOrder, ContainerItem, RingItem, ConsolRingItem, PycnometerItem, MoldItem, ReamerItem, PersonnelItem } from '../types';
 import {
-  INITIAL_POS,
-  INITIAL_CLIENTS,
   DEFAULT_CONTAINER_CATALOGUE,
   DEFAULT_RING_CATALOGUE,
   DEFAULT_CONSOL_RING_CATALOGUE,
@@ -14,9 +14,11 @@ import {
   DEFAULT_PERSONNEL_CATALOGUE
 } from '../data/initialData';
 
-const CLOUD_STORAGE_KEY = 'ansa_lab_cloud_db_v1';
+// Dedicated Cloud Storage Object ID on HTTPS Rest API
+const CLOUD_OBJECT_ID = 'ff808181a058d43f01a0615d96ab1b61';
+const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
+const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v2';
 
-/** Interfase state terpusat di Cloud Database */
 export interface CloudDatabaseState {
   users: UserProfile[];
   clients: Client[];
@@ -31,7 +33,7 @@ export interface CloudDatabaseState {
   updatedAt: string;
 }
 
-/** Ambil seluruh data master & setting resmi awal */
+/** State dasar bawaan bersih */
 export function getInitialMasterState(): CloudDatabaseState {
   return {
     users: INITIAL_USERS,
@@ -48,22 +50,24 @@ export function getInitialMasterState(): CloudDatabaseState {
   };
 }
 
-/** Simpan data state ke Cloud Service */
+/** Simpan data state secara permanen ke Cloud Database Server */
 export async function saveStateToCloud(state: CloudDatabaseState): Promise<boolean> {
   try {
-    const payload = JSON.stringify(state);
-    // Simpan ke Local Storage Cadangan Realtime
-    localStorage.setItem(CLOUD_STORAGE_KEY, payload);
+    // 1. Simpan ke local cache untuk kecepatan UI
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
 
-    // Kirim ke Cloud Supabase Service
-    const { error } = await supabase.from('ansa_lab_master_store').upsert({
-      id: 'main_store',
-      data: state,
-      updated_at: new Date().toISOString(),
+    // 2. Kirim langsung ke Server Cloud Database HTTPS
+    const res = await fetch(CLOUD_API_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: 'ANSA_LIMS_PRODUCTION_CLOUD_DATABASE',
+        data: state
+      })
     });
 
-    if (error) {
-      console.warn('[Cloud Sync Warning] Supabase upsert payload saved locally:', error.message);
+    if (!res.ok) {
+      console.warn('[Cloud Sync Warning] Server HTTP status:', res.status);
     }
     return true;
   } catch (e) {
@@ -72,45 +76,47 @@ export async function saveStateToCloud(state: CloudDatabaseState): Promise<boole
   }
 }
 
-/** Muat data dari Cloud Service */
+/** Ambil data permanen langsung dari Cloud Database Server */
 export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   const defaultState = getInitialMasterState();
 
   try {
-    // 1. Coba ambil data terbaru dari Supabase Cloud Database
-    const { data, error } = await supabase
-      .from('ansa_lab_master_store')
-      .select('data')
-      .eq('id', 'main_store')
-      .single();
+    const res = await fetch(CLOUD_API_URL);
+    if (res.ok) {
+      const result = await res.json();
+      if (result && result.data) {
+        const cloudData = result.data as CloudDatabaseState;
+        
+        // Simpan snapshot cloud terbaru ke local cache
+        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cloudData));
 
-    if (data && data.data && !error) {
-      const cloudData = data.data as CloudDatabaseState;
-      // Pastikan 142 cawan dan 8 user selalu ter-merge sempurna
-      const mergedContainers = mergeContainers(cloudData.containers || []);
-      const mergedUsers = mergeUsers(cloudData.users || []);
-      return {
-        ...defaultState,
-        ...cloudData,
-        containers: mergedContainers,
-        users: mergedUsers,
-      };
+        return {
+          ...defaultState,
+          ...cloudData,
+          users: mergeUsers(cloudData.users || []),
+          containers: mergeContainers(cloudData.containers || []),
+          pos: cloudData.pos || [],
+          clients: cloudData.clients || []
+        };
+      }
     }
   } catch (e) {
-    console.warn('[Cloud Database Load Warning]: Fallback to local cloud backup', e);
+    console.warn('[Cloud Load Warning]: Failed to reach cloud API, checking local fallback', e);
   }
 
-  // 2. Fallback ke Cadangan Cloud Lokal jika jaringan offline
-  const localSaved = localStorage.getItem(CLOUD_STORAGE_KEY);
-  if (localSaved) {
+  // Fallback ke local cache jika offline
+  const cached = localStorage.getItem(LOCAL_CACHE_KEY);
+  if (cached) {
     try {
-      const parsed = JSON.parse(localSaved);
+      const parsed = JSON.parse(cached);
       if (parsed && typeof parsed === 'object') {
         return {
           ...defaultState,
           ...parsed,
-          containers: mergeContainers(parsed.containers || []),
           users: mergeUsers(parsed.users || []),
+          containers: mergeContainers(parsed.containers || []),
+          pos: parsed.pos || [],
+          clients: parsed.clients || []
         };
       }
     } catch (err) {}
@@ -119,7 +125,6 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   return defaultState;
 }
 
-/** Helper penggabungan 142 cawan terkalibrasi */
 function mergeContainers(existing: ContainerItem[]): ContainerItem[] {
   if (!existing || existing.length === 0) return DEFAULT_CONTAINER_CATALOGUE;
   const defaultMap = new Map(DEFAULT_CONTAINER_CATALOGUE.map(c => [String(c.id).toUpperCase(), c.weight]));
@@ -132,7 +137,6 @@ function mergeContainers(existing: ContainerItem[]): ContainerItem[] {
   return missing.length > 0 ? [...updated, ...missing] : updated;
 }
 
-/** Helper penggabungan 8 user resmi */
 function mergeUsers(existing: UserProfile[]): UserProfile[] {
   if (!existing || existing.length === 0) return INITIAL_USERS;
   const existingIds = new Set(existing.map(u => u.id));
