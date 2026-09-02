@@ -6,6 +6,7 @@ import { getRequiredPhotoCount } from '../../utils/helpers';
 import { SIEVE_SPECIFICATIONS, HYDROMETER_TIME_SPECIFICATIONS, ModernSoilColourSelect, getWaterTempProperties, validatePycCode } from '../PhysicalPropertiesView';
 import { DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE } from '../../data/initialData';
 import { CustomDatePicker } from '../common/CustomDatePicker';
+import { SlideToConfirm } from '../common/SlideToConfirm';
 import {
   ArrowLeft,
   Save,
@@ -2638,15 +2639,15 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
             <span>{isOnline ? 'Online' : 'Offline'}</span>
           </span>
 
-          {isFormFullyCompleted && (
-            <button
-              onClick={() => handleSaveData(true)}
-              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer animate-fade-in"
-            >
-              <Save className="w-3.5 h-3.5" />
-              <span>Simpan</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => handleSaveData(false)}
+            className="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-[11px] font-bold flex items-center gap-1 shadow-2xs transition active:scale-95 cursor-pointer"
+            title="Simpan Draft Pengujian"
+          >
+            <Save className="w-3.5 h-3.5 text-slate-500" />
+            <span>Draft</span>
+          </button>
         </div>
       </div>
 
@@ -5696,37 +5697,49 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         )}
       </div>
 
-      {/* ????????? BOTTOM ACTION BAR ????????? */}
-      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-lg z-20 flex flex-col gap-1.5 max-w-lg mx-auto">
+      {/* ─── BOTTOM ACTION BAR ─── */}
+      <div className="fixed bottom-0 left-0 right-0 p-3 bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-xl z-20 flex flex-col gap-2 max-w-lg mx-auto">
         {!isFormFullyCompleted && (
-          <div className="text-[10px] text-center font-mono font-bold text-amber-800 bg-amber-50/90 py-1 px-2 rounded-lg border border-amber-200 animate-fade-in">
-            *Lengkapi Tanggal, Data Pengujian, &amp; Minimal {minRequiredPhotos} Foto untuk membuka tombol "Tandai Selesai Uji"
+          <div className="text-[10px] text-center font-mono font-bold text-amber-800 bg-amber-50/90 py-1.5 px-2.5 rounded-lg border border-amber-200 animate-fade-in">
+            *Lengkapi Tanggal, Data Pengujian, &amp; Minimal {minRequiredPhotos} Foto untuk membuka slide "Selesai Uji"
           </div>
         )}
 
-        <div className="flex items-center justify-between gap-2.5">
+        {isFormFullyCompleted ? (
+          <div className="flex flex-col gap-2 w-full animate-fade-in">
+            {/* 🌟 SLIDE TO COMPLETE (GESER UNTUK SELESAI UJI) 🌟 */}
+            <SlideToConfirm
+              onConfirm={() => handleSaveData(true)}
+              label="Geser untuk Selesai Uji"
+              completedLabel="Menyimpan Hasil Pengujian..."
+            />
+
+            {/* Opsi Simpan Draft (Secondary Action) */}
+            <div className="flex items-center justify-between px-1">
+              <button
+                type="button"
+                onClick={() => handleSaveData(false)}
+                className="py-1 px-2.5 rounded-lg text-slate-600 hover:text-slate-900 text-[11px] font-bold flex items-center gap-1.5 transition active:scale-95 cursor-pointer hover:bg-slate-100"
+              >
+                <Save className="w-3.5 h-3.5 text-slate-500" />
+                <span>Simpan sebagai Draft Saja</span>
+              </button>
+              <span className="text-[10.5px] text-emerald-600 font-bold flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Form Lengkap</span>
+              </span>
+            </div>
+          </div>
+        ) : (
           <button
+            type="button"
             onClick={() => handleSaveData(false)}
-            className={`py-2.5 rounded-xl font-extrabold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer ${
-              isFormFullyCompleted
-                ? 'flex-1 border border-slate-300 text-slate-700 hover:bg-slate-50'
-                : 'w-full bg-blue-600 hover:bg-blue-700 text-white shadow-md'
-            }`}
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-md transition active:scale-98 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             <span>Simpan Draft</span>
           </button>
-
-          {isFormFullyCompleted && (
-            <button
-              onClick={() => handleSaveData(true)}
-              className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer active:scale-95 animate-fade-in"
-            >
-              <CheckCircle2 className="w-4 h-4 text-white" />
-              <span>Tandai Selesai Uji</span>
-            </button>
-          )}
-        </div>
+        )}
       </div>
 
       {/* ????????? PROFESSIONAL SAVE SUCCESS OVERLAY MODAL ????????? */}
