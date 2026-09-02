@@ -286,7 +286,7 @@ export function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (Array.isArray(parsed)) {
           initialList = parsed;
         }
       } catch (e) { console.error(e); }
@@ -428,11 +428,7 @@ export function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map((c: any) => c.id));
-          const missingDefaults = INITIAL_CLIENTS.filter(c => !existingIds.has(c.id));
-          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
-        }
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {}
     }
     return INITIAL_CLIENTS;
