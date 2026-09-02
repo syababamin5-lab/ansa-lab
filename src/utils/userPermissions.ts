@@ -1,7 +1,7 @@
 // =====================================================================
 // TIMES® ANSA LIMS — User Permissions & Menu Access Control (RBAC)
 // =====================================================================
-import { UserRole } from '../types/userTypes';
+import { UserRole, UserProfile } from '../types/userTypes';
 
 // ─── MENU ACCESS MATRIX ──────────────────────────────────────────────
 // Maps each menu tab ID to which roles are allowed to see/use it.
@@ -90,15 +90,9 @@ export function isAnalyst(role: UserRole): boolean {
   return role === 'ANALYST';
 }
 
-/** Cek apakah sampel atau pengujian di dalamnya ditugaskan ke pengguna tertentu */
-export function isSampleAssignedToUser(sample: any, user: UserProfile): boolean {
-  if (!user || !sample) return false;
-
-  // Super Admin, Lab Manager, dan QA/QC Coordinator dapat melihat semua sampel
-  if (['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR'].includes(user.role)) {
-    return true;
-  }
-
+/** Helper penentuan nama teknisi match */
+const getMatchingTerms = (user: UserProfile): string[] => {
+  if (!user) return [];
   const terms = [
     user.name?.toLowerCase(),
     user.shortName?.toLowerCase(),
@@ -120,6 +114,14 @@ export function isSampleAssignedToUser(sample: any, user: UserProfile): boolean 
   if (user.shortName?.toLowerCase() === 'noval' || user.name?.toLowerCase().includes('nouval')) {
     terms.push('m noval', 'noval fadli', 'nouval', 'kor-0001');
   }
+  return terms;
+};
+
+/** Cek apakah PENGUJIAN SPESIFIK (Single Test Item) ditugaskan ke teknisi tertentu */
+export function isSingleTestAssignedToUser(test: any, sample: any, user: UserProfile): boolean {
+  if (!user || !test) return false;
+
+  const terms = getMatchingTerms(user);
 
   const isMatch = (val?: string) => {
     if (!val || typeof val !== 'string') return false;
@@ -128,33 +130,36 @@ export function isSampleAssignedToUser(sample: any, user: UserProfile): boolean 
     return terms.some(t => lVal.includes(t) || t.includes(lVal));
   };
 
-  // 1. Cek level sampel jika ditugaskan langsung
-  if (isMatch(sample.testedBy) || isMatch(sample.assignedTechnician)) {
+  // 1. Direct assignment on test object
+  if (isMatch(test.technicianName) || isMatch(test.assignedTechnician) || isMatch(test.testedBy)) {
     return true;
   }
 
-  // 2. Cek level pengujian (tests) jika penguji ditugaskan pada jenis uji spesifik
-  const tests = sample.tests || [];
-  const hasSpecificTestMatch = tests.some((t: any) => {
-    if (isMatch(t.technicianName) || isMatch(t.assignedTechnician)) {
-      return true;
-    }
-    const calc = t.calculationData || {};
-    const inputVal = calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician;
-    const summaryVal = calc.summaryResults?.testedBy || calc.summaryResults?.assignedTechnician;
-    return isMatch(inputVal) || isMatch(summaryVal);
-  });
+  // 2. Calculation data / worksheet values
+  const calc = test.calculationData || {};
+  const inputVal = calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician;
+  const summaryVal = calc.summaryResults?.testedBy || calc.summaryResults?.assignedTechnician;
+  if (isMatch(inputVal) || isMatch(summaryVal)) {
+    return true;
+  }
 
-  if (hasSpecificTestMatch) return true;
-
-  // 3. Fallback: Jika sampel/uji belum ditugaskan ke siapa pun (unassigned), izinkan teknisi melihat & mengambil sampel tersebut
-  const hasAnyAssignment = (sample.testedBy && sample.testedBy.trim()) ||
-    (sample.assignedTechnician && sample.assignedTechnician.trim()) ||
-    tests.some((t: any) => (t.technicianName && t.technicianName.trim()) || (t.assignedTechnician && t.assignedTechnician.trim()));
-
-  if (!hasAnyAssignment) {
+  // 3. Fallback to sample level testedBy if sample-wide assignment
+  if (isMatch(sample?.testedBy) || isMatch(sample?.assignedTechnician)) {
     return true;
   }
 
   return false;
+}
+
+/** Cek apakah sampel atau pengujian di dalamnya ditugaskan ke pengguna tertentu */
+export function isSampleAssignedToUser(sample: any, user: UserProfile): boolean {
+  if (!user || !sample) return false;
+
+  // Super Admin, Lab Manager, dan QA/QC Coordinator dapat melihat semua sampel
+  if (['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR'].includes(user.role)) {
+    return true;
+  }
+
+  const tests = sample.tests || [];
+  return tests.some((test: any) => isSingleTestAssignedToUser(test, sample, user));
 }

@@ -11,9 +11,12 @@ import {
   Camera,
   ArrowRight,
   FileSpreadsheet,
+  Filter,
+  UserCheck,
+  User
 } from 'lucide-react';
 
-import { isSampleAssignedToUser } from '../../utils/userPermissions';
+import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
 
 interface MobileTaskQueueViewProps {
@@ -32,6 +35,7 @@ interface MobileTaskCard {
   testCode: string;
   testName: string;
   status: string;
+  assignedTechnicianName?: string;
 }
 
 const getTestBadgeProps = (code: string) => {
@@ -60,10 +64,22 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
 }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'unstarted' | 'draft' | 'completed'>(externalActiveFilter);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTechFilter, setSelectedTechFilter] = useState<string>('my_tasks'); // 'my_tasks' | 'all' | 'unassigned' | 'rafi' | 'noval' | etc.
 
   useEffect(() => {
     setActiveFilter(externalActiveFilter);
   }, [externalActiveFilter]);
+
+  const isManagement = ['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'EXECUTIVE_DIRECTOR'].includes(currentUser?.role);
+
+  // Helper get assigned technician name for display
+  const getAssignedName = (test: SampleTest, sample: Sample): string => {
+    const calc = test.calculationData || {};
+    const name = test.technicianName || test.assignedTechnician || test.testedBy ||
+      calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician ||
+      calc.summaryResults?.testedBy || sample.testedBy || sample.assignedTechnician;
+    return name?.trim() || '';
+  };
 
   // Collect all task cards (1 card per sample per test form)
   const allTaskCards: MobileTaskCard[] = [];
@@ -73,17 +89,49 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
       const tests = sample.tests || [];
       tests.forEach(test => {
         const code = (test.testTypeCode || test.testTypeId || 'SG').toUpperCase();
-        if (code === 'PP') return; // PP is a category header, not a standalone test form
+        if (code === 'PP') return; // PP is a category header
 
-        allTaskCards.push({
-          id: `${sample.id}-${code}-${test.id}`,
-          sample,
-          po,
-          test,
-          testCode: code,
-          testName: test.testTypeName || code,
-          status: test.status || 'Belum Diuji'
-        });
+        const assignedName = getAssignedName(test, sample);
+
+        // FILTER PENUGASAN STRICT:
+        // Jika login sebagai Teknisi (ANALYST): Hanya tampilkan pengujian yang Tested By nya di-assign ke teknisi ini!
+        // Jika login sebagai Super Admin / Manager: Tampilkan sesuai filter pilihan
+        let shouldInclude = false;
+
+        if (!isManagement) {
+          // Strict filter per teknisi
+          shouldInclude = isSingleTestAssignedToUser(test, sample, currentUser);
+        } else {
+          // Management filter options
+          if (selectedTechFilter === 'my_tasks') {
+            shouldInclude = isSingleTestAssignedToUser(test, sample, currentUser);
+          } else if (selectedTechFilter === 'all') {
+            shouldInclude = true;
+          } else if (selectedTechFilter === 'unassigned') {
+            shouldInclude = !assignedName;
+          } else {
+            // Match specific technician name filter
+            const mockUser: Partial<UserProfile> = {
+              name: selectedTechFilter,
+              shortName: selectedTechFilter,
+              nip: selectedTechFilter,
+            };
+            shouldInclude = isSingleTestAssignedToUser(test, sample, mockUser as UserProfile);
+          }
+        }
+
+        if (shouldInclude) {
+          allTaskCards.push({
+            id: `${sample.id}-${code}-${test.id}`,
+            sample,
+            po,
+            test,
+            testCode: code,
+            testName: test.testTypeName || code,
+            status: test.status || 'Belum Diuji',
+            assignedTechnicianName: assignedName || 'Belum Di-Assign'
+          });
+        }
       });
     });
   });
@@ -104,13 +152,14 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
 
   const query = searchQuery.trim().toLowerCase();
 
-  const filteredCards = allTaskCards.filter(({ sample, po, testCode, testName, test }) => {
+  const filteredCards = allTaskCards.filter(({ sample, po, testCode, testName, test, assignedTechnicianName }) => {
     const matchesQuery =
       sample.sampleCode.toLowerCase().includes(query) ||
       po.poNumber.toLowerCase().includes(query) ||
       po.clientName.toLowerCase().includes(query) ||
       testCode.toLowerCase().includes(query) ||
-      testName.toLowerCase().includes(query);
+      testName.toLowerCase().includes(query) ||
+      (assignedTechnicianName || '').toLowerCase().includes(query);
 
     if (!matchesQuery) return false;
 
@@ -122,7 +171,55 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
   });
 
   return (
-    <div className="space-y-4 pb-20 font-sans">
+    <div className="space-y-3.5 pb-20 font-sans">
+      
+      {/* MANAGEMENT TECHNICIAN FILTER DROPDOWN (JIKA LOGIN CONTROL/ADMIN/MANAGER) */}
+      {isManagement && (
+        <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+            <span className="flex items-center gap-1.5 text-teal-800 font-extrabold">
+              <UserCheck className="w-4 h-4 text-teal-600" />
+              <span>Filter Tugas Penguji (Tested By)</span>
+            </span>
+            <span className="text-[10.5px] font-mono text-slate-500">Super Admin Control</span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+            <button
+              onClick={() => setSelectedTechFilter('my_tasks')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'my_tasks' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Tugas Saya ({currentUser.shortName})
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('all')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'all' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Semua Uji Lab
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('Rafi')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'Rafi' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Rafli / Rafi (AO#1)
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('Noval')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'Noval' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Noval Fadli
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* SEARCH BAR */}
       <div className="relative">
         <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -130,141 +227,123 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
           type="text"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Cari sampel, no PO, pengujian..."
-          className="w-full bg-white border border-slate-200 rounded-xl pl-9 pr-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          placeholder="Cari sampel, no PO, pengujian, atau penguji..."
+          className="w-full bg-white border border-slate-200 rounded-2xl pl-9 pr-4 py-2.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600 shadow-2xs font-medium"
         />
       </div>
 
       {/* FILTER TABS */}
-      <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-        {[
-          { id: 'all', label: `Semua (${allTaskCards.length})` },
-          { id: 'unstarted', label: `Belum (${unstartedCount})` },
-          { id: 'draft', label: `Proses (${draftCount})` },
-          { id: 'completed', label: `Selesai (${completedCount})` },
-        ].map(tab => {
-          const isActive = activeFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => handleFilterClick(tab.id as any)}
-              className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all text-center ${
-                isActive
-                  ? 'bg-white text-slate-900 shadow-xs'
-                  : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
-              {tab.label}
-            </button>
-          );
-        })}
+      <div className="flex bg-slate-100 p-1 rounded-2xl gap-1">
+        <button
+          onClick={() => handleFilterClick('all')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-extrabold transition cursor-pointer text-center ${
+            activeFilter === 'all' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          Semua ({allTaskCards.length})
+        </button>
+        <button
+          onClick={() => handleFilterClick('unstarted')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-extrabold transition cursor-pointer text-center ${
+            activeFilter === 'unstarted' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          Belum ({unstartedCount})
+        </button>
+        <button
+          onClick={() => handleFilterClick('draft')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-extrabold transition cursor-pointer text-center ${
+            activeFilter === 'draft' ? 'bg-amber-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          Proses ({draftCount})
+        </button>
+        <button
+          onClick={() => handleFilterClick('completed')}
+          className={`flex-1 py-1.5 px-2 rounded-xl text-xs font-extrabold transition cursor-pointer text-center ${
+            activeFilter === 'completed' ? 'bg-emerald-600 text-white shadow-xs' : 'text-slate-500 hover:text-slate-800'
+          }`}
+        >
+          Selesai ({completedCount})
+        </button>
       </div>
 
       {/* TASK CARDS LIST */}
-      <div className="space-y-2.5">
-        {filteredCards.map(({ sample, po, test, testCode }, idx) => {
-          const badge = getTestBadgeProps(testCode);
-          const statusObj = getTestStatus3State(test);
-          const isDone = statusObj.state === 'completed';
-          const isDraft = statusObj.state === 'draft';
-          const totalPhotos = (sample.photos?.length || 0) + (test.photos?.length || 0);
+      {filteredCards.length === 0 ? (
+        <div className="bg-white border border-slate-200 rounded-3xl p-8 text-center space-y-3 my-4">
+          <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center mx-auto shadow-xs">
+            <UserCheck className="w-6 h-6" />
+          </div>
+          <div>
+            <h3 className="text-sm font-extrabold text-slate-900">Belum Ada Tugas Ditugaskan</h3>
+            <p className="text-xs text-slate-500 font-medium mt-1 max-w-xs mx-auto">
+              {isManagement
+                ? 'Tidak ada tugas yang di-assign untuk filter teknisi ini. Silakan tentukan "Tested By" di Web App.'
+                : `Halo ${currentUser.shortName}, belum ada form pengujian yang ditugaskan kepada Anda (Tested By).`}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredCards.map(({ id, sample, po, test, testCode, testName, assignedTechnicianName }) => {
+            const badgeProps = getTestBadgeProps(testCode);
+            const statusObj = getTestStatus3State(test);
 
-          return (
-            <div
-              key={`${sample.id}-${testCode}-${idx}`}
-              onClick={() => onOpenWorksheet(sample, po, testCode)}
-              className="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 transition-all shadow-2xs hover:shadow-md cursor-pointer space-y-2.5 active:scale-[0.99]"
-            >
-              {/* TOP ROW: 1. UJI APA + 3. KODE SAMPEL & 2. NO PO (HIGHLIGHTED) + STATUS */}
-              <div className="flex items-start justify-between gap-2">
-                <div className="flex items-start gap-2.5 min-w-0">
-                  {/* 1. UJI APA */}
-                  <span className={`px-2.5 py-1.5 rounded-xl text-xs font-black uppercase font-mono shadow-xs border shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}>
-                    {testCode}
-                  </span>
-                  
-                  <div className="min-w-0">
-                    {/* 3. KODE SAMPEL */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <h3 className="text-xs font-black text-slate-900 leading-tight truncate">{sample.sampleCode}</h3>
-                      {sample.idLab && (
-                        <span className="text-[9.5px] text-slate-400 font-mono">({sample.idLab})</span>
-                      )}
+            return (
+              <div
+                key={id}
+                onClick={() => onOpenWorksheet(sample, po, testCode)}
+                className="bg-white border border-slate-200 hover:border-teal-500 rounded-3xl p-4 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer active:scale-98 space-y-3"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className={`w-10 h-10 rounded-2xl ${badgeProps.bg} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs`}>
+                      {testCode}
                     </div>
-
-                    {/* 2. NO PO (PROMINENTLY HIGHLIGHTED) */}
-                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 font-mono font-black text-[10px] border border-amber-300 shadow-2xs">
-                        <span className="text-amber-600 font-bold">PO:</span>
-                        <span>{po.poNumber}</span>
-                      </span>
-                      <span className="text-[10px] text-slate-400 font-medium truncate max-w-[140px]" title={po.clientName}>
-                        {po.clientName}
-                      </span>
+                    <div>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <strong className="text-sm font-black text-slate-900 leading-tight">{sample.sampleCode}</strong>
+                        <span className="text-[10px] text-slate-400 font-mono">({sample.sampleLabCode})</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="px-2 py-0.2 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[9.5px] font-extrabold font-mono">
+                          PO: {po.poNumber}
+                        </span>
+                        <span className="text-[10.5px] text-slate-500 font-medium truncate max-w-[140px]">{po.clientName}</span>
+                      </div>
                     </div>
                   </div>
+
+                  <button className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold flex items-center gap-1 shrink-0 shadow-xs">
+                    <span>Input Uji {testCode}</span>
+                  </button>
                 </div>
 
-                {/* STATUS BADGE */}
-                {isDone ? (
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[9.5px] flex items-center gap-1 shrink-0">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                    <span>Selesai</span>
-                  </span>
-                ) : isDraft ? (
-                  <span className="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-bold text-[9.5px] flex items-center gap-1 shrink-0">
-                    <Clock className="w-3 h-3 text-amber-600" />
-                    <span>Dalam Proses</span>
-                  </span>
-                ) : (
-                  <span className="px-2.5 py-1 rounded-xl bg-blue-600 text-white font-black text-[10px] shadow-xs shrink-0 hover:bg-blue-700">
-                    Input Uji {testCode}
-                  </span>
-                )}
-              </div>
-
-              {/* TEST NAME & 4. KEDALAMAN (HIGHLIGHTED) */}
-              <div className="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between text-[10.5px]">
-                <span className="font-semibold text-slate-700 truncate max-w-[190px]">
-                  {badge.label}
-                </span>
-                {/* 4. KEDALAMAN BERAPA */}
-                <span className="font-mono font-black text-blue-800 bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md shrink-0">
-                  Kedalaman: {sample.depthStart.toFixed(1)}-{sample.depthEnd.toFixed(1)}m
-                </span>
-              </div>
-
-              {/* ACTION ROW */}
-              <div className="flex items-center justify-between pt-0.5 text-[10.5px]">
-                <div className="flex items-center gap-2 text-slate-400 font-mono text-[10px]">
-                  {totalPhotos > 0 && (
-                    <span className="flex items-center gap-1 text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded-md">
-                      <Camera className="w-3 h-3" />
-                      <span>{totalPhotos} Foto</span>
+                <div className="bg-slate-50/80 p-2.5 rounded-2xl border border-slate-100 flex items-center justify-between gap-2 text-xs">
+                  <span className="font-bold text-slate-700 truncate">{badgeProps.label}</span>
+                  {sample.depth && (
+                    <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-900 font-mono font-bold text-[10px] shrink-0 border border-blue-200">
+                      Kedalaman: {sample.depth}
                     </span>
                   )}
-                  {sample.locationTag && (
-                    <span>Rak: {sample.locationTag}</span>
-                  )}
                 </div>
 
-                <div className="flex items-center gap-1 font-extrabold text-blue-600 hover:text-blue-700 text-xs">
-                  <span>Buka Form</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                <div className="flex items-center justify-between text-[10.5px] text-slate-500 font-medium pt-1 border-t border-slate-100">
+                  <div className="flex items-center gap-1">
+                    <User className="w-3.5 h-3.5 text-teal-600" />
+                    <span>Penguji (Tested By): <strong className="text-slate-800 font-mono">{assignedTechnicianName}</strong></span>
+                  </div>
+
+                  <span className="text-blue-600 font-bold flex items-center gap-1">
+                    <span>Buka Form</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </span>
                 </div>
               </div>
-            </div>
-          );
-        })}
-
-        {filteredCards.length === 0 && (
-          <div className="text-center py-12 bg-white rounded-2xl border border-slate-200 p-6 space-y-2">
-            <Layers className="w-8 h-8 text-slate-300 mx-auto" />
-            <h3 className="text-xs font-bold text-slate-700">Tidak Ada Form Uji</h3>
-            <p className="text-[10.5px] text-slate-400">Tidak ada form pengujian yang sesuai dengan pencarian atau filter Anda.</p>
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };
