@@ -206,6 +206,29 @@ export const buildDualKeyPayload = (
   return payload;
 };
 
+/**
+ * Universal helper for Sieve Analysis & Hydrometer test codes.
+ * Matches all variations: SVE-HYD, Sieve-Hydro, S&H, SVE, SIEVE_HYDRO, etc.
+ */
+export const isSieveHydroCode = (code: string | undefined): boolean => {
+  if (!code) return false;
+  const c = code.toUpperCase().trim();
+  return (
+    c === 'SVE-HYD' ||
+    c === 'SIEVE-HYDRO' ||
+    c === 'SIEVE_HYDRO' ||
+    c === 'SIEVE-HYD' ||
+    c === 'S&H' ||
+    c === 'SVE' ||
+    c === 'SIEVE' ||
+    c === 'HYD' ||
+    c === 'SVE & HYD' ||
+    c === 'SIEVE & HYDRO' ||
+    c.includes('SIEVE') ||
+    c.includes('HYDRO')
+  );
+};
+
 export type MobileTestButtonState = {
   statusType: 'completed' | 'draft' | 'unstarted';
   label: string;

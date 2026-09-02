@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Sample, SampleTest, PurchaseOrder, ContainerItem, TrxRingItem, RingItem, DsRingItem, DsProvingItem, UctRingItem, PycnometerItem, TestPhoto, SOIL_COLOUR_CATALOGUE } from '../../types';
 import { UserProfile } from '../../types/userTypes';
-import { cleanIndoNumStr, parseIndoFloat, safeUpper, getArrayOrFlatSync, buildDualKeyPayload } from '../../utils/mobileSync';
+import { cleanIndoNumStr, parseIndoFloat, safeUpper, getArrayOrFlatSync, buildDualKeyPayload, isSieveHydroCode } from '../../utils/mobileSync';
 import { getRequiredPhotoCount } from '../../utils/helpers';
 import { SIEVE_SPECIFICATIONS, HYDROMETER_TIME_SPECIFICATIONS, ModernSoilColourSelect, getWaterTempProperties, validatePycCode } from '../PhysicalPropertiesView';
 import { DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE } from '../../data/initialData';
@@ -137,7 +137,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
     const code = (t.testTypeCode || t.testTypeId || '').toUpperCase().trim();
     if (code === activeNorm) return true;
     if (['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && code === 'PP') return true;
-    if (['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(activeNorm) && ['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(code)) return true;
+    if (isSieveHydroCode(activeNorm) && isSieveHydroCode(code)) return true;
     if (['PB', 'PRM'].includes(activeNorm) && ['PB', 'PRM'].includes(code)) return true;
     if (['CT', 'CNS'].includes(activeNorm) && ['CT', 'CNS'].includes(code)) return true;
     return code.includes(activeNorm) || activeNorm.includes(code);
@@ -1637,7 +1637,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       const code = (t.testTypeCode || t.testTypeId || '').toUpperCase().trim();
       if (code === activeNorm) return true;
       if (['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && code === 'PP') return true;
-      if (['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(activeNorm) && ['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(code)) return true;
+      if (isSieveHydroCode(activeNorm) && isSieveHydroCode(code)) return true;
       if (['PB', 'PRM'].includes(activeNorm) && ['PB', 'PRM'].includes(code)) return true;
       if (['CT', 'CNS'].includes(activeNorm) && ['CT', 'CNS'].includes(code)) return true;
       return code.includes(activeNorm) || activeNorm.includes(code);
@@ -1935,7 +1935,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
           caption = 'Foto Pengujian SG (Berat Jenis)';
         } else if (['ATB'].includes(normCode)) {
           caption = 'Foto Pengujian ATB (Atterberg Limits)';
-        } else if (['SVE-HYD', 'S&H', 'SIEVE-HYDRO', 'SVE', 'SIEVE'].includes(normCode)) {
+        } else if (isSieveHydroCode(normCode)) {
           if (photoIndex === 0) caption = 'Foto Pengujian Sieve & Hydro - Analisis Saringan';
           else if (photoIndex === 1) caption = 'Foto Pengujian Sieve & Hydro - Analisis Hidrometer';
           else caption = `Foto Sieve & Hydro ${photoIndex + 1}`;
@@ -2035,7 +2035,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       const hasBlows = atbWet.filter(v => parseIndoFloat(v) > 0).length >= 3;
       const hasPl = atbPlWet.filter(v => parseIndoFloat(v) > 0).length >= 2;
       return Boolean(hasBlows && hasPl);
-    } else if (['Sieve-Hydro', 'SVE-HYD', 'S&H', 'SVE'].includes(normCode)) {
+    } else if (isSieveHydroCode(normCode)) {
       const sieveCount = shSieveRetained.filter(v => parseIndoFloat(v) > 0).length;
       return sieveCount >= 3;
     } else if (['TRX-UU', 'TRX', 'TRX-CU', 'TRX-CD'].some(c => normCode.includes(c) || normCode === c)) {
@@ -2111,7 +2111,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         isTargetTest = true;
       } else if (['MC', 'UW', 'SG', 'ATB'].includes(activeNorm) && (codeNorm === 'PP' || codeNorm === activeNorm)) {
         isTargetTest = true;
-      } else if (['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(activeNorm) && ['SVE-HYD', 'S&H', 'Sieve-Hydro', 'SVE'].includes(codeNorm)) {
+      } else if (isSieveHydroCode(activeNorm) && isSieveHydroCode(codeNorm)) {
         isTargetTest = true;
       } else if (['PB', 'PRM'].includes(activeNorm) && ['PB', 'PRM'].includes(codeNorm)) {
         isTargetTest = true;
@@ -2241,7 +2241,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         Object.assign(mergedInputValues, buildDualKeyPayload('atbPlDry', 'atbPlDry', saveAtbPlDry));
       }
 
-      if (['Sieve-Hydro', 'SVE-HYD', 'S&H', 'SVE'].includes(activeNorm)) {
+      if (isSieveHydroCode(activeNorm)) {
         mergedInputValues.shSieveRetained = saveShSieveRetained;
         mergedInputValues.shHydroReadings = saveShHydroReadings;
         mergedInputValues.sieve4 = saveShSieveRetained[7] || prevInputs.sieve4;
@@ -2600,7 +2600,12 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
     handleSaveData(false);
   };
 
-  const activeTestObj = currentSample.tests.find(t => (t.testTypeCode || t.testTypeId) === activeTestCode);
+  const activeTestObj = currentSample.tests.find(t => {
+    const code = t.testTypeCode || t.testTypeId || '';
+    if (code === activeTestCode) return true;
+    if (isSieveHydroCode(code) && isSieveHydroCode(activeTestCode)) return true;
+    return false;
+  });
   const isCurrentTestLocked = Boolean(activeTestObj?.lockedByTechnician || activeTestObj?.status === 'Selesai');
 
   return (
@@ -2658,7 +2663,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         <div className="flex items-center justify-between border-b border-slate-100 pb-2">
           <div>
             <span className="text-xs font-black uppercase text-slate-900 tracking-wide flex items-center gap-1.5">
-              <span>PENGUJIAN {['MC', 'UW', 'SG', 'ATB', 'Sieve-Hydro', 'SVE-HYD', 'SVE'].includes(activeTestCode) ? 'PHYSICAL PROPERTIES (PP)' : activeTestCode}</span>
+              <span>PENGUJIAN {(['MC', 'UW', 'SG', 'ATB'].includes(activeTestCode) || isSieveHydroCode(activeTestCode)) ? 'PHYSICAL PROPERTIES (PP)' : activeTestCode}</span>
             </span>
             <p className="text-[10.5px] text-slate-500 font-mono mt-0.5">
               Penguji: <strong className="text-slate-800">{currentUser.name}</strong> ??? SNI Terkait
@@ -3649,7 +3654,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       )}
 
       {/* 🚀 SECTION 2D: SIEVE ANALYSIS & HYDROMETER FORM (Sieve-Hydro) 🚀 */}
-      {['Sieve-Hydro', 'SVE-HYD', 'S&H', 'SVE'].includes(activeTestCode) && (
+      {isSieveHydroCode(activeTestCode) && (
         <div className="space-y-4">
           {/* CARD 1: ANALISIS SARINGAN / SIEVE ANALYSIS (14 SARINGAN + PAN) */}
           <div className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
