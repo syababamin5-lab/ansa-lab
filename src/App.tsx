@@ -873,8 +873,37 @@ export function App() {
   }, [personnelCatalogue]);
 
   const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
+  // Timestamp kapan terakhir device INI melakukan save ke cloud
+  const lastSavedAtRef = React.useRef<number>(0);
+  // Lock: larang polling berjalan saat ada save in-flight (mencegah race condition)
+  const isSavingRef = React.useRef<boolean>(false);
 
-  // Manual & Instant Cloud Refresh Handler
+  // Helper: terapkan cloud snapshot ke state HANYA jika cloud lebih baru dari data lokal
+  const applyCloudSnapshot = React.useCallback((cloudState: CloudDatabaseState) => {
+    const cloudTs = cloudState.updatedAt ? new Date(cloudState.updatedAt).getTime() : 0;
+    const localTs = lastSavedAtRef.current;
+    // Jika data lokal lebih baru atau sama → TOLAK, jangan timpa state lokal
+    if (localTs > 0 && cloudTs <= localTs) return;
+    if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
+    if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+    if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
+    if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
+    if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
+    if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
+    if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+    if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
+    if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
+    if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
+    if (Array.isArray(cloudState.rings) && cloudState.rings.length > 0) setRingCatalogue(cloudState.rings);
+    if (Array.isArray(cloudState.consolRings) && cloudState.consolRings.length > 0) setConsolRingCatalogue(cloudState.consolRings);
+    if (Array.isArray(cloudState.pycnometers) && cloudState.pycnometers.length > 0) setPycCatalogue(cloudState.pycnometers);
+    if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
+    if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
+    if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+    lastSavedAtRef.current = cloudTs;
+  }, []);
+
+  // Manual & Instant Cloud Refresh Handler (forced, abaikan timestamp guard)
   const handleManualSyncCloud = async () => {
     try {
       const cloudState = await loadStateFromCloud();
@@ -902,11 +931,10 @@ export function App() {
     }
   };
 
-  // 1. Startup & Real-time Auto-Polling Cloud Fetch Effect (Polls every 6 seconds across devices)
+  // 1. STARTUP CLOUD FETCH — satu kali saat aplikasi pertama dibuka
   useEffect(() => {
     let isMounted = true;
-
-    async function fetchCloud() {
+    async function initialFetch() {
       try {
         const cloudState = await loadStateFromCloud();
         if (isMounted && cloudState) {
@@ -926,6 +954,7 @@ export function App() {
           if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
           if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
           if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+          if (cloudState.updatedAt) lastSavedAtRef.current = new Date(cloudState.updatedAt).getTime();
         }
       } catch (e) {
         console.error('[Cloud DB Init Error]:', e);
@@ -933,25 +962,32 @@ export function App() {
         if (isMounted) setIsCloudLoaded(true);
       }
     }
-
-    // Initial fetch
-    fetchCloud();
-
-    // Auto-poll cloud database every 6 seconds for multi-device live sync
-    const pollInterval = setInterval(() => {
-      fetchCloud();
-    }, 6000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(pollInterval);
-    };
+    initialFetch();
+    return () => { isMounted = false; };
   }, []);
 
-  // 2. REAL-TIME CLOUD DATABASE SYNC EFFECT (Guarded: Only runs AFTER Cloud state is loaded)
+  // 2. AUTO-POLLING — hanya untuk sinkronisasi ANTAR device, dengan timestamp guard & save lock
   useEffect(() => {
     if (!isCloudLoaded) return;
+    let isMounted = true;
+    const pollInterval = setInterval(async () => {
+      if (isSavingRef.current) return; // Skip jika sedang save (race condition prevention)
+      try {
+        const cloudState = await loadStateFromCloud();
+        if (isMounted && cloudState) applyCloudSnapshot(cloudState);
+      } catch (e) {
+        console.warn('[Cloud Poll Error]:', e);
+      }
+    }, 15000); // Poll setiap 15 detik — aman untuk sync antar device
+    return () => { isMounted = false; clearInterval(pollInterval); };
+  }, [isCloudLoaded, applyCloudSnapshot]);
 
+  // 3. CLOUD SAVE EFFECT — dipicu saat data berubah, dengan isSaving lock
+  useEffect(() => {
+    if (!isCloudLoaded) return;
+    const now = Date.now();
+    lastSavedAtRef.current = now;   // Catat timestamp save SEKARANG
+    isSavingRef.current = true;     // Kunci polling selama save berlangsung
     const cloudState: CloudDatabaseState = {
       users,
       clients,
@@ -969,9 +1005,11 @@ export function App() {
       molds: moldCatalogue,
       reamers: reamerCatalogue,
       personnels: personnelCatalogue,
-      updatedAt: new Date().toISOString(),
+      updatedAt: new Date(now).toISOString(),
     };
-    saveStateToCloud(cloudState);
+    saveStateToCloud(cloudState).finally(() => {
+      isSavingRef.current = false; // Buka kunci setelah save selesai
+    });
   }, [
     isCloudLoaded,
     users,
