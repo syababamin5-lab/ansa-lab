@@ -1,0 +1,49 @@
+==================== SHEET: Shearing Ds CD ====================
+Range: A1:BP62 (Rows: 62, Cols: 68)
+Row 6: D6:Client | K6:: | L6: [=IF(OR('Cons.Ds CD'!L6=""),"",'Cons.Ds CD'!L6)]
+Row 7: D7:Project | K7:: | L7: [=IF(OR('Cons.Ds CD'!L7=""),"",'Cons.Ds CD'!L7)]
+Row 8: D8:Location | K8:: | L8: [=IF(OR('Cons.Ds CD'!L8=""),"",'Cons.Ds CD'!L8)]
+Row 11: D11:DIRECT SHEAR CD TEST REPORT
+Row 12: D12:Test Method: ASTM D3080
+Row 14: D14:Borehole No. | K14:: | L14: [=IF(OR('Cons.Ds CD'!L14=""),"",'Cons.Ds CD'!L14)]
+Row 15: D15:Sample No. | K15:: | L15: [=IF(OR('Cons.Ds CD'!L15=""),"",'Cons.Ds CD'!L15)]
+Row 16: D16:Depth | K16:: | L16: [=IF(OR('Cons.Ds CD'!L16=""),"",'Cons.Ds CD'!L16)] | T16:m
+Row 17: D17:Description | K17:: | L17: [=IF(OR('Cons.Ds CD'!L17=""),"",'Cons.Ds CD'!L17)]
+Row 19: D19:Specimen No. | V19:1 | AH19:2
+Row 20: D20:Specimen Depth | Q20:m | V20:0.00 - 00.00 [=IF('Cons.Ds CD'!V20="","",'Cons.Ds CD'!V20)] | AH20:0.00 - 00.00 [=IF('Cons.Ds CD'!AH20="","",'Cons.Ds CD'!AH20)]
+Row 21: D21:Normal Force | Q21:kg | V21:3 [=IF('Cons.Ds CD'!V21="","",'Cons.Ds CD'!V21)] | AH21:6 [=IF('Cons.Ds CD'!AH21="","",'Cons.Ds CD'!AH21)]
+Row 22: A22:: | B22:: | D22:Normal Stress | Q22:kPa | V22:10.825762207386683 [=IF('Cons.Ds CD'!V22="","",'Cons.Ds CD'!V22)] | AH22:21.651524414773366 [=IF('Cons.Ds CD'!AH22="","",'Cons.Ds CD'!AH22)]
+Row 23: A23:Date | B23:Date | D23:Shear Rate | Q23:mm/min | V23:0.104 | AH23:0.114
+Row 25: D25:Shearing Stage
+Row 26: D26:Horizontal Displacement | M26:1 | AB26:2
+Row 27: M27:Vertical Reading | R27:Force Reading | W27:Shear Stress | AB27:Vertical Reading | AG27:Force Reading
+Row 29: A29:: | B29:: | D29:mm | R29:div | W29:kPa | AG29:div
+Row 30: A30:Checked by | B30:Approved by | D30:0 | M30:9161 | R30:0 | W30:0 [=IF(OR(R30="",$BL$24="",'Cons.Ds CD'!V25=""),"",R30*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB30:8352 | AG30:0
+Row 31: D31:0.3 | M31:911.5 | R31:6.2 | W31:1.2998853541149435 [=IF(OR(R31="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R31*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB31:828.3 | AG31:12
+Row 32: D32:0.6 | M32:908.1 | R32:10 | W32:2.0965892808305537 [=IF(OR(R32="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R32*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB32:823.5 | AG32:20
+Row 33: D33:0.9 | M33:906 | R33:15 | W33:3.1448839212458313 [=IF(OR(R33="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R33*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB33:820 | AG33:25
+Row 34: D34:1.2 | M34:905.1 | R34:18 | W34:3.7738607054949966 [=IF(OR(R34="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R34*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB34:840.8 | AG34:30
+Row 35: A35:LHU Template New 7 (Recovered) revisi.xlsx [=MID(CELL("filename",A1),FIND("[",CELL("filename",A1))+1, FIND("]",CELL("filename",A1))-FIND("[",CELL("filename",A1))-1)] | B35: [=IF(AV8="","",AV8)] | D35:1.5 | M35:904 | R35:22 | W35:4.612496417827219 [=IF(OR(R35="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R35*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB35:817 | AG35:35
+Row 36: D36:1.8 | M36:903.2 | R36:25 | W36:5.241473202076384 [=IF(OR(R36="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R36*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB36:815 | AG36:40
+Row 37: D37:2.1 | M37:903 | R37:28 | W37:5.870449986325552 [=IF(OR(R37="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R37*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB37:813.1 | AG37:45
+Row 38: D38:2.4 | M38:902.3 | R38:30 | W38:6.2897678424916625 [=IF(OR(R38="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R38*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB38:811.2 | AG38:50
+Row 39: D39:2.7 | M39:902.1 | R39:31 | W39:6.4994267705747175 [=IF(OR(R39="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R39*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB39:810 | AG39:55
+Row 40: D40:3 | M40:901.6 | R40:31.5 | W40:6.604256234616245 [=IF(OR(R40="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R40*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB40:809 | AG40:60
+Row 41: D41:3.3 | M41:900.9 | R41:32 | W41:6.709085698657773 [=IF(OR(R41="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R41*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB41:808 | AG41:65
+Row 42: D42:3.6 | M42:901.5 | R42:32.2 | W42:6.751017484274385 [=IF(OR(R42="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R42*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB42:807.9 | AG42:70
+Row 43: D43:3.9 | M43:902.3 | R43:32.4 | W43:6.792949269890994 [=IF(OR(R43="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R43*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB43:807.5 | AG43:75
+Row 44: D44:4.2 | M44:903.9 | R44:32.6 | W44:6.834881055507607 [=IF(OR(R44="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R44*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB44:807.3 | AG44:77
+Row 45: D45:4.5 | M45:904 | R45:32.8 | W45:6.876812841124216 [=IF(OR(R45="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R45*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB45:807.2 | AG45:78
+Row 46: D46:4.8 | M46:906.9 | R46:32.9 | W46:6.8977787339325225 [=IF(OR(R46="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R46*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB46:807.3 | AG46:78.5
+Row 47: D47:5.1 | M47:907 | R47:33 | W47:6.918744626740828 [=IF(OR(R47="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R47*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB47:807.3 | AG47:79
+Row 48: A48:: | B48:: | D48:5.4 | M48:908 | R48:33 | W48:6.918744626740828 [=IF(OR(R48="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R48*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB48:808.1 | AG48:79.2
+Row 49: A49:Filename | B49:Date | D49:5.7 | M49:909.6 | R49:33 | W49:6.918744626740828 [=IF(OR(R49="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R49*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB49:809 | AG49:79.4
+Row 50: D50:6 | M50:910.8 | R50:33 | W50:6.918744626740828 [=IF(OR(R50="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R50*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB50:808.9 | AG50:79.6
+Row 51: D51:6.3 | M51:911.9 | R51:33 | W51:6.918744626740828 [=IF(OR(R51="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R51*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB51:810.4 | AG51:79.8
+Row 52: D52:6.6 | M52:913 | R52:33 | W52:6.918744626740828 [=IF(OR(R52="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R52*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB52:811.1 | AG52:80
+Row 53: D53:6.9 | M53:913.9 | R53:33 | W53:6.918744626740828 [=IF(OR(R53="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R53*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB53:809.9 | AG53:80
+Row 54: D54:7.2 | M54:914.3 | R54:33 | W54:6.918744626740828 [=IF(OR(R54="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R54*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB54:810.6 | AG54:80
+Row 55: D55:7.5 | M55:914.7 | R55:33 | W55:6.918744626740828 [=IF(OR(R55="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R55*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB55:811.9 | AG55:80
+Row 56: D56:7.8 | M56:914.9 | R56:33 | W56:6.918744626740828 [=IF(OR(R56="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R56*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB56:812.2 | AG56:80
+Row 57: D57:8.1 | M57:915 | R57:33 | W57:6.918744626740828 [=IF(OR(R57="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R57*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB57:813 | AG57:80
+Row 58: D58:8.4 | M58:915.1 | R58:50 | W58:10.482946404152768 [=IF(OR(R58="",$BL$24="",'Cons.Ds CD'!$V$25=""),"",R58*$BL$24/'Cons.Ds CD'!$V$28*10)] | AB58:813.2 | AG58:80

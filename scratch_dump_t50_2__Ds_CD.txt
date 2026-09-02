@@ -1,0 +1,12 @@
+==================== SHEET: t50(2) Ds CD ====================
+Range: A1:CB75 (Rows: 75, Cols: 80)
+Row 3: D3:DIRECT SHEAR TEST REPORT
+Row 4: D4:Test Method: ASTM D3080
+Row 10: A10:: | B10::
+Row 11: A11:Date | B11:Date
+Row 19: A19:: | B19::
+Row 21: A21:Checked by | B21:Approved by
+Row 26: A26:LHU Template New 7 (Recovered) revisi.xlsx [=MID(CELL("filename",A1),FIND("[",CELL("filename",A1))+1, FIND("]",CELL("filename",A1))-FIND("[",CELL("filename",A1))-1)] | B26:23 [=IF(#REF!="","",#REF!)] | AA26:t50 | AD26:= | AF26:2.1 [=IF(BQ32="","",BQ32)] | AI26:menit
+Row 40: A40:: | B40::
+Row 41: A41:Filename | B41:Date
+Row 49: AA49:t90 | AD49:= | AF49: [=IF(BO68="","",BK75)] | AI49:menit

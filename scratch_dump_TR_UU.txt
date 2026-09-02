@@ -1,0 +1,33 @@
+==================== SHEET: TR UU ====================
+Range: C2:AB82 (Rows: 82, Cols: 28)
+Row 4: F4:GEOLAND QUATTRO TECHNOLAB
+Row 5: F5:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah
+Row 6: F6:Kec. Margahayu, Kab. Bandung 40225
+Row 7: F7:Telp/WhatsApp : 082115618130
+Row 8: F8:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 10: D10:UJI TRIAXIAL UU/ TRIAXIAL UNDRAINED UNCONSOLIDATED TEST
+Row 11: D11:SNI 4813 : 2015
+Row 13: E13:Deskripsi Sampel / Sample Description | M13:Penguji / Test by | O13:: | Q13:PT. MGS
+Row 14: E14:Pelanggan / Client | G14:: | H14:PT Itamatra Nusantara  [=Details!B4] | M14:No. PKS | O14:: | Q14:001/PKS GQT-MGS/VIII/2025
+Row 15: E15:Proyek / Project | G15:: | H15:hidroplogi [=Details!B8] | M15:Tanggal / Dated | O15:: | Q15:46218 [=Details!B32]
+Row 16: E16:Id Lab / Lab id | G16:: | H16:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [=Details!B7] | M16:Diperiksa / Checked by | O16:: | Q16:AS Sumartadji [=Details!B22]
+Row 17: E17:No Sampel / Sample No | G17:: | H17:BH-05_UDS-01 [=Details!B1] | M17:No. Lampiran | O17:: | Q17:MGS/02/VI/2026 [=Details!B2]
+Row 18: E18:Kedalaman / Depth | G18:: | H18:0,00-0,50 m [=Details!B13&" m"]
+Row 19: E19:Jenis Tanah / Soil Type | G19:: | H19:7 [=Details!B14] | M19:Parameter
+Row 20: E20:Warna / Colour | G20:: | H20:Abu-abu / Gray [=Details!B15] | M20:Kadar Air  | O20:(w) | P20:: | Q20:54.10531349985958 [=PP!J33] | S20:%
+Row 21: E21:Jenis Sampel / Sample Type | G21:: | H21:Undisturbed Sample / UDS [=Details!B16] | M21:Berat Jenis | O21:(Gs) | P21:: | Q21:2.673747624240277 [=PP!J24]
+Row 22: E22:Disclaimer : [=Details!C15] | F22:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [=Details!C16] | M22:Berat Isi | O22:(Yn) | P22:: | Q22:1.6801960244785452 [=PP!J39] | S22:kg/m3
+Row 23: M23:Derajat Kejenuhan | O23:(Sr) | P23:: | Q23:99.60850854874855 [=PP!J44] | S23:%
+Row 26: E26:S  P  E  C  I  M  E  N     D  A  T  A
+Row 27: E27:  Number Of Specimen | I27:1 | J27:2 | K27:3
+Row 28: M28:ANGLE OF INTERNAL FRICTION
+Row 29: E29:  Specimen Diameter | H29:mm | I29:3.8 [=UU!I18] | J29:3.8 [=UU!J18] | K29:3.8 [=UU!K18]
+Row 30: E30:  Specimen Height | H30:mm | I30:7.6 [=UU!I19] | J30:7.6 [=UU!J19] | K30:7.6 [=UU!K19] | M30:Ø = | N30:15 [=UU!O20] | P30:o
+Row 31: E31:  Specimen Area | H31:cm2 | I31:11.341149479459153 [=UU!I20] | J31:11.341149479459153 [=UU!J20] | K31:11.341149479459153 [=UU!K20]
+Row 33: E33:  Dial Gauge Subdevision | H33:mm/div | I33:0.002 [=UU!I22] | J33:0.002 [=UU!J22] | K33:0.002 [=UU!K22] | M33:COHESION
+Row 34: E34:  Load Rate | H34:kg/min | I34:0.14 [=UU!I23] | J34:0.14 [=UU!J23] | K34:0.14 [=UU!K23]
+Row 35: E35:  Load Ring Constant | H35:kg/div | I35:0.12064 [=UU!I24] | J35:0.12064 [=UU!J24] | K35:0.12064 [=UU!K24] | M35:C = | N35:15 [=UU!O27] | P35:kg/cm2
+Row 37: E37:  Lateral Pressure | H37:kg/cm2 | I37:0.5 [=UU!I26] | J37:1 [=UU!J26] | K37:2 [=UU!K26]
+Row 38: E38:  Maximum Deviator Stress | H38:kg/cm2 | I38:15 [=UU!I27] | J38:15 [=UU!J27] | K38:15 [=UU!K27]
+Row 39: E39:  Maximum Value Of Vertical Stress | H39:kg/cm2 | I39:15 [=UU!I28] | J39:15 [=UU!J28] | K39:15 [=UU!K28]
+Row 41: K41:Notes :

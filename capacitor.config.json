@@ -1,0 +1,9 @@
+{
+  "appId": "com.ansalab.mobile",
+  "appName": "ANSA Mobile Lab",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -1,0 +1,218 @@
+==================== SHEET: A. GS ====================
+Range: A1:BA112 (Rows: 112, Cols: 53)
+Row 3: F3:Project | G3:hidroplogi [=Details!B8] | K3:0 [=G10] | L3:0 [=G4] | M3:hidroplogi [=G3] | N3:PO-GQT-19 [=G5] | O3:0 [=G6] | Q3:0 [=C10] | R3:0,00-0,50 [=C12] | S3:0 [=I6] | T3:Sample Type                : [=F11] | U3:Sample Description    : [=F12] | V3:7 [=IF($M$14=$AI$27,AG29,AP29)] | W3:7 [=IF($M$14=$AI$27,AH29,AQ29)] | X3:7 [=IF($M$14=$AI$27,AI29,AR29)] | Y3:42 [=IF($M$14=$AI$27,AJ29,AS29)] | Z3:42 [=IF($M$14=$AI$27,AK29,AT29)] | AA3:0 [=C62] | AB3:0 [=J62] | AC3:Sieve opening | AD3:Percent finer
+Row 4: AB4:42 [=100-AD4] | AC4:0.0017694496748470387 [=+$H$58] | AD4:42 [=+I58] | AE4:42 [=$I$58]
+Row 5: F5:Job No. | G5:PO-GQT-19 [=Details!B3] | H5:Date | AB5:42 [=100-AD5] | AC5:0.004334248828908851 [=+$H$57] | AD5:42 [=+I57] | AE5:42 [=$I$57-$I$58]
+Row 6: F6:Tested By | H6:Checked By | AB6:42 [=100-AD6] | AC6:0.008668497657817702 [=+$H$56] | AD6:42 [=+I56] | AE6:42 [=$I$56-$I$57]
+Row 7: AB7:42 [=100-AD7] | AC7:0.012259106953085203 [=+$H$55] | AD7:42 [=+I55] | AE7:42 [=$I$55-$I$56]
+Row 8: A8:PARTICLE SIZE DISTRIBUTION ANALYSIS | AB8:42 [=100-AD8] | AC8:0.017336995315635404 [=+$H$54] | AD8:42 [=+I54] | AE8:42 [=$I$54-$I$55]
+Row 9: AB9:42 [=100-AD9] | AC9:0.030028556737264143 [=+$H$53] | AD9:42 [=+I53] | AE9:42 [=$I$53-$I$54]
+Row 10: B10:Location      : | C10:0 [=Details!B10] | AB10:42 [=100-AD10] | AC10:0.047479317068674545 [=+$H$52] | AD10:42 [=+I52] | AE10:42 [=$I$52-$I$53]
+Row 11: B11:Hole No.      : | C11:BH-05_UDS-01 [=Details!B1] | F11:Sample Type                : | AB11:42 [=100-AD11] | AC11:0.06714589413073192 [=+$H$51] | AD11:42 [=+I51] | AE11:42 [=$I$51-$I$52]
+Row 12: B12:Depth          : | C12:0,00-0,50 [=Details!B13] | D12:m | F12:Sample Description    : | H12:7 [=IF(AH29>90,"GRAVEL",
+IF(AJ29>90,"SILT",
+IF(AK29>90,"CLAY",
+IF(AI29>90,"SAND",
+TRIM(
+SUBSTITUTE(
+TEXTJOIN(" ",TRUE,
+IF(AND(AH29>=AJ29,AH29>=AK29,AH29>=AI29),
+(
+TRIM(
+IF(TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)<>"",TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)&" GRAVEL",
+"GRAVEL"
+)
+)&
+IF(TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+)<>""," with "&TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+),"")
+),
+""
+),
+IF(AND(AJ29>=AH29,AJ29>=AK29,AJ29>=AI29),
+(
+TRIM(
+IF(TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)<>"",TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)&" SILT",
+"SILT"
+)
+)&
+IF(TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+)<>""," with "&TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+),"")
+),
+""
+),
+IF(AND(AK29>=AH29,AK29>=AJ29,AK29>=AI29),
+(
+TRIM(
+IF(TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)<>"",TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)&" CLAY",
+"CLAY"
+)
+)&
+IF(TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+)<>""," with "&TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+),"")
+),
+""
+),
+IF(AND(AI29>=AH29,AI29>=AJ29,AI29>=AK29),
+(
+TRIM(
+IF(TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)<>"",TEXTJOIN(", ",TRUE,
+IF(LARGE(AH29:AK29,2)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravelly","sandy","silty","clayey"),""),
+IF(LARGE(AH29:AK29,3)>=15,CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravelly","sandy","silty","clayey"),"")
+)&" SAND",
+"SAND"
+)
+)&
+IF(TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+)<>""," with "&TEXTJOIN(" and ",TRUE,
+IF(AND(LARGE(AH29:AK29,2)>0,LARGE(AH29:AK29,2)<15),
+IF(LARGE(AH29:AK29,2)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,2),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+),
+IF(AND(LARGE(AH29:AK29,3)>0,LARGE(AH29:AK29,3)<15),
+IF(LARGE(AH29:AK29,3)<5,"trace "&CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay"),CHOOSE(MATCH(LARGE(AH29:AK29,3),AH29:AK29,0),"gravel","sand","silt","clay")),
+""
+)
+),"")
+),
+""
+)
+),
+" and with "," and"))))))] | AB12:42 [=100-AD12] | AC12:0.09495863413734909 [=+$H$50] | AD12:42 [=+I50] | AE12:42 [=$I$50-$I$51]
+Row 13: O13:0.005 | P13:0 | R13:0.075 | S13:0 | U13:4.26 | V13:0 | AB13:7 [=100-AD13] | AC13:0.074 [=+$C$35] | AD13:7 [=+G35] | AE13:7 [=$E$35]
+Row 14: B14:SIEVE ANALYSIS  | L14:Graphic Type | M14:ASTM D 422 | O14:0.005 | P14:100 | R14:0.075 | S14:100 | U14:4.26 | V14:100 | AB14:7 [=100-AD14] | AC14:0.149 [=+$C$34] | AD14:7 [=+G34] | AE14:7 [=$E$34]
+Row 15: AB15:7 [=100-AD15] | AC15:0.177 [=+$C$33] | AD15:7 [=+G33] | AE15:7 [=$E$33]
+Row 16: B16:Initial weight of dry soil : | D16:0 [=+D50+D36] | E16:g | AB16:7 [=100-AD16] | AC16:0.42 [=+$C$32] | AD16:7 [=+G32] | AE16:7 [=$E$32]
+Row 17: AB17:7 [=100-AD17] | AC17:0.84 [=+$C$31] | AD17:7 [=IF(AD16=100,100,G31)] | AE17:7 [=$E$31]
+Row 18: B18:Sieve  | C18:Sieve | D18:Wt. Soil | E18:Percent | F18:Cumulative | G18:Percent | AB18:7 [=100-AD18] | AC18:2.38 [=+$C$30] | AD18:7 [=IF(AD17=100,100,G30)] | AE18:7 [=$E$30]
+Row 19: B19:No. | C19:Opening | D19:Retained | E19:Retained | F19:Percent | G19:Finer | L19:42 [=AK29] | M19:42 [=AJ29] | O19:7 [=AI29] | AB19:7 [=100-AD19] | AC19:4.76 [=+$C$29] | AD19:7 [=IF(AD18=100,100,G29)] | AE19:7 [=$E$29]
+Row 20: F20:Retained | AB20:7 [=100-AD20] | AC20:9.525 [=+$C$28] | AD20:7 [=IF(AD19=100,100,G28)] | AE20:7 [=$E$28]
+Row 21: C21:mm | D21:  | E21:% | F21:% | G21:% | AB21:7 [=100-AD21] | AC21:12.7 [=+$C$27] | AD21:7 [=IF(AD20=100,100,G27)] | AE21:7 [=$E$27]
+Row 22: B22:3" | C22:101.6 | D22:0 [=Data!E2] | E22:7 [=D22/$D$16*100] | F22:7 [=+E22] | G22:7 [=100-F22] | AB22:7 [=100-AD22] | AC22:19.05 [=+$C$26] | AD22:7 [=IF(AD21=100,100,G26)] | AE22:7 [=$E$26]
+Row 23: B23:2" | C23:75 | D23:0 [=Data!E3] | E23:7 [=D23/$D$16*100] | F23:7 [=F22+E23] | G23:7 [=100-F23] | AB23:7 [=100-AD23] | AC23:25.4 [=+$C$25] | AD23:7 [=IF(AD22=100,100,G25)] | AE23:7 [=$E$25]
+Row 24: B24:1 1/2" | C24:38.1 | D24:0 [=Data!E4] | E24:7 [=D24/$D$16*100] | F24:7 [=F23+E24] | G24:7 [=100-F24] | AB24:7 [=100-AD24] | AC24:38.1 [=+$C$24] | AD24:7 [=IF(AD23=100,100,G24)] | AE24:7 [=$E$24]
+Row 25: B25:1" | C25:25.4 | D25:0 [=Data!E5] | E25:7 [=D25/$D$16*100] | F25:7 [=F24+E25] | G25:7 [=100-F25] | AB25:7 [=100-AD25] | AC25:75 [=+$C$23] | AD25:7 [=IF(AD24=100,100,G23)] | AE25:7 [=$E$23]
+Row 26: B26:3/4" | C26:19.05 | D26:0 [=Data!E6] | E26:7 [=D26/$D$16*100] | F26:7 [=F25+E26] | G26:7 [=100-F26] | AB26:7 [=100-AD26] | AC26:101.6 [=+$C$22] | AD26:7 [=IF(AD25=100,100,G22)] | AE26:7 [=$E$22]
+Row 27: B27:1/2" | C27:12.7 | D27:0 [=Data!E7] | E27:7 [=D27/$D$16*100] | F27:7 [=F26+E27] | G27:7 [=100-F27]
+Row 28: B28:3/8" | C28:9.525 | D28:0 [=Data!E8] | E28:7 [=D28/$D$16*100] | F28:7 [=F27+E28] | G28:7 [=100-F28]
+Row 29: B29:4 | C29:4.76 | D29:0 [=Data!E9] | E29:7 [=D29/$D$16*100] | F29:7 [=F28+E29] | G29:7 [=100-F29]
+Row 30: B30:8 | C30:2.38 | D30:0 [=Data!E10] | E30:7 [=D30/$D$16*100] | F30:7 [=F29+E30] | G30:7 [=100-F30]
+Row 31: B31:20 | C31:0.84 | D31:0 [=Data!E11] | E31:7 [=D31/$D$16*100] | F31:7 [=F30+E31] | G31:7 [=100-F31] | AE31:Cobbles
+Row 32: B32:40 | C32:0.42 | D32:0 [=Data!E12] | E32:7 [=D32/$D$16*100] | F32:7 [=F31+E32] | G32:7 [=100-F32]
+Row 33: B33:80 | C33:0.177 | D33:0 [=Data!E13] | E33:7 [=D33/$D$16*100] | F33:7 [=F32+E33] | G33:7 [=100-F33]
+Row 34: B34:100 | C34:0.149 | D34:0 [=Data!E14] | E34:7 [=D34/$D$16*100] | F34:7 [=F33+E34] | G34:7 [=100-F34] | AE34:gravel
+Row 35: B35:200 | C35:0.074 | D35:0 [=Data!E15] | E35:7 [=D35/$D$16*100] | F35:7 [=F34+E35] | G35:7 [=100-F35]
+Row 36: B36:Pan | D36:0 [=SUM(D22:D35)] | E36:7 [=D36/$D$16*100] | F36:7 [=F35+E36]
+Row 37: AE37:Sand
+Row 38: D38:0 [=SUM(D22:D36)] | E38:7 [=SUM(E22:E37)]
+Row 39: B39:HYDROMETER ANALYSIS SNI 3423 : 2008
+Row 40: AE40:Silt
+Row 41: B41:Weight of soil         : | D41:0 [=Data!F2] | E41:g | F41:Tube  No. | H41::
+Row 42: B42:Specific Gravity (Gs)    : | D42:2.673747624240277 [=PP!J24] | F42:Hydrometer  No. | H42::
+Row 43: B43:Meniscus Correction,c : | F43:Temperature Correction, mt | H43:: | I43:42 [=VLOOKUP(L43,Q46:R61,2,0)] | K43:temperature = | L43:0 [=Data!F3] | AE43:Clay
+Row 44: B44:Viscosity of water        : | D44:1.7865 [=+(0.000000000153808*L43^6)-(0.0000000215035*L43^5)+(0.000001335*L43^4)-(0.0000539985*L43^3)+(0.001865353*L43^2)-(0.062670029*L43)+1.7865] | F44:Dispersant Correction, x | H44:: | K44:density of water | L44:0.99984 [=+(0.00000000000294863*L43^6)-(0.000000000349145*L43^5)+(0.0000000151156*L43^4)-(0.000000247168*L43^3)-(0.00000563567*L43^2)+(0.0000548713*L43)+0.99984] | Q44:koreksi suhu
+Row 45: C45:Elapsed | D45:Hydrometer | E45:true | F45:Effective | G45:Fully | H45:Particle | I45:Percentage Finer | K45:Cw  | L45:0.160000000000049 [=+(1-L44)*1000] | O45:Temp. | P45:mt | Q45:suhu | R45:corection
+Row 46: B46:Time | C46:Time | D46:reading | E46:Reading | F46:depth | G46:Corrected | H46:Diameter | I46:Than D | L46:0 [=(((D41/100))+1)*D16] | O46:24 | P46:0.8 | Q46:15 | R46:-1.1
+Row 47: C47:t | D47:R'h | E47:Rh | F47:HR | G47:Reading | H47:D | I47:K | O47:25 | P47:1 | Q47:16 | R47:-0.9
+Row 48: C48:min | F48:mm | H48:mm | I48:% | O48:26 | P48:1.26 | Q48:17 | R48:-0.7
+Row 49: C49:0 | O49:27 | P49:1.52 | Q49:18 | R49:-0.5
+Row 50: C50:0.5 | D50:0 [=Data!F4] | E50:0 [=D50+$D$43] | F50:173.09 [=IF($I$42="m",157.59-(E50*1.36),173.09-(E50*1.56))] | G50:42 [=E50+$I$43-$I$44+$L$45] | H50:0.09495863413734909 [=0.00494*($D$44*F50/(($D$42-1)*C50))^0.5] | I50:42 [=+($D$41*L50/100)/$L$46*100] | L50:42 [=$D$42*G50*100/($D$41*($D$42-1))] | O50:28 | P50:1.78 | Q50:19 | R50:-0.3
+Row 51: C51:1 | D51:0 [=Data!F5] | E51:0 [=D51+$D$43] | F51:173.09 [=IF($I$42="m",157.59-(E51*1.36),173.09-(E51*1.56))] | G51:42 [=E51+$I$43-$I$44+$L$45] | H51:0.06714589413073192 [=0.00494*($D$44*F51/(($D$42-1)*C51))^0.5] | I51:42 [=+($D$41*L51/100)/$L$46*100] | L51:42 [=$D$42*G51*100/($D$41*($D$42-1))] | O51:29 | P51:2.04 | Q51:20 | R51:0
+Row 52: C52:2 | D52:0 [=Data!F6] | E52:0 [=D52+$D$43] | F52:173.09 [=IF($I$42="m",157.59-(E52*1.36),173.09-(E52*1.56))] | G52:42 [=E52+$I$43-$I$44+$L$45] | H52:0.047479317068674545 [=0.00494*($D$44*F52/(($D$42-1)*C52))^0.5] | I52:42 [=+($D$41*L52/100)/$L$46*100] | L52:42 [=$D$42*G52*100/($D$41*($D$42-1))] | O52:30 | P52:2.3 | Q52:21 | R52:0.2
+Row 53: C53:5 | D53:0 [=Data!F7] | E53:0 [=D53+$D$43] | F53:173.09 [=IF($I$42="m",157.59-(E53*1.36),173.09-(E53*1.56))] | G53:42 [=E53+$I$43-$I$44+$L$45] | H53:0.030028556737264143 [=0.00494*($D$44*F53/(($D$42-1)*C53))^0.5] | I53:42 [=+($D$41*L53/100)/$L$46*100] | L53:42 [=$D$42*G53*100/($D$41*($D$42-1))] | Q53:22 | R53:0.4
+Row 54: C54:15 | D54:0 [=Data!F8] | E54:0 [=D54+$D$43] | F54:173.09 [=IF($I$42="m",157.59-(E54*1.36),173.09-(E54*1.56))] | G54:42 [=E54+$I$43-$I$44+$L$45] | H54:0.017336995315635404 [=0.00494*($D$44*F54/(($D$42-1)*C54))^0.5] | I54:42 [=+($D$41*L54/100)/$L$46*100] | L54:42 [=$D$42*G54*100/($D$41*($D$42-1))] | Q54:23 | R54:0.7
+Row 55: C55:30 | D55:0 [=Data!F9] | E55:0 [=D55+$D$43] | F55:173.09 [=IF($I$42="m",157.59-(E55*1.36),173.09-(E55*1.56))] | G55:42 [=E55+$I$43-$I$44+$L$45] | H55:0.012259106953085203 [=0.00494*($D$44*F55/(($D$42-1)*C55))^0.5] | I55:42 [=+($D$41*L55/100)/$L$46*100] | L55:42 [=$D$42*G55*100/($D$41*($D$42-1))] | Q55:24 | R55:1
+Row 56: C56:60 | D56:0 [=Data!F10] | E56:0 [=D56+$D$43] | F56:173.09 [=IF($I$42="m",157.59-(E56*1.36),173.09-(E56*1.56))] | G56:42 [=E56+$I$43-$I$44+$L$45] | H56:0.008668497657817702 [=0.00494*($D$44*F56/(($D$42-1)*C56))^0.5] | I56:42 [=+($D$41*L56/100)/$L$46*100] | L56:42 [=$D$42*G56*100/($D$41*($D$42-1))] | Q56:25 | R56:1.3
+Row 57: C57:240 | D57:0 [=Data!F11] | E57:0 [=D57+$D$43] | F57:173.09 [=IF($I$42="m",157.59-(E57*1.36),173.09-(E57*1.56))] | G57:42 [=E57+$I$43-$I$44+$L$45] | H57:0.004334248828908851 [=0.00494*($D$44*F57/(($D$42-1)*C57))^0.5] | I57:42 [=+($D$41*L57/100)/$L$46*100] | L57:42 [=$D$42*G57*100/($D$41*($D$42-1))] | Q57:26 | R57:1.65
+Row 58: C58:1440 | D58:0 [=Data!F12] | E58:0 [=D58+$D$43] | F58:173.09 [=IF($I$42="m",157.59-(E58*1.36),173.09-(E58*1.56))] | G58:42 [=E58+$I$43-$I$44+$L$45] | H58:0.0017694496748470387 [=0.00494*($D$44*F58/(($D$42-1)*C58))^0.5] | I58:42 [=+($D$41*L58/100)/$L$46*100] | L58:42 [=$D$42*G58*100/($D$41*($D$42-1))] | Q58:27 | R58:2
+Row 59: B59:NOTES : | Q59:28 | R59:2.5
+Row 60: Q60:29 | R60:3.05
+Row 61: Q61:30 | R61:3.8
+Row 67: L67:0.09495863413734909 [=H50]
+Row 68: H68:Less Than  | I68:Percent | L68:0.06714589413073192 [=H51]
+Row 69: H69:0.02 | I69:42 [=AVERAGE(I53:I54)] | L69:0.047479317068674545 [=H52]
+Row 70: H70:0.002 | I70:42 [=I58] | L70:0.030028556737264143 [=H53]
+Row 71: H71:0.001 | I71:0 | L71:0.017336995315635404 [=H54]
+Row 72: L72:0.012259106953085203 [=H55]
+Row 73: L73:0.008668497657817702 [=H56]
+Row 74: L74:0.004334248828908851 [=H57]
+Row 75: L75:0.0017694496748470387 [=H58]

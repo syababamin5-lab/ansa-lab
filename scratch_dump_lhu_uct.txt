@@ -1,0 +1,62 @@
+=== DUMP OF SHEET: " LHU_UCT" ===
+ROW   1 | F1: LABORATORIUM MEKANIKA TANAH
+ROW   2 | F2: PT. TERRAFORMA GEOTEKNIK INDONESIA
+ROW   3 | F3: LABORATORY TEST REPORT
+ROW   6 | A6: No. Laporan / Report No.   | E6: :  23/MGS/53/II/2026 [FORMULA: =":  " & IF('DATA INDUK'!$H$17="","",'DATA INDUK'!$H$17)]
+ROW   7 | A7: Revisi / Revision                                  | E7: :  R0 [FORMULA: =":  "&IF('DATA INDUK'!$H$18="","",'DATA INDUK'!$H$18)] | J7: Tgl. Laporan / Report Date  | M7: :  29 January 2026 [FORMULA: =":  "&IF('DATA INDUK'!H19="","",TEXT('DATA INDUK'!H19,"dd mmmm yyyy"))] | T7: Halaman/Pages      | W7: :  1 dari 2 [FORMULA: =":  1 dari 2"]
+ROW   9 | A9: INFORMASI PROYEK /PROJECT INFORMATION | N9: INFORMASI CONTOH / SAMPLE INFORMATION
+ROW  11 | A11: Nama Proyek / Project Name  | N11: Kode Laboratorium / Laboratory Id.
+ROW  12 | A12: BSI Candrian Waste Dump Extension Study [FORMULA: =IF('DATA INDUK'!H2="","",'DATA INDUK'!H2)] | N12: 26-001-DS-001 [FORMULA: =IF('WS-UCT'!D9="","",'WS-UCT'!D7)]
+ROW  13 | A13: Lokasi Proyek / Location             | E13: :  Banyuwangi - JAWA TIMUR [FORMULA: =":  "&IF('DATA INDUK'!H3="","",'DATA INDUK'!H3)] | N13: No. Contoh / Sample Id.                   | S13: :  BH-04R1-SPT 15 [FORMULA: =":  "&IF('WS-UCT'!D9="","",'WS-UCT'!D9)]
+ROW  14 | A14: No. PO / PO Number           | E14: :  PO-GQT-001 [FORMULA: =":  "&IF('DATA INDUK'!H9="","",'DATA INDUK'!H9)] | N14: Kedalaman / Depth (m)                  | S14: #N/A [FORMULA: =":  "&IF('WS-UCT'!D10="","",'WS-UCT'!D10)]
+ROW  15 | N15: Jenis Contoh / Sample Type             | S15: :  Disturbed Sample [FORMULA: =":  "&IF('WS-UCT'!D11="","",'WS-UCT'!D11)]
+ROW  17 | A17: IDENTITAS KLIEN / CLIENT INFORMATION | N17: Deskripsi Tanah / Soil Description     | S17: :  Lempung / Clay [FORMULA: =":  "&IF('WS-UCT'!D12="","",'WS-UCT'!D12)]
+ROW  18 | N18: Warna Tanah / Soil Color                    | S18: :   [FORMULA: =":  "&IF('WS-UCT'!D13="","",'WS-UCT'!D13)]
+ROW  19 | A19: Klien / Client                   | E19: :  PT. GEOLAND QUATRO TECHNOLAB [FORMULA: =":  "&IF('DATA INDUK'!H4="","",'DATA INDUK'!H4)]
+ROW  20 | N20: Tgl.Diterima / Date Received             | S20: :  05 January 2026 [FORMULA: =":  "&IF('DATA INDUK'!H13="","",TEXT('DATA INDUK'!H13,"dd mmmm yyyy"))]
+ROW  21 | A21: Alamat / Address           | E21: :  Kab. Bandung - JAWA BARAT [FORMULA: =":  "&IF('DATA INDUK'!H6="","",'DATA INDUK'!H6)]
+ROW  22 | N22: Tgl Pengujian / Date Tested                  | S22: :  25 April 2026 [FORMULA: =":  "&IF('WS-UCT'!O12="","",TEXT('WS-UCT'!O12,"dd mmmm yyyy"))]
+ROW  26 | A26: UJI KUAT TEKAN BEBAS [FORMULA: ='WS-UCT'!A2] | U26: SNI | V26: 3638:2012 [FORMULA: ='DATA INDUK'!$BS$40]
+ROW  27 | A27: UNCONFINED COMPRESSION TEST [FORMULA: ='WS-UCT'!A3]
+ROW  29 | A29: INFORMASI BENDA UJI / SPECIMEN INFORMATION | N29: GRAFIK
+ROW  30 | A30: Contoh/Sample | H30: Tidak Terganggu /Undisturbed | K30: Cetak Ulang / Remolded | N30: GRAFIK TEGANGAN VS REGANGAN / STRESS VS STRAIN CURVE
+ROW  32 | A32: Diameter Awal / Initial diameter (mm) | H32: 38.00 [FORMULA: ='WS-UCT'!D166] | K32: 38.00 [FORMULA: ='WS-UCT'!E166] | AA32: LHU No.   : 23/MGS/53/II/2026 [FORMULA: ="LHU No.   : "& IF('DATA INDUK'!$H$17="","",'DATA INDUK'!$H$17)]
+ROW  33 | A33: Tinggi Awal / Initial Height (mm) | H33: 76.00 [FORMULA: ='WS-UCT'!D167] | K33: 76.00 [FORMULA: ='WS-UCT'!E167] | AA33: LAB ID.        : 26-001-DS-001 [FORMULA: ="LAB ID.        : "&$N$12&""]
+ROW  34 | A34: Luas Penampang Awal / Initial area (mm²) | H34: 1134.11 [FORMULA: ='WS-UCT'!D168] | K34: 1134.11 [FORMULA: ='WS-UCT'!E168] | Z34: UCT | AA34: TEST TYPE   : UCT [FORMULA: ="TEST TYPE   : "&Z34&""]
+ROW  35 | A35: Kadar Air / Moisture Content (%) | H35: 8.15 [FORMULA: ='WS-UCT'!D169] | K35: 8.98 [FORMULA: ='WS-UCT'!E169] | AA35: DATE            : 2026-01-29 [FORMULA: ="DATE            : "&TEXT('DATA INDUK'!$H$19,"yyyy-mm-dd")]
+ROW  36 | A36: Berat Isi Basah / Wet Density (g/cm³) | H36: 2.01 [FORMULA: ='WS-UCT'!D170] | K36: 1.97 [FORMULA: ='WS-UCT'!E170]
+ROW  37 | A37: Berat Isi Kering / Dry Density (g/cm³) | H37: 1.86 [FORMULA: ='WS-UCT'!D171] | K37: 1.81 [FORMULA: ='WS-UCT'!E171]
+ROW  39 | A39: HASIL PENGUJIAN / TEST RESULT
+ROW  40 | A40: Contoh/Sample | H40: Tidak Terganggu /Undisturbed | K40: Cetak Ulang / Remolded
+ROW  42 | A42: Kuat Tekan Bebas / Unconfined Compressive Strength, qu (kPa) | H42: 107.17 [FORMULA: ='WS-UCT'!D175] | K42: 83.87 [FORMULA: ='WS-UCT'!E175]
+ROW  44 | A44: Kuat Geser Tak Terdrainase / Undrained Shear Strength, Su (kPa) | H44: 53.59 [FORMULA: ='WS-UCT'!D176] | K44: 41.93 [FORMULA: ='WS-UCT'!E176]
+ROW  46 | A46: Regangan Saat Keruntuhan / Strain at Failure (%) | H46: 9.87 [FORMULA: ='WS-UCT'!D177] | K46: 11.18 [FORMULA: ='WS-UCT'!E177]
+ROW  48 | A48: Sensitivitas / Sensitivity, St ( - ) | H48: 1.28 [FORMULA: ='WS-UCT'!D178]
+ROW  59 | T59: SCAN FOR REPORT VERIFICATION
+ROW  60 | C60: DIUJI OLEH / | H60: DIPERIKSA OLEH / | M60: DISETUJUI  OLEH /
+ROW  61 | C61: TESTED BY | H61: CHECKED BY | M61: APPROVED BY
+ROW  65 | C65: NOUFAL [FORMULA: ='WS-UCT'!O9] | H65:  -  [FORMULA: =IF(C65='WS-UCT'!O10," - ",'WS-UCT'!O10)] | M65: A.SUMARTADJI [FORMULA: ='WS-UCT'!O11]
+ROW  66 | C66: Teknisi/Analis | H66: Koordinator Teknis | M66: Kepala Laboratorium
+ROW  67 | C67: Tgl./Date : | E67: 28/01/26 [FORMULA: =IF('DATA INDUK'!$H$19="","",'DATA INDUK'!$H$19-1)] | H67: Tgl./Date : | J67: 28/01/26 [FORMULA: =IF('DATA INDUK'!$H$19="","",'DATA INDUK'!$H$19-1)] | M67: Tgl./Date : | P67: 28/01/26 [FORMULA: =IF('DATA INDUK'!$H$19="","",'DATA INDUK'!$H$19-1)]
+ROW  69 | A69: KETERANGAN / NOTES | D69: -  Laporan hasil Uji ini hanya berlaku untuk contoh yang diuji | M69: - | N69: This test report applies only to the tested sample.
+ROW  70 | D70: -  Dilarang memperbanyak laporan tanpa ijin tertulis dari Laboratorium  | M70: - | N70: This report shall not be reproduced except in full without written approval from 
+ROW  71 | D71:    Mekanika Tanah PT. TERRAFORMA GEOTEKNIK INDONESIA. | N71: PT. TERRAFORMA GEOTEKNIK INDONESIA Soil Mechanics Laboratory.
+ROW  72 | D72: -  Laboratorium tidak bertanggung jawab atas kegiatan pengambilan  | M72: - | N72: The laboratory is not responsible for sampling,handling and sample transportation 
+ROW  73 | D73:    dan transportasi contoh yang dilakukan oleh pihak lain. | N73: conducted by others.
+ROW  74 | T74: 23-MINEARTH-RM-LHU-UCT-R0 [FORMULA: ='DATA INDUK'!$BT$40]
+ROW  75 | A75: Jl. Leuwisari VII No.23, Kota Bandung | K75: Telp     : 022-4572503 | S75: Email : Soil_test@minearth.co.id 
+ROW  76 | A76: Jawa Barat-40235 | K76: Mobile : 0811-2183-223 | S76: Website : www.minearth.co.id
+ROW  79 | F79: LABORATORIUM MEKANIKA TANAH
+ROW  80 | F80: PT. TERRAFORMA GEOTEKNIK INDONESIA
+ROW  81 | F81: LABORATORY TEST REPORT
+ROW  84 | A84: No. Laporan / Report No.   | E84: :  23/MGS/53/II/2026 [FORMULA: =":  " & IF('DATA INDUK'!$H$17="","",'DATA INDUK'!$H$17)]
+ROW  85 | A85: Revisi / Revision                                  | E85: :  R0 [FORMULA: =":  "&IF('DATA INDUK'!$H$18="","",'DATA INDUK'!$H$18)] | J85: Tgl. Laporan / Report Date  | M85: :  29 January 2026 [FORMULA: =":  "&IF('DATA INDUK'!H19="","",TEXT('DATA INDUK'!H19,"dd mmmm yyyy"))] | T85: Halaman/Pages      | W85: :  2 dari 2 [FORMULA: =":  2 dari 2"]
+ROW  87 | A87: LAMPIRAN / APPENDIX
+ROW 139 | U139: SCAN FOR REPORT VERIFICATION
+ROW 140 | A140: CATATAN /NOTES : | H140: DIUJI OLEH / | L140: DIPERIKSA OLEH / | P140: DISETUJUI  OLEH /
+ROW 141 | H141: TESTED BY | L141: CHECKED BY | P141: APPROVED BY
+ROW 142 | H142: NOUFAL [FORMULA: =C65]
+ROW 145 | L145:  -  [FORMULA: =H65] | P145: A.SUMARTADJI [FORMULA: =M65]
+ROW 146 | H146: Teknisi/Analis [FORMULA: =C66] | L146: Koordinator Teknis [FORMULA: =H66] | P146: Kepala Laboratorium [FORMULA: =M66]
+ROW 147 | H147: Tgl./Date : | J147: 28/01/26 [FORMULA: =E67] | L147:   Tgl./Date : | N147: 28/01/26 [FORMULA: =J67] | P147: Tgl./Date  | R147: 28/01/26 [FORMULA: =P67]
+ROW 149 | T149: 23-MINEARTH-RM-LHU-UCT-R0 [FORMULA: =$T$74]

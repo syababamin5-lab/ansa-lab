@@ -1,0 +1,74 @@
+==================== SHEET: DS ====================
+Range: B2:AU121 (Rows: 121, Cols: 47)
+Row 3: G3:GEOLAND QUATTRO TECHNOLAB
+Row 4: G4:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah | AA4:area | AC4:27.711674638050212 [=PI()*(AF5/2)^2] | AE4:height | AF4:2.49
+Row 5: G5:Kec. Margahayu, Kab. Bandung 40225 | AA5:volume | AC5:69.00206984874504 [=AC4*AF4] | AE5:Dia. | AF5:5.94
+Row 6: G6:Telp/WhatsApp : 082115618130 | AA6:Calibration | AB6:kgf/div | AC6:0.4067
+Row 7: G7:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 9: C9:UJI KUAT GESER LANGSUNG TANAH UU/ DIRECT SHEAR UU TEST | AA9:kg/cm2 | AB9:1 | AC9:2 | AD9:4
+Row 10: C10:SNI 3420 : 2016 | AA10:Shear | AB10:Proving reading | AE10:Shear strenght kg/cm
+Row 11: C11:Deskripsi Sampel / Sample Description | AA11:Dial | AB11:A | AC11:B | AD11:C | AE11:A | AF11:B | AG11:C
+Row 12: C12:Pelanggan / Client | H12:: | I12:PT Itamatra Nusantara  [=Details!B4] | Q12:Penguji / Test by | T12:: | U12:PT. MGS | AA12:0 | AB12:0 | AC12:0 | AD12:0 | AE12:0 [=AB12*AC$6/AC$4] | AF12:0 [=AC12*AC$6/AC$4] | AG12:0 [=AD12*AC$6/AC$4]
+Row 13: C13:Proyek / Project | H13:: | I13:hidroplogi [=Details!B8] | Q13:No. PKS | T13:: | U13:001/PKS GQT-MGS/VIII/2025 | AA13:0.2 | AB13:<> [=_xlws.FILTER(Data!Z3:Z34,Data!Z3:Z34,"<>")] | AC13:<> [=_xlws.FILTER(Data!AA3:AA34,Data!AA3:AA34,"<>")] | AD13:<> [=_xlws.FILTER(Data!AB3:AB34,Data!AB3:AB34,"<>")] | AE13:15 [=AB13*AC$6/AC$4] | AF13:15 [=AC13*AC$6/AC$4] | AG13:15 [=AD13*AC$6/AC$4]
+Row 14: C14:Id Lab / Lab id | H14:: | I14:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [=Details!B7] | Q14:Tanggal / Dated | T14:: | U14:46221 [=Details!B34] | AA14:0.4 [=AA13+0.2] | AE14:0 [=AB14*AC$6/AC$4] | AF14:0 [=AC14*AC$6/AC$4] | AG14:0 [=AD14*AC$6/AC$4]
+Row 15: C15:No Sampel / Sample No | H15:: | I15:BH-05_UDS-01 [=Details!B1] | Q15:Diperiksa / Checked by | T15:: | U15:AS Sumartadji [=Details!B22] | AA15:0.6000000000000001 [=AA14+0.2] | AE15:0 [=AB15*AC$6/AC$4] | AF15:0 [=AC15*AC$6/AC$4] | AG15:0 [=AD15*AC$6/AC$4]
+Row 16: C16:Kedalaman / Depth | H16:: | I16:0,00-0,50 m [=Details!B13&" m"] | Q16:No. Lampiran | T16:: | U16:MGS/02/VI/2026 [=Details!B2] | AA16:0.8 [=AA15+0.2] | AE16:0 [=AB16*AC$6/AC$4] | AF16:0 [=AC16*AC$6/AC$4] | AG16:0 [=AD16*AC$6/AC$4]
+Row 17: C17:Jenis Tanah / Soil Type | H17:: | I17:7 [=Details!B14] | AA17:1 [=AA16+0.2] | AE17:0 [=AB17*AC$6/AC$4] | AF17:0 [=AC17*AC$6/AC$4] | AG17:0 [=AD17*AC$6/AC$4]
+Row 18: C18:Warna / Colour | H18:: | I18:Abu-abu / Gray [=Details!B15] | AA18:1.2 [=AA17+0.2] | AE18:0 [=AB18*AC$6/AC$4] | AF18:0 [=AC18*AC$6/AC$4] | AG18:0 [=AD18*AC$6/AC$4]
+Row 19: C19:Jenis Sampel / Sample Type | H19:: | I19:Undisturbed Sample / UDS [=Details!B16] | AA19:1.4 [=AA18+0.2] | AE19:0 [=AB19*AC$6/AC$4] | AF19:0 [=AC19*AC$6/AC$4] | AG19:0 [=AD19*AC$6/AC$4]
+Row 20: D20:Disclaimer : [=Details!C15] | F20:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [=Details!C16] | T20:Notes : | AA20:1.5999999999999999 [=AA19+0.2] | AE20:0 [=AB20*AC$6/AC$4] | AF20:0 [=AC20*AC$6/AC$4] | AG20:0 [=AD20*AC$6/AC$4]
+Row 21: AA21:1.7999999999999998 [=AA20+0.2] | AE21:0 [=AB21*AC$6/AC$4] | AF21:0 [=AC21*AC$6/AC$4] | AG21:0 [=AD21*AC$6/AC$4]
+Row 22: E22:SPECIMENT | L22:UNIT | M22:1 | O22:2 | Q22:3 | AA22:1.9999999999999998 [=AA21+0.2] | AE22:0 [=AB22*AC$6/AC$4] | AF22:0 [=AC22*AC$6/AC$4] | AG22:0 [=AD22*AC$6/AC$4]
+Row 23: E23:Tinggi awal/ Initial height | K23:Ho | L23:cm | M23:2.49 [=AF4] | O23:2.49 [=M23] | Q23:2.49 [=O23] | AA23:2.1999999999999997 [=AA22+0.2] | AE23:0 [=AB23*AC$6/AC$4] | AF23:0 [=AC23*AC$6/AC$4] | AG23:0 [=AD23*AC$6/AC$4]
+Row 24: E24:Diameter sample/sample diameter | K24:Do | L24:cm | M24:5.94 [=AE60] | O24:5.94 [=AF60] | Q24:5.94 [=AG60] | AA24:2.4 [=AA23+0.2] | AE24:0 [=AB24*AC$6/AC$4] | AF24:0 [=AC24*AC$6/AC$4] | AG24:0 [=AD24*AC$6/AC$4]
+Row 25: E25:Area | K25:A | L25:cm2 | M25:27.697626000000007 [=AE61] | O25:27.697626000000007 [=AF61] | Q25:27.697626000000007 [=AG61] | AA25:2.6 [=AA24+0.2] | AE25:0 [=AB25*AC$6/AC$4] | AF25:0 [=AC25*AC$6/AC$4] | AG25:0 [=AD25*AC$6/AC$4]
+Row 26: E26:Volume awal/initial volume | K26:Vo | L26:cm3 | M26:68.96708874000002 [=AE62] | O26:68.96708874000002 [=AF62] | Q26:68.96708874000002 [=AG62] | AA26:2.8000000000000003 [=AA25+0.2] | AE26:0 [=AB26*AC$6/AC$4] | AF26:0 [=AC26*AC$6/AC$4] | AG26:0 [=AD26*AC$6/AC$4]
+Row 27: E27:Proving ring Calibration | L27:kgf/dif | M27:0.4067 [=AC6] | O27:0.4067 [=AC6] | Q27:0.4067 [=AC6] | AA27:3.0000000000000004 [=AA26+0.2] | AE27:0 [=AB27*AC$6/AC$4] | AF27:0 [=AC27*AC$6/AC$4] | AG27:0 [=AD27*AC$6/AC$4]
+Row 28: AA28:3.2000000000000006 [=AA27+0.2] | AE28:0 [=AB28*AC$6/AC$4] | AF28:0 [=AC28*AC$6/AC$4] | AG28:0 [=AD28*AC$6/AC$4]
+Row 29: E29:Berat isi tanah basah/ wet density*1 | K29:γw | L29:gr/cm3 | M29:-1.7133099592685515 [=AE67] | O29:-1.7133099592685515 [=AF67] | Q29:-1.7133099592685515 [=AG67] | AA29:3.400000000000001 [=AA28+0.2] | AE29:0 [=AB29*AC$6/AC$4] | AF29:0 [=AC29*AC$6/AC$4] | AG29:0 [=AD29*AC$6/AC$4]
+Row 30: E30:Berat Isi Tanah Kering/dry density*1 | K30:γd | L30:gr/cm3 | M30:42 [=AE78] | O30:42 [=AF78] | Q30:42 [=AG78] | AA30:3.600000000000001 [=AA29+0.2] | AE30:0 [=AB30*AC$6/AC$4] | AF30:0 [=AC30*AC$6/AC$4] | AG30:0 [=AD30*AC$6/AC$4] | AI30:BERAT ISI TANAH NON KOHESIF
+Row 31: E31:Kadar air/moisture content | K31:W | L31:% | M31:42 [=AE75] | O31:42 [=AF75] | Q31:42 [=AG75] | AA31:3.800000000000001 [=AA30+0.2] | AE31:0 [=AB31*AC$6/AC$4] | AF31:0 [=AC31*AC$6/AC$4] | AG31:0 [=AD31*AC$6/AC$4] | AI31:SNI 03-4804-1998
+Row 32: AA32:4.000000000000001 [=AA31+0.2] | AE32:0 [=AB32*AC$6/AC$4] | AF32:0 [=AC32*AC$6/AC$4] | AG32:0 [=AD32*AC$6/AC$4]
+Row 33: E33:Tegangan geser max/Max. shear strength | K33:τ | L33:kg/cm2 | M33:0 [=AE47] | O33:0 [=AF47] | Q33:0 [=AG47] | AA33:4.200000000000001 [=AA32+0.2] | AE33:0 [=AB33*AC$6/AC$4] | AF33:0 [=AC33*AC$6/AC$4] | AG33:0 [=AD33*AC$6/AC$4]
+Row 34: E34:Tegangan normal/Normal strength | K34:σ | L34:kg/cm2 | M34:0.3608587402462227 [=AA49] | O34:0.7217174804924454 [=AA50] | Q34:0 [=AB51] | AA34:4.400000000000001 [=AA33+0.2] | AE34:0 [=AB34*AC$6/AC$4] | AF34:0 [=AC34*AC$6/AC$4] | AG34:0 [=AD34*AC$6/AC$4]
+Row 35: AA35:4.600000000000001 [=AA34+0.2] | AE35:0 [=AB35*AC$6/AC$4] | AF35:0 [=AC35*AC$6/AC$4] | AG35:0 [=AD35*AC$6/AC$4] | AI35:Berat alat penakar Kosong (w1)
+Row 36: E36:Sudut geser dalam /angel of internal friction | K36:φ | L36:o | M36:0 [=AD51] | O36:0 [=AD51] | Q36:0 [=AD51] | AA36:4.800000000000002 [=AA35+0.2] | AE36:0 [=AB36*AC$6/AC$4] | AF36:0 [=AC36*AC$6/AC$4] | AG36:0 [=AD36*AC$6/AC$4] | AI36:Berat tanah basah + alat penakar(W2)
+Row 37: E37:Kohesi/Cohesion | K37:Cu | L37:kg/cm2 | M37:0 [=AB48] | O37:0 [=M37] | Q37:0 [=M37] | AA37:5.000000000000002 [=AA36+0.2] | AE37:0 [=AB37*AC$6/AC$4] | AF37:0 [=AC37*AC$6/AC$4] | AG37:0 [=AD37*AC$6/AC$4] | AI37:Berat tanah basah
+Row 38: E38:Kuat geser langsung/direct shear | K38:S | L38:kg/cm2 | M38:0 [=M34*TAN(RADIANS(M36))+M37] | O38:0 [=O34*TAN(RADIANS(O36))+O37] | Q38:0 [=Q34*TAN(RADIANS(Q36))+Q37] | AA38:5.200000000000002 [=AA37+0.2] | AE38:0 [=AB38*AC$6/AC$4] | AF38:0 [=AC38*AC$6/AC$4] | AG38:0 [=AD38*AC$6/AC$4]
+Row 39: L39:Kpa | M39:0 [=M38*98.0665] | O39:0 [=O38*98.0665] | Q39:0 [=Q38*98.0665] | AA39:5.400000000000002 [=AA38+0.2] | AE39:0 [=AB39*AC$6/AC$4] | AF39:0 [=AC39*AC$6/AC$4] | AG39:0 [=AD39*AC$6/AC$4] | AI39:Volume alat penakar
+Row 40: AA40:5.600000000000002 [=AA39+0.2] | AE40:0 [=AB40*AC$6/AC$4] | AF40:0 [=AC40*AC$6/AC$4] | AG40:0 [=AD40*AC$6/AC$4]
+Row 41: AA41:5.8000000000000025 [=AA40+0.2] | AE41:0 [=AB41*AC$6/AC$4] | AF41:0 [=AC41*AC$6/AC$4] | AG41:0 [=AD41*AC$6/AC$4] | AI41:Berat isi tanah  basah (p)
+Row 42: AA42:6.000000000000003 [=AA41+0.2] | AE42:0 [=AB42*AC$6/AC$4] | AF42:0 [=AC42*AC$6/AC$4] | AG42:0 [=AD42*AC$6/AC$4]
+Row 43: AA43:6.200000000000003 [=AA42+0.2] | AE43:0 [=AB43*AC$6/AC$4] | AF43:0 [=AC43*AC$6/AC$4] | AG43:0 [=AD43*AC$6/AC$4] | AI43:Berat tanah kering + alat penakar
+Row 44: AA44:6.400000000000003 [=AA43+0.2] | AE44:0 [=AB44*AC$6/AC$4] | AF44:0 [=AC44*AC$6/AC$4] | AG44:0 [=AD44*AC$6/AC$4] | AI44:Berat Tanah kering
+Row 46: AI46:Berat isi tanah Kering
+Row 47: AA47:x | AB47:y | AD47:MAX | AE47:0 [=MAX(AE14:AE46)] | AF47:0 [=MAX(AF14:AF46)] | AG47:0 [=MAX(AG14:AG46)]
+Row 48: AA48:0 | AB48:0 [=(((AA48-AA49)/(AA51-AA49))*(AB51-AB49)+AB49)]
+Row 49: AA49:0.3608587402462227 [=AB9/AC4*10] | AB49:0 [=AE47] | AD49:nilai kohesi
+Row 50: AA50:0.7217174804924454 [=AC9/AC4*10] | AB50:0 [=AF47] | AD50:0 [=((AB51-AB49)/(AA51-AA49))] | AF50:x | AG50:y
+Row 51: AA51:1.4434349609848909 [=AD9/AC4*10] | AB51:0 [=AG47] | AD51:0 [=DEGREES(ATAN(AD50))] | AF51:0 [=AA48] | AG51:0 [=AB48]
+Row 52: AA52:6 | AB52:0 [=(((AA52-AA49)/(AA51-AA49)*(AB51-AB49)+AB49))] | AF52:1.4434349609848909 [=AA51] | AG52:0 [=AB51]
+Row 53: AA53:Tanah Non Kohesif
+Row 54: AA54:SPECIMENT TANAH | AE54:A | AF54:B | AG54:C | AI54:No Cawan | AJ54:Berat Cawan (g)
+Row 55: AA55:Massa tanah basah + ring | AD55:gr | AI55:A | AJ55:9.633
+Row 56: AA56:Massa ring | AD56:gr | AE56:118.162 | AF56:118.162 [=AE56] | AG56:118.162 [=AE56] | AI56:B | AJ56:9.693
+Row 57: AI57:C | AJ57:9.8
+Row 58: AA58:Tinggi  awal Contoh | AD58:cm | AE58:2.49 | AF58:2.49 [=AE58] | AG58:2.49 [=AE58] | AI58:D | AJ58:9.757
+Row 59: AA59:Tinggi akhir | AD59:cm | AI59:E | AJ59:9.668
+Row 60: AA60:Diameter Contoh | AD60:cm | AE60:5.94 | AF60:5.94 [=AE60] | AG60:5.94 [=AE60] | AI60:F | AJ60:9.575
+Row 61: AA61:Area | AD61:cm2 | AE61:27.697626000000007 [=(AE60^2/4)*3.14] | AF61:27.697626000000007 [=(AF60^2/4)*3.14] | AG61:27.697626000000007 [=(AG60^2/4)*3.14] | AI61:G | AJ61:9.748
+Row 62: AA62:Vol contoh | AD62:cm3 | AE62:68.96708874000002 [=AE61*AE58] | AF62:68.96708874000002 [=AF61*AF58] | AG62:68.96708874000002 [=AG61*AG58] | AI62:H | AJ62:9.431
+Row 63: AI63:I | AJ63:9.446
+Row 64: AA64:Berat tanah basah | AD64:gr/cm3 | AE64:-118.162 [=AE55-AE56] | AF64:-118.162 [=AF55-AF56] | AG64:-118.162 [=AG55-AG56] | AI64:J | AJ64:9.578
+Row 65: AA65:Rata-rata berat tanah basah | AD65:gr/cm3 | AE65:-118.16199999999999 [=AVERAGE(AE64:AG64)] | AI65:K | AJ65:9.558
+Row 66: AI66:L | AJ66:9.704
+Row 67: AA67:Berat Isi basah | AD67:g/cm3 | AE67:-1.7133099592685515 [=AE64/AE62] | AF67:-1.7133099592685515 [=AF64/AF62] | AG67:-1.7133099592685515 [=AG64/AG62]
+Row 69: AA69:Data Kadar Air
+Row 70: AA70:Massa tanah basah+cawan | AD70:gr
+Row 71: AA71:Massa tanah kering+cawan | AD71:gr
+Row 72: AA72:Massa air | AD72:gr | AE72:0 [=AE70-AE71] | AF72:0 [=AF70-AF71] | AG72:0 [=AG70-AG71]
+Row 73: AA73:Massa cawan | AD73:gr | AE73:42 [=VLOOKUP(AE69,$AI$54:$AJ$66,2,0)] | AF73:42 [=VLOOKUP(AF69,$AI$54:$AJ$66,2,0)] | AG73:42 [=VLOOKUP(AG69,$AI$54:$AJ$66,2,0)]
+Row 74: AA74:Massa tanah kering | AD74:gr | AE74:42 [=AE71-AE73] | AF74:42 [=AF71-AF73] | AG74:42 [=AG71-AG73]
+Row 75: AA75:Kadar air | AD75:% | AE75:42 [=AE72/AE74*100] | AF75:42 [=AF72/AF74*100] | AG75:42 [=AG72/AG74*100]
+Row 76: AA76:Rata-rata kadar air | AD76:% | AE76:42 [=AVERAGE(AE75:AG75)]
+Row 78: AA78:Berat isi tanah kering | AD78:gr/cm3 | AE78:42 [=AE74/AE62] | AF78:42 [=AF74/AF62] | AG78:42 [=AG74/AG62]

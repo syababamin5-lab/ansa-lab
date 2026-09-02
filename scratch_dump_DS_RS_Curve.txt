@@ -1,0 +1,49 @@
+==================== SHEET: DS RS Curve ====================
+Range: A1:BO273 (Rows: 273, Cols: 67)
+Row 3: H3:GEOLAND QUATTRO TECHNOLAB
+Row 4: H4:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah
+Row 5: H5:Kec. Margahayu, Kab. Bandung 40225
+Row 6: H6:Telp/WhatsApp : 082115618130
+Row 7: H7:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 10: C10:Uji Direct Shear (CD – Kondisi Residual)/Direct Shear Test (CD Condition – Residual Shear Strength)
+Row 11: C11:SNI 2813 : 2008
+Row 13: C13:Deskripsi Sampel / Sample Description
+Row 14: C14:Pelanggan / Client | J14:: | K14:PT Itamatra Nusantara  [='Graph Ds CD'!K14] | X14:Penguji / Test by | AB14:: | AC14:PT. MGS
+Row 15: C15:Proyek / Project | J15:: | K15:hidroplogi [=K90] | X15:No. PKS | AB15:: | AC15:001/PKS GQT-MGS/VIII/2025 [=AC90]
+Row 16: C16:Id Lab / Lab id | J16:: | K16:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [='Cu_Multi Graph'!H14] | X16:Tanggal / Dated | AB16:: | AC16:46226 [=Details!B38]
+Row 17: C17:No Sampel / Sample No | J17:: | K17:BH-05_UDS-01 [=K92] | X17:Diperiksa / Checked by | AB17:: | AC17:AS Sumartadji [=AC92]
+Row 18: C18:Kedalaman / Depth | J18:: | K18:0,00-0,50 [=K93] | X18:No. Lampiran | AB18:: | AC18:MGS/02/VI/2026 [=AC93]
+Row 19: C19:Jenis Tanah / Soil Type | J19:: | K19:7 [=K94]
+Row 20: C20:Warna / Colour | J20:: | K20:Abu-abu / Gray [=K95]
+Row 21: C21:Jenis Sampel / Sample Type | J21:: | K21:Undisturbed Sample / UDS [=K96]
+Row 22: E22:Disclaimer : [=E97] | H22:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [=H97]
+Row 71: C71:CATATAN/NOTE :
+Row 72: C72:Uji Direct Shear dilakukan hingga kondisi residual menggunakan sampel curah (disturbed). Parameter kuat geser residual yang diperoleh merepresentasikan perilaku material tanah pada kondisi terdrainase dan digunakan secara konservatif, bukan kondisi in-situ / The Direct Shear test was continued to the residual condition using a bulk (disturbed) sample. The residual shear strength parameters represent soil material behavior under drained conditions and are applied conservatively, not in-situ conditions.
+Row 77: H77:GEOLAND QUATTRO TECHNOLAB
+Row 78: H78:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah
+Row 79: H79:Kec. Margahayu, Kab. Bandung 40225
+Row 80: H80:Telp/WhatsApp : 082115618130
+Row 81: H81:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 84: C84:Uji Direct Shear (CD – Kondisi Residual)/Direct Shear Test (CD Condition – Residual Shear Strength)
+Row 85: C85:SNI 2813 : 2008
+Row 88: C88:Deskripsi Sampel / Sample Description
+Row 89: C89:Pelanggan / Client | J89:: | K89:PT Itamatra Nusantara  [='Graph Ds CD'!K14] | X89:Penguji / Test by | AB89:: | AC89:PT. MGS [=AC14]
+Row 90: C90:Proyek / Project | J90:: | K90:hidroplogi [='Graph Ds CD'!K15] | X90:No. PKS | AB90:: | AC90:001/PKS GQT-MGS/VIII/2025 [='Graph Ds CD'!AC15]
+Row 91: C91:Id Lab / Lab id | J91:: | K91:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [=K16] | X91:Tanggal / Dated | AB91:: | AC91:46226 [=Details!B38]
+Row 92: C92:No Sampel / Sample No | J92:: | K92:BH-05_UDS-01 [='Graph Ds CD'!K17] | X92:Diperiksa / Checked by | AB92:: | AC92:AS Sumartadji [='Graph Ds CD'!AC17]
+Row 93: C93:Kedalaman / Depth | J93:: | K93:0,00-0,50 [='Graph Ds CD'!K18] | X93:No. Lampiran | AB93:: | AC93:MGS/02/VI/2026 [='Graph Ds CD'!AC18]
+Row 94: C94:Jenis Tanah / Soil Type | J94:: | K94:7 [='Graph Ds CD'!K19]
+Row 95: C95:Warna / Colour | J95:: | K95:Abu-abu / Gray [='Graph Ds CD'!K20]
+Row 96: C96:Jenis Sampel / Sample Type | J96:: | K96:Undisturbed Sample / UDS [='Graph Ds CD'!K21]
+Row 97: E97:Disclaimer : [='Graph Ds CD'!E22] | H97:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [='Graph Ds CD'!H22]
+Row 101: C101:SPECIMENS | P101:1 | R101:2 | T101:3 | Y101:Result | AC101:Peak | AD101:Residual
+Row 102: C102:Normal stress | O102:kN/m2 | P102:59.90255088087299 [=BI51] | R102:99.3782417815704 [=BI52] | T102:239.46586002739338 [=BI53] | Y102:C'r | AA102:(kN/m2) | AC102:14 [=BH42] | AD102:4 [=BJ42]
+Row 103: C103:Failure | G103:Peak shear stress | O103:kN/m2 | P103:0 [=BJ51] | R103:0 [=BJ52] | T103:0 [=BJ53] | Y103:φ'r | AA103:o | AC103:20.980066070419287 [=DEGREES(BM57)] | AD103:20.11231208461414 [=DEGREES(BM58)]
+Row 104: G104:Residual shear stress | O104:kN/m2 | P104:0 [=BK51] | R104:0 [=BK52] | T104:0 [=BK53]
+Row 105: C105:Start of shear | G105:Wet density | O105:g/cm3 | P105:1.8568718341473098 [='DS RS(1)'!L20] | R105:1.9055347198970451 [='DS RS(2)'!L20] | T105:1.8270466418811764 [='DS RS(3)'!L20]
+Row 106: G106:Moisture content | O106:% | P106:32.45942313656568 [='DS RS(1)'!L19] | R106:16.80111265646732 [='DS RS(2)'!L19] | T106:30.92740679198256 [='DS RS(3)'!L19]
+Row 107: G107:Dry density | O107:g/cm3 | P107:1.4018420057838201 [='DS RS(1)'!L21] | R107:1.6314354174874677 [='DS RS(2)'!L21] | T107:1.3954653854742483 [='DS RS(3)'!L21]
+Row 108: G108:Voids ratio | P108:0.8761030052951457 [='DS RS(1)'!L23] | R108:0.6120772981932661 [='DS RS(2)'!L23] | T108:0.8846759134094864 [='DS RS(3)'!L23]
+Row 112: E112:Spesimen 1 | P112:Spesimen 2 | W112:Spesimen 3
+Row 131: D131:CATATAN/NOTE :
+Row 132: D132:Uji Direct Shear dilakukan hingga kondisi residual menggunakan sampel curah (disturbed). Parameter kuat geser residual yang diperoleh merepresentasikan perilaku material tanah pada kondisi terdrainase dan digunakan secara konservatif, bukan kondisi in-situ / The Direct Shear test was continued to the residual condition using a bulk (disturbed) sample. The residual shear strength parameters represent soil material behavior under drained conditions and are applied conservatively, not in-situ conditions.

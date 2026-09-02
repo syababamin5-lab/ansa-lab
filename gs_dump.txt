@@ -1,0 +1,75 @@
+==================== SHEET: GS ====================
+Range: C2:AC147 (Rows: 147, Cols: 29)
+Row 4: G4:GEOLAND QUATTRO TECHNOLAB
+Row 5: G5:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah
+Row 6: G6:Kec. Margahayu, Kab. Bandung 40225
+Row 7: G7:Telp/WhatsApp : 082115618130
+Row 8: G8:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 11: D11:UJI ANALISIS UKURAN BUTIR / SIEVE AND HYDROMETER ANALYSIS
+Row 12: D12:SNI 3423:2008
+Row 14: E14:Deskripsi Sampel / Sample Description
+Row 15: E15:Pelanggan / Client | G15:: | H15:PT Itamatra Nusantara  [=Details!B4] | L15:Penguji / Test by | N15:: | O15:PT. MGS
+Row 16: E16:Proyek / Project | G16:: | H16:hidroplogi [=Details!B8] | L16:No. PKS | N16:: | O16:001/PKS GQT-MGS/VIII/2025
+Row 17: E17:No Sampel / Sample Number | G17:: | H17:BH-05_UDS-01 [=Details!B1] | L17:Tanggal / Dated | N17:: | O17:46212 [=Details!B29]
+Row 18: E18:Id Lab / Lab ID | G18:: | H18:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [=Details!B7] | L18:Diperiksa / Checked by | N18:: | O18:AS Sumartadji [=Details!B22]
+Row 19: E19:Kedalaman / Depth | G19:: | H19:0,00-0,50 m [=Details!B13&" m"] | L19:No. Lampiran | N19:: | O19:MGS/02/VI/2026 [=Details!B2]
+Row 20: E20:Tipe Tanah / Soil Type | G20:: | H20:7 [='A. GS'!H12]
+Row 21: E21:Warna / Colour | G21:: | H21:Abu-abu / Gray [=Details!B15]
+Row 22: E22:Berat Jenis /  Specific Gravity | G22:: | H22:2.673747624240277 [=PP!J24]
+Row 23: E23:Jenis Sampel / Type of Sample | G23:: | H23:Undisturbed Sample / UDS [=Details!B16]
+Row 24: F24:Disclaimer : [=Details!C15] | G24:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [=Details!C16]
+Row 25: F25:HASIL/ Result | G25:Lempung/Clay | I25:Lanau/Silt | J25:Halus/Fine | K25:Sedang/Medium | L25:Kasar/Coarse | M25: Halus/Fine | P25:Kasar/Coarse
+Row 26: J26:Pasir/Sand | M26:Kerikil/ Gravel
+Row 27: F27:% | G27:42 [='A. GS'!Z3] | I27:42 [='A. GS'!Y3] | J27:7 [='A. GS'!X3] | M27:42 [=100-SUM(G27:L27)] | P27:42 [=100-SUM(G27:M27)]
+Row 29: F29:HASIL ANALISIS MEKANIKAL/ Mechanical Analysis Results
+Row 31: F31:ANALISIS SARINGAN/ SIEVE ANALYSIS | K31:ANALISIS HIDROMETER/HIDROMETER ANALYSIS
+Row 32: F32:UKURAN SARINGAN
+Row 33: F33:Standar, mm | G33:No. Saringan / Sieve No. | I33:Persen Lolos / Percent Passing | K33:Lebih Kecil / 
+Les Than | L33:Persen / Percent
+Row 34: F34:101.6 | G34:3" | I34:7 [='A. GS'!G22] | K34:0.02 mm | L34:%
+Row 35: F35:75 | G35:2" | I35:7 [='A. GS'!G23] | K35:0.017336995315635404 [=_xlws.FILTER('A. GS'!$H$50:$H$58, ('A. GS'!$H$50:$H$58>0.002)*('A. GS'!$H$50:$H$58<=0.02))] | L35: -  [=IFNA(VLOOKUP(K35,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 36: F36:38.1 | G36:1 1/2" | I36:7 [='A. GS'!G24] | K36:0.012259106953085203 | L36: -  [=IFNA(VLOOKUP(K36,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 37: F37:25.4 | G37:1" | I37:7 [='A. GS'!G25] | K37:0.008668497657817702 | L37: -  [=IFNA(VLOOKUP(K37,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 38: F38:19.05 | G38:3/4" | I38:7 [='A. GS'!G26] | K38:0.004334248828908851 | L38: -  [=IFNA(VLOOKUP(K38,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 39: F39:12.7 | G39:1/2" | I39:7 [='A. GS'!G27] | L39: -  [=IFNA(VLOOKUP(K39,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 40: F40:9.525 | G40:3/8" | I40:7 [='A. GS'!G28] | L40: -  [=IFNA(VLOOKUP(K40,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 41: F41:4.76 | G41:4 | I41:7 [='A. GS'!G29] | K41:0,002 mm
+Row 42: F42:2.38 | G42:8 | I42:7 [='A. GS'!G30] | K42:0.0017694496748470387 [=_xlws.FILTER('A. GS'!$H$50:$H$58, ('A. GS'!$H$50:$H$58>0.001)*('A. GS'!$H$50:$H$58<=0.002))] | L42: -  [=IFNA(VLOOKUP(K42,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 43: F43:0.84 | G43:20 | I43:7 [='A. GS'!G31] | L43: -  [=IFNA(VLOOKUP(K43,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 44: F44:0.42 | G44:40 | I44:7 [='A. GS'!G32] | L44: -  [=IFNA(VLOOKUP(K44,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 45: F45:0.177 | G45:80 | I45:7 [='A. GS'!G33] | K45:0,001 mm
+Row 46: F46:0.149 | G46:100 | I46:7 [='A. GS'!G34] | K46:- [=IFERROR(_xlws.FILTER('A. GS'!$H$50:$H$58,'A. GS'!$H$50:$H$58<=0.001),"-")] | L46: -  [=IFNA(VLOOKUP(K46,'A. GS'!$H$50:$I$58,2,0)," - ")]
+Row 47: F47:0.074 | G47:200 | I47:7 [='A. GS'!G35]
+Row 50: N50:Notes :
+Row 74: W74:FU-GS-23-004
+Row 75: W75:BH-05_UDS-01 [=Details!B1]
+Row 76: W76:Grainsize Analisys
+Row 77: W77:PO-GQT-19 [=Details!B3]
+Row 80: X80:LEMPUNG | Y80:0.002 | Z80:0
+Row 81: Y81:0.002 | Z81:120
+Row 83: X83:LANAU | Y83:0.074 | Z83:0
+Row 84: Y84:0.074 | Z84:120
+Row 86: X86:PASIR 
+Row 87: X87:PASIR HALUS | Y87:0.42 | Z87:0
+Row 88: Y88:0.42 | Z88:120
+Row 89: X89:PASIR SEDANG | Y89:0.84 | Z89:0
+Row 90: Y90:0.84 | Z90:120
+Row 91: X91:PASIR KASAR | Y91:2 | Z91:0
+Row 92: Y92:2 | Z92:120
+Row 93: X93:KERIKIL
+Row 94: X94:KERIKIL HALUS | Y94:19.1 | Z94:0
+Row 95: Y95:19.1 | Z95:120
+Row 96: X96:KERIKIL KASAR | Y96:76.1 | Z96:0
+Row 97: Y97:76.1 | Z97:120
+Row 100: X100:0.074 | Y100:0
+Row 101: X101:0.074 | Y101:120
+Row 103: X103:0.149 | Y103:0
+Row 104: X104:0.149 | Y104:120
+Row 107: X107:0.177 | Y107:0
+Row 108: X108:0.177 | Y108:120
+Row 111: X111:0.42 | Y111:0
+Row 112: X112:0.42 | Y112:120
+Row 115: X115:0.84 | Y115:0
+Row 116: X116:0.84 [=X115] | Y116:120
+Row 119: X119:2.38 | Y119:0
+Row 120: X120:2.38 [=X119] | Y120:120

@@ -1,0 +1,36 @@
+==================== SHEET: Graph Ds CD ====================
+Range: B1:AL76 (Rows: 76, Cols: 38)
+Row 3: H3:GEOLAND QUATTRO TECHNOLAB
+Row 4: H4:JL. Nata Endah, Komplek Indahco No.22 Kel. Margahayu Tengah
+Row 5: H5:Kec. Margahayu, Kab. Bandung 40225
+Row 6: H6:Telp/WhatsApp : 082115618130
+Row 7: H7:Email : geolandquattro@gmail.com; geolandquattro@geolandtechnolab.com
+Row 10: C10:UJI GESER LANGSUNG(KONDISI KONSOLIDASI-TERDRAINASE / CD) /DiIRECT SHEAR TEST (CONSOLIDATED–DRAINED / CD Condition)
+Row 11: C11:SNI 2813 : 2008
+Row 13: C13:Deskripsi Sampel / Sample Description
+Row 14: C14:Pelanggan / Client | J14:: | K14:PT Itamatra Nusantara  [=Details!B4] | X14:Penguji / Test by | AB14:: | AC14:Rafli
+Row 15: C15:Proyek / Project | J15:: | K15:hidroplogi [=Details!B8] | X15:No. PKS | AB15:: | AC15:001/PKS GQT-MGS/VIII/2025 [='Cu_Multi Graph'!P13]
+Row 16: C16:Id Lab / Lab id | J16:: | K16:23-GQT--19-UDS-1-BH-05-0,00-0,50-100726-001 [='DS RS Curve'!K91] | X16:Tanggal / Dated | AB16:: | AC16:46225 [=Details!B37]
+Row 17: C17:No Sampel / Sample No | J17:: | K17:BH-05_UDS-01 [=Details!B1] | X17:Diperiksa / Checked by | AB17:: | AC17:AS Sumartadji [=Details!B22]
+Row 18: C18:Kedalaman / Depth | J18:: | K18:0,00-0,50 [=Details!B13] | X18:No. Lampiran | AB18:: | AC18:MGS/02/VI/2026 [=Details!B2]
+Row 19: C19:Jenis Tanah / Soil Type | J19:: | K19:7 [='A. GS'!H12]
+Row 20: C20:Warna / Colour | J20:: | K20:Abu-abu / Gray [=Details!B15]
+Row 21: C21:Jenis Sampel / Sample Type | J21:: | K21:Undisturbed Sample / UDS [=Details!B16]
+Row 22: E22:Disclaimer : [=Details!C15] | H22:The samples were received as Undisturbed Sample / UDS and the validity of the sampling process was not verified by the laboratory. [=Details!C16]
+Row 25: AC25:Speciment -1
+Row 37: AC37:Speciment-2
+Row 49: AC49:Speciment-3
+Row 50: AI50:DATA GRAFIK
+Row 51: AI51:5.241473202076387 [=Y59] | AJ51:0
+Row 52: AI52:10.482946404152768 [=X56] | AJ52:10.825762207386683 [=X55]
+Row 53: AI53:16.77271424664443 [=Y56] | AJ53:21.651524414773366 [=Y55]
+Row 54: T54:Speciment | X54:1 | Y54:2 | Z54:3 | AI54:28.303955291212475 [=Z56] | AJ54:43.30304882954673 [=Z55]
+Row 55: T55:Normal Stress | W55:kPa | X55:10.825762207386683 [=IF('Cons.Ds CD'!V22="","",'Cons.Ds CD'!V22)] | Y55:21.651524414773366 [=IF('Cons.Ds CD'!AH22="","",'Cons.Ds CD'!AH22)] | Z55:43.30304882954673 [=IF('Cons.Ds CD'!AT22="","",'Cons.Ds CD'!AT22)]
+Row 56: T56:Shear Stress | W56:kPa | X56:10.482946404152768 [=MAX('Shearing Ds CD'!BI30:BI58)] | Y56:16.77271424664443 [=MAX('Shearing Ds CD'!BJ30:BJ58)] | Z56:28.303955291212475 [=MAX('Shearing Ds CD'!BK30:BK58)] | AI56:0 | AJ56:0
+Row 57: AI57:28.303955291212475 [=AI54] | AJ57:43.30304882954673 [=AJ54]
+Row 58: T58:Soil Parameter at Peak Condition | AH58:5.241473202076387 [=Y59] | AI58:7 [=AVERAGE(W70:AD70)] | AJ58:7 [=AVERAGE(W71:AD71)]
+Row 59: T59:Cohesion | X59:c' | Y59:5.241473202076387 [=AL51] | AA59:kN/m2 | AH59:29.3623940633045 [=Y60] | AI59:7 [=AVERAGE(Z69:AG69)] | AJ59:7 [=AVERAGE(AA70:AH70)]
+Row 60: T60:Internal friction Angle | X60:φ' | Y60:29.3623940633045 [=ATAN((AL53-AL51)/AK53)*60] | AA60:o | AI60:0 [=AI56] | AJ60:7 [=((-AI58/(AI59-AI58))*(AJ59-AJ58))+AJ58]
+Row 61: AI61:28.403955291212476 [=AI57+0.1] | AJ61:7 [=(((AI59-AI58)/(-AI58))*(AJ59-AJ58))+AJ58]
+Row 69: C69:CATATAN/NOTES :
+Row 70: C70:Uji Direct Shear CD dilakukan pada sampel curah (disturbed); parameter yang diperoleh merepresentasikan sifat material tanah dan digunakan secara konservatif, bukan kondisi in-situ./The Direct Shear CD test was performed on a bulk (disturbed) sample; the parameters represent soil material behavior and are used conservatively, not in-situ conditions.
