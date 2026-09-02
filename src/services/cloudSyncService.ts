@@ -1,5 +1,5 @@
 // =====================================================================
-// TIMES® ANSA LIMS — Realtime Cloud Database Service Engine
+// TIMES® ANSA LIMS — Official Vercel KV Realtime Database Engine
 // =====================================================================
 import { UserProfile, INITIAL_USERS } from '../types/userTypes';
 import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice } from '../types/workflowTypes';
@@ -14,10 +14,11 @@ import {
   DEFAULT_PERSONNEL_CATALOGUE
 } from '../data/initialData';
 
-// Active REST API Cloud Store Endpoint
-const CRUD_API_BASE = 'https://crudcrud.com/api/0a010bdb162249a7bd44a10a9e0fb17e';
-const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v4';
-let cachedDocumentId: string | null = '6a97f90780971203e84819dd';
+// Official Vercel KV (Upstash Redis) REST API Configuration
+const VERCEL_KV_REST_API_URL = 'https://neat-bengal-180591.upstash.io';
+const VERCEL_KV_REST_API_TOKEN = 'gQAAAAAAAsFvAAIgcDI0Yzk0MGE3ZTZlZWI0NDAwODAyNjgzMDQ1YmNhYjIwNA';
+const STORE_KEY = 'ansa_lab_master_store_v2';
+const LOCAL_CACHE_KEY = 'ansa_lab_vercel_kv_cache_v2';
 
 export interface CloudDatabaseState {
   users: UserProfile[];
@@ -62,84 +63,73 @@ export function getInitialMasterState(): CloudDatabaseState {
   };
 }
 
-/** Simpan data state secara permanen ke Cloud Database Server */
+/** Simpan data state secara permanen ke Vercel KV Server Database */
 export async function saveStateToCloud(state: CloudDatabaseState): Promise<boolean> {
   try {
-    // 1. Simpan ke local cache untuk kecepatan UI
+    // 1. Simpan snapshot cepat ke Local Cache untuk kecepatan UI
     localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
 
-    if (!cachedDocumentId) {
-      // POST baru
-      const res = await fetch(`${CRUD_API_BASE}/main_store`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(state)
-      });
-      if (res.ok) {
-        const created = await res.json();
-        if (created._id) cachedDocumentId = created._id;
-      }
-    } else {
-      // PUT update
-      const res = await fetch(`${CRUD_API_BASE}/main_store/${cachedDocumentId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(state)
-      });
+    // 2. Kirim langsung ke Server Vercel KV REST API
+    const res = await fetch(VERCEL_KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['SET', STORE_KEY, JSON.stringify(state)])
+    });
 
-      if (!res.ok) {
-        // Fallback POST jika ID hilang/reset
-        const postRes = await fetch(`${CRUD_API_BASE}/main_store`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(state)
-        });
-        if (postRes.ok) {
-          const created = await postRes.json();
-          if (created._id) cachedDocumentId = created._id;
-        }
-      }
+    if (!res.ok) {
+      console.warn('[Vercel KV Warning] HTTP Status:', res.status);
     }
     return true;
   } catch (e) {
-    console.error('[Cloud Sync Error]:', e);
+    console.error('[Vercel KV Save Error]:', e);
     return false;
   }
 }
 
-/** Ambil data permanen langsung dari Cloud Database Server */
+/** Ambil data permanen langsung dari Vercel KV Server Database */
 export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   const defaultState = getInitialMasterState();
 
   try {
-    const res = await fetch(`${CRUD_API_BASE}/main_store`);
-    if (res.ok) {
-      const result = await res.json();
-      if (Array.isArray(result) && result.length > 0) {
-        const doc = result[result.length - 1]; // Ambil snapshot terbaru
-        if (doc._id) cachedDocumentId = doc._id;
+    const res = await fetch(VERCEL_KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['GET', STORE_KEY])
+    });
 
-        // Simpan snapshot cloud terbaru ke local cache
-        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(doc));
+    if (res.ok) {
+      const responseJson = await res.json();
+      if (responseJson && responseJson.result) {
+        const rawString = responseJson.result;
+        const cloudData = (typeof rawString === 'string' ? JSON.parse(rawString) : rawString) as CloudDatabaseState;
+        
+        // Simpan snapshot Vercel KV terbaru ke local cache
+        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cloudData));
 
         return {
           ...defaultState,
-          ...doc,
-          users: mergeUsers(doc.users),
-          containers: mergeContainers(doc.containers),
-          pos: doc.pos || [],
-          clients: doc.clients || [],
-          quotations: doc.quotations || [],
-          sampleReceipts: doc.sampleReceipts || [],
-          prepReports: doc.prepReports || [],
-          subcontractNotices: doc.subcontractNotices || [],
-          invoices: doc.invoices || [],
-          documents: doc.documents || []
+          ...cloudData,
+          users: mergeUsers(cloudData.users),
+          containers: mergeContainers(cloudData.containers),
+          pos: cloudData.pos || [],
+          clients: cloudData.clients || [],
+          quotations: cloudData.quotations || [],
+          sampleReceipts: cloudData.sampleReceipts || [],
+          prepReports: cloudData.prepReports || [],
+          subcontractNotices: cloudData.subcontractNotices || [],
+          invoices: cloudData.invoices || [],
+          documents: cloudData.documents || []
         };
       }
     }
   } catch (e) {
-    console.warn('[Cloud Load Warning]: Failed to reach cloud API, checking local fallback', e);
+    console.warn('[Vercel KV Load Warning]: Failed to reach Vercel KV, checking local fallback', e);
   }
 
   // Fallback ke local cache jika offline
