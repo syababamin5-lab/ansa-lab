@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Sample, SampleTest, PurchaseOrder, ContainerItem, TrxRingItem, RingItem, DsRingItem, DsProvingItem, UctRingItem, TestPhoto, SOIL_COLOUR_CATALOGUE } from '../../types';
+import { Sample, SampleTest, PurchaseOrder, ContainerItem, TrxRingItem, RingItem, DsRingItem, DsProvingItem, UctRingItem, PycnometerItem, TestPhoto, SOIL_COLOUR_CATALOGUE } from '../../types';
 import { UserProfile } from '../../types/userTypes';
 import { cleanIndoNumStr, parseIndoFloat, safeUpper, getArrayOrFlatSync, buildDualKeyPayload } from '../../utils/mobileSync';
 import { getRequiredPhotoCount } from '../../utils/helpers';
-import { SIEVE_SPECIFICATIONS, HYDROMETER_TIME_SPECIFICATIONS, ModernSoilColourSelect } from '../PhysicalPropertiesView';
-import { DEFAULT_UCT_RING_CATALOGUE } from '../../data/initialData';
+import { SIEVE_SPECIFICATIONS, HYDROMETER_TIME_SPECIFICATIONS, ModernSoilColourSelect, getWaterTempProperties, validatePycCode } from '../PhysicalPropertiesView';
+import { DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE } from '../../data/initialData';
 import { CustomDatePicker } from '../common/CustomDatePicker';
 import {
   ArrowLeft,
@@ -45,6 +45,7 @@ interface MobileWorksheetViewProps {
   dsRingCatalogue?: DsRingItem[];
   dsProvingCatalogue?: DsProvingItem[];
   uctRingCatalogue?: UctRingItem[];
+  pycnometerCatalogue?: PycnometerItem[];
   onBack: () => void;
   onSaveSample: (updatedSample: Sample) => void;
 }
@@ -72,6 +73,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   dsRingCatalogue = [],
   dsProvingCatalogue = [],
   uctRingCatalogue = DEFAULT_UCT_RING_CATALOGUE,
+  pycnometerCatalogue = [],
   onBack,
   onSaveSample,
 }) => {
@@ -216,14 +218,39 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const [pycWaterTemp, setPycWaterTemp] = useState(activeTest?.calculationData?.inputValues?.pycWaterTemp || '');
   const [pycGsVal, setPycGsVal] = useState(activeTest?.calculationData?.inputValues?.pycGsVal || '');
 
-  const [pycNo1, setPycNo1] = useState(activeTest?.calculationData?.inputValues?.pycNo1 || '');
+  const [pycNo1, setPycNo1] = useState(activeTest?.calculationData?.inputValues?.pycNo1 || activeTest?.calculationData?.inputValues?.pycNo || '');
   const [pycNo2, setPycNo2] = useState(activeTest?.calculationData?.inputValues?.pycNo2 || '');
-  const [wtDrySoil1, setWtDrySoil1] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil1 || '');
-  const [wtDrySoil2, setWtDrySoil2] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil2 || '');
-  const [temp1, setTemp1] = useState(activeTest?.calculationData?.inputValues?.temp1 || '');
-  const [temp2, setTemp2] = useState(activeTest?.calculationData?.inputValues?.temp2 || '');
-  const [wtPycWaterSoil1, setWtPycWaterSoil1] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil1 || '');
-  const [wtPycWaterSoil2, setWtPycWaterSoil2] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil2 || '');
+  const [wtDrySoil1, setWtDrySoil1] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil1 || (activeTest?.calculationData?.inputValues?.sgA1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgA1) : ''));
+  const [wtDrySoil2, setWtDrySoil2] = useState(activeTest?.calculationData?.inputValues?.wtDrySoil2 || (activeTest?.calculationData?.inputValues?.sgA2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgA2) : ''));
+  const [temp1, setTemp1] = useState(activeTest?.calculationData?.inputValues?.temp1 || (activeTest?.calculationData?.inputValues?.sgT1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgT1) : ''));
+  const [temp2, setTemp2] = useState(activeTest?.calculationData?.inputValues?.temp2 || (activeTest?.calculationData?.inputValues?.sgT2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgT2) : ''));
+  const [wtPycWaterSoil1, setWtPycWaterSoil1] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil1 || (activeTest?.calculationData?.inputValues?.sgB1 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgB1) : ''));
+  const [wtPycWaterSoil2, setWtPycWaterSoil2] = useState(activeTest?.calculationData?.inputValues?.wtPycWaterSoil2 || (activeTest?.calculationData?.inputValues?.sgB2 !== undefined ? String(activeTest?.calculationData?.inputValues?.sgB2) : ''));
+
+  // Specific Gravity Live Calculations (SNI 1964:2008 / ASTM D854)
+  const effectivePycCatalogue = (pycnometerCatalogue && pycnometerCatalogue.length > 0) ? pycnometerCatalogue : DEFAULT_PYCNOMETER_CATALOGUE;
+  const pycVal1 = validatePycCode(effectivePycCatalogue, pycNo1);
+  const pycVal2 = validatePycCode(effectivePycCatalogue, pycNo2);
+  const pycObj1 = pycVal1.isValid ? pycVal1.found : null;
+  const pycObj2 = pycVal2.isValid ? pycVal2.found : null;
+
+  const tempObj1 = getWaterTempProperties(temp1);
+  const tempObj2 = getWaterTempProperties(temp2);
+
+  const numSgA1 = parseIndoFloat(wtDrySoil1) || 0;
+  const numSgA2 = parseIndoFloat(wtDrySoil2) || 0;
+  const numSgB1 = parseIndoFloat(wtPycWaterSoil1) || 0;
+  const numSgB2 = parseIndoFloat(wtPycWaterSoil2) || 0;
+
+  const sgC1 = (pycNo1.trim() && pycObj1) ? ((tempObj1.density / 0.997077) * (pycObj1.weightWater25 - pycObj1.weightTare)) + pycObj1.weightTare : 0;
+  const sgC2 = (pycNo2.trim() && pycObj2) ? ((tempObj2.density / 0.997077) * (pycObj2.weightWater25 - pycObj2.weightTare)) + pycObj2.weightTare : 0;
+
+  const sgDenom1 = (numSgA1 > 0 && numSgB1 > 0 && sgC1 > 0) ? numSgA1 + (sgC1 - numSgB1) : 0;
+  const sgDenom2 = (numSgA2 > 0 && numSgB2 > 0 && sgC2 > 0) ? numSgA2 + (sgC2 - numSgB2) : 0;
+
+  const computedGs1 = (pycVal1.isValid && sgDenom1 > 0) ? (numSgA1 / sgDenom1) * tempObj1.kFactor : 0;
+  const computedGs2 = (pycVal2.isValid && sgDenom2 > 0) ? (numSgA2 / sgDenom2) * tempObj2.kFactor : 0;
+  const computedGsAvg = (computedGs1 > 0 && computedGs2 > 0) ? (computedGs1 + computedGs2) / 2 : (computedGs1 || computedGs2 || 0);
 
   // 3. Atterberg Limits (ATB)
   const [llBlows, setLlBlows] = useState<string>(activeTest?.calculationData?.inputValues?.llBlows || '25');
@@ -416,20 +443,24 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
 
   // FIX: Re-sync ALL test form states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft & buka ulang)
   useEffect(() => {
-    const iv = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+    const origSnapshot = activeTest?.originalTechnicianInput;
+    const isLocked = Boolean(activeTest?.lockedByTechnician || activeTest?.status === 'Selesai');
+    const iv = (isLocked && origSnapshot?.inputValues)
+      ? origSnapshot.inputValues
+      : (activeTest?.calculationData?.inputValues || activeTest?.calculationData || {});
 
     // SG
     setPycNo(iv.pycNo || '');
     setPycWaterTemp(iv.pycWaterTemp || '');
-    setPycGsVal(iv.pycGsVal || '');
-    setPycNo1(iv.pycNo1 || '');
+    setPycGsVal(iv.pycGsVal || iv.gsAvg || '');
+    setPycNo1(iv.pycNo1 || iv.pycNo || '');
     setPycNo2(iv.pycNo2 || '');
-    setWtDrySoil1(iv.wtDrySoil1 || '');
-    setWtDrySoil2(iv.wtDrySoil2 || '');
-    setTemp1(iv.temp1 || '');
-    setTemp2(iv.temp2 || '');
-    setWtPycWaterSoil1(iv.wtPycWaterSoil1 || '');
-    setWtPycWaterSoil2(iv.wtPycWaterSoil2 || '');
+    setWtDrySoil1(iv.wtDrySoil1 || (iv.sgA1 !== undefined ? String(iv.sgA1) : ''));
+    setWtDrySoil2(iv.wtDrySoil2 || (iv.sgA2 !== undefined ? String(iv.sgA2) : ''));
+    setTemp1(iv.temp1 || (iv.sgT1 !== undefined ? String(iv.sgT1) : ''));
+    setTemp2(iv.temp2 || (iv.sgT2 !== undefined ? String(iv.sgT2) : ''));
+    setWtPycWaterSoil1(iv.wtPycWaterSoil1 || (iv.sgB1 !== undefined ? String(iv.sgB1) : ''));
+    setWtPycWaterSoil2(iv.wtPycWaterSoil2 || (iv.sgB2 !== undefined ? String(iv.sgB2) : ''));
 
     // ATB
     setAtbBlows(iv.atbBlows || ['', '', '', '']);
@@ -594,6 +625,100 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
 
   const dsUuDialReadingsCRef = useRef(dsUuDialReadingsC);
   dsUuDialReadingsCRef.current = dsUuDialReadingsC;
+
+  // --- REFS & TOUCH NUMPAD TRIGGERS FOR SG (SPECIFIC GRAVITY) ---
+  const pycNo1Ref = useRef(pycNo1); pycNo1Ref.current = pycNo1;
+  const pycNo2Ref = useRef(pycNo2); pycNo2Ref.current = pycNo2;
+  const wtDrySoil1Ref = useRef(wtDrySoil1); wtDrySoil1Ref.current = wtDrySoil1;
+  const wtDrySoil2Ref = useRef(wtDrySoil2); wtDrySoil2Ref.current = wtDrySoil2;
+  const temp1Ref = useRef(temp1); temp1Ref.current = temp1;
+  const temp2Ref = useRef(temp2); temp2Ref.current = temp2;
+  const wtPycWaterSoil1Ref = useRef(wtPycWaterSoil1); wtPycWaterSoil1Ref.current = wtPycWaterSoil1;
+  const wtPycWaterSoil2Ref = useRef(wtPycWaterSoil2); wtPycWaterSoil2Ref.current = wtPycWaterSoil2;
+
+  const openSgNumpad = (field: 'pyc1' | 'pyc2' | 'dry1' | 'dry2' | 'temp1' | 'temp2' | 'wet1' | 'wet2') => {
+    if (field === 'pyc1') {
+      setActiveNumpad({
+        fieldId: 'pycNo1',
+        label: 'Pycnometer No. (Trial 1)',
+        value: pycNo1Ref.current,
+        onChange: v => setPycNo1(v.toUpperCase()),
+        allowDecimal: false,
+        nextLabel: 'Lanjut ke Pyc No. 2 ➔',
+        onNext: () => openSgNumpad('pyc2'),
+      });
+    } else if (field === 'pyc2') {
+      setActiveNumpad({
+        fieldId: 'pycNo2',
+        label: 'Pycnometer No. (Trial 2)',
+        value: pycNo2Ref.current,
+        onChange: v => setPycNo2(v.toUpperCase()),
+        allowDecimal: false,
+        nextLabel: 'Lanjut ke Wt. Dry Soil 1 ➔',
+        onNext: () => openSgNumpad('dry1'),
+      });
+    } else if (field === 'dry1') {
+      setActiveNumpad({
+        fieldId: 'wtDrySoil1',
+        label: 'Wt. Dry Soil (A) Trial 1 [g]',
+        value: wtDrySoil1Ref.current,
+        onChange: v => setWtDrySoil1(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Lanjut ke Wt. Dry Soil 2 ➔',
+        onNext: () => openSgNumpad('dry2'),
+      });
+    } else if (field === 'dry2') {
+      setActiveNumpad({
+        fieldId: 'wtDrySoil2',
+        label: 'Wt. Dry Soil (A) Trial 2 [g]',
+        value: wtDrySoil2Ref.current,
+        onChange: v => setWtDrySoil2(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Lanjut ke Suhu T1 (°C) ➔',
+        onNext: () => openSgNumpad('temp1'),
+      });
+    } else if (field === 'temp1') {
+      setActiveNumpad({
+        fieldId: 'temp1',
+        label: 'Temperature Trial 1 [°C]',
+        value: temp1Ref.current,
+        onChange: v => setTemp1(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Lanjut ke Suhu T2 (°C) ➔',
+        onNext: () => openSgNumpad('temp2'),
+      });
+    } else if (field === 'temp2') {
+      setActiveNumpad({
+        fieldId: 'temp2',
+        label: 'Temperature Trial 2 [°C]',
+        value: temp2Ref.current,
+        onChange: v => setTemp2(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Lanjut ke Wt. Pyc+Air+Tanah 1 ➔',
+        onNext: () => openSgNumpad('wet1'),
+      });
+    } else if (field === 'wet1') {
+      setActiveNumpad({
+        fieldId: 'wtPycWaterSoil1',
+        label: 'Wt. Pyc + Water + Soil (B) Trial 1 [g]',
+        value: wtPycWaterSoil1Ref.current,
+        onChange: v => setWtPycWaterSoil1(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Lanjut ke Trial 2 (B) ➔',
+        onNext: () => openSgNumpad('wet2'),
+      });
+    } else if (field === 'wet2') {
+      setActiveNumpad({
+        fieldId: 'wtPycWaterSoil2',
+        label: 'Wt. Pyc + Water + Soil (B) Trial 2 [g]',
+        value: wtPycWaterSoil2Ref.current,
+        onChange: v => setWtPycWaterSoil2(cleanIndoNumStr(v)),
+        allowDecimal: true,
+        nextLabel: 'Selesai Input SG ✓',
+        onNext: () => setActiveNumpad(null),
+      });
+    }
+  };
 
   // --- TOUCH NUMPAD TRIGGERS FOR DS-UU ---
   const openDsUuHeaderNumpad = (field: 'dia' | 'height' | 'calib') => {
@@ -1896,8 +2021,8 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
       const hasRing = (dsUuRingNo || '').trim() !== '' && parseIndoFloat(dsUuRingDia) > 0 && parseIndoFloat(dsUuRingHeight) > 0;
       return Boolean(hasLoads && hasWetSoil && hasContainers && hasWetCan && hasDryCan && hasDialA && hasDialB && hasDialC && hasRing);
     } else if (normCode === 'SG') {
-      const hasTrial1 = (pycNo1 || pycNo) && parseIndoFloat(wtDrySoil1) > 0 && parseIndoFloat(temp1) > 0 && parseIndoFloat(wtPycWaterSoil1) > 0;
-      const hasTrial2 = (pycNo2 || pycNo) && parseIndoFloat(wtDrySoil2) > 0 && parseIndoFloat(temp2) > 0 && parseIndoFloat(wtPycWaterSoil2) > 0;
+      const hasTrial1 = Boolean((pycNo1 || pycNo) && parseIndoFloat(wtDrySoil1) > 0 && parseIndoFloat(temp1) > 0 && parseIndoFloat(wtPycWaterSoil1) > 0);
+      const hasTrial2 = pycNo2 ? Boolean(parseIndoFloat(wtDrySoil2) > 0 && parseIndoFloat(temp2) > 0 && parseIndoFloat(wtPycWaterSoil2) > 0) : true;
       return Boolean(hasTrial1 && hasTrial2);
     } else if (normCode === 'MC') {
       const hasTrial1 = Boolean((mcContainer1 || mcContainer) && parseIndoFloat(mcWet1 || mcWet) > 0 && parseIndoFloat(mcDry1 || mcDry) > 0);
@@ -2079,7 +2204,15 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
           mergedInputValues.wtPycWaterSoil2 = cleanNumStr(wtPycWaterSoil2);
           mergedInputValues.sgB2 = cleanNumStr(wtPycWaterSoil2);
         }
-        if (pycGsVal) mergedInputValues.pycGsVal = parseFloat(cleanNumStr(pycGsVal)) || 2.65;
+        if (computedGsAvg > 0) {
+          mergedInputValues.gsAvg = Number(computedGsAvg.toFixed(3));
+          mergedInputValues.specificGravity = Number(computedGsAvg.toFixed(3));
+          mergedInputValues.pycGsVal = Number(computedGsAvg.toFixed(3));
+        } else if (pycGsVal) {
+          mergedInputValues.pycGsVal = parseFloat(cleanNumStr(pycGsVal)) || 2.65;
+          mergedInputValues.gsAvg = parseFloat(cleanNumStr(pycGsVal)) || 2.65;
+          mergedInputValues.specificGravity = parseFloat(cleanNumStr(pycGsVal)) || 2.65;
+        }
       }
 
       // 4. Unit Weight (UW) - only update if on UW or PP, or if values entered
@@ -2116,8 +2249,25 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
         mergedInputValues.sieve200 = saveShSieveRetained[13] || prevInputs.sieve200;
       }
 
+      const finalGs = computedGsAvg > 0 ? Number(computedGsAvg.toFixed(3)) : (parseFloat(cleanNumStr(pycGsVal)) || undefined);
+
       const calcData = {
         ...(t.calculationData || {}),
+        summaryResults: {
+          ...(t.calculationData?.summaryResults || {}),
+          ...(finalGs !== undefined ? {
+            specificGravity: finalGs,
+            gsAvg: finalGs,
+            status: 'Calculated'
+          } : {}),
+          ...(computedMcPct > 0 ? {
+            avgMoistureContent: Number(computedMcPct.toFixed(2)),
+            moistureContent: Number(computedMcPct.toFixed(2)),
+          } : {}),
+          ...(computedBulkDensity > 0 ? {
+            bulkDensity: Number(computedBulkDensity.toFixed(3)),
+          } : {}),
+        },
         inputValues: {
           ...mergedInputValues,
           ...buildDualKeyPayload('atbPlWet', 'atbPlWet', saveAtbPlWet),
@@ -2276,6 +2426,7 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
 
       const hasDataEntered = (
         computedMcPct > 0 ||
+        computedGsAvg > 0 ||
         (parseIndoFloat(wtDrySoil1) > 0 && parseIndoFloat(wtPycWaterSoil1) > 0) ||
         (parseIndoFloat(wtDrySoil2) > 0 && parseIndoFloat(wtPycWaterSoil2) > 0) ||
         (parseIndoFloat(uwRingWetWeight) > 0 && uwRingNo.trim() !== '') ||
@@ -3142,20 +3293,30 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
                   <td className="py-1 px-1">
                     <input
                       type="text"
+                      readOnly
+                      inputMode="none"
                       value={pycNo1}
-                      onChange={e => setPycNo1(e.target.value.toUpperCase())}
+                      onClick={() => openSgNumpad('pyc1')}
                       placeholder="No."
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
+                    {!pycVal1.isValid && pycNo1.trim() !== '' && (
+                      <span className="text-[9.5px] text-red-500 font-bold block text-center mt-0.5">Pikno Tidak Ada</span>
+                    )}
                   </td>
                   <td className="py-1 px-1">
                     <input
                       type="text"
+                      readOnly
+                      inputMode="none"
                       value={pycNo2}
-                      onChange={e => setPycNo2(e.target.value.toUpperCase())}
+                      onClick={() => openSgNumpad('pyc2')}
                       placeholder="No."
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
+                    {!pycVal2.isValid && pycNo2.trim() !== '' && (
+                      <span className="text-[9.5px] text-red-500 font-bold block text-center mt-0.5">Pikno Tidak Ada</span>
+                    )}
                   </td>
                 </tr>
 
@@ -3164,51 +3325,51 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
                   <td className="py-2 px-1 text-slate-700 font-medium">Wt. Dry Soil (A) [g]</td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.001"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={wtDrySoil1}
-                      onChange={e => setWtDrySoil1(e.target.value)}
+                      onClick={() => openSgNumpad('dry1')}
                       placeholder="0.000"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.001"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={wtDrySoil2}
-                      onChange={e => setWtDrySoil2(e.target.value)}
+                      onClick={() => openSgNumpad('dry2')}
                       placeholder="0.000"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                 </tr>
 
-                {/* 3. Temperature (??C) */}
+                {/* 3. Temperature (°C) */}
                 <tr>
-                  <td className="py-2 px-1 text-slate-700 font-medium">Temperature (??C)</td>
+                  <td className="py-2 px-1 text-slate-700 font-medium">Temperature (°C)</td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.1"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={temp1}
-                      onChange={e => setTemp1(e.target.value)}
+                      onClick={() => openSgNumpad('temp1')}
                       placeholder="0"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.1"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={temp2}
-                      onChange={e => setTemp2(e.target.value)}
+                      onClick={() => openSgNumpad('temp2')}
                       placeholder="0"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                 </tr>
@@ -3218,30 +3379,62 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
                   <td className="py-2 px-1 text-slate-700 font-medium">Wt. Pyc + Water + Soil (B) [g]</td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.001"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={wtPycWaterSoil1}
-                      onChange={e => setWtPycWaterSoil1(e.target.value)}
+                      onClick={() => openSgNumpad('wet1')}
                       placeholder="0.000"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                   <td className="py-1 px-1">
                     <input
-                      type="number"
-                      step="0.001"
-                      inputMode="decimal"
+                      type="text"
+                      readOnly
+                      inputMode="none"
                       value={wtPycWaterSoil2}
-                      onChange={e => setWtPycWaterSoil2(e.target.value)}
+                      onClick={() => openSgNumpad('wet2')}
                       placeholder="0.000"
-                      className="w-full bg-white border border-slate-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs"
+                      className="w-full bg-slate-50 border border-blue-300 rounded-xl px-2 py-1.5 text-xs text-center font-bold font-mono text-slate-800 placeholder-slate-400 focus:ring-2 focus:ring-blue-500 shadow-2xs cursor-pointer select-none"
                     />
                   </td>
                 </tr>
+
+                {/* 5. Wt. Pyc + Water (C) [g] */}
+                <tr className="bg-slate-50 text-slate-700">
+                  <td className="py-2 px-1 font-medium">Wt. Pyc + Water (C) [g]</td>
+                  <td className="py-1 px-1 text-center font-mono font-bold text-slate-700 text-xs">
+                    {sgC1 > 0 ? sgC1.toFixed(3) : '-'}
+                  </td>
+                  <td className="py-1 px-1 text-center font-mono font-bold text-slate-700 text-xs">
+                    {sgC2 > 0 ? sgC2.toFixed(3) : '-'}
+                  </td>
+                </tr>
+
+                {/* 6. Live Calculated Specific Gravity (Gs) */}
+                {(computedGs1 > 0 || computedGs2 > 0) && (
+                  <tr className="bg-blue-50/70 border-t border-blue-200">
+                    <td className="py-2 px-1 text-blue-900 font-extrabold">Hasil Specific Gravity (Gs)</td>
+                    <td className="py-2 px-1 text-center font-bold font-mono text-blue-700 text-xs">
+                      {computedGs1 > 0 ? computedGs1.toFixed(3) : '-'}
+                    </td>
+                    <td className="py-2 px-1 text-center font-bold font-mono text-blue-700 text-xs">
+                      {computedGs2 > 0 ? computedGs2.toFixed(3) : '-'}
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* GS RATA-RATA BANNER */}
+          {computedGsAvg > 0 && (
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl text-white flex items-center justify-between shadow-xs">
+              <span className="text-xs font-bold uppercase tracking-wider">Gs Rata-rata (Specific Gravity):</span>
+              <span className="text-lg font-black font-mono tracking-tight">{computedGsAvg.toFixed(3)}</span>
+            </div>
+          )}
         </div>
       )}
 

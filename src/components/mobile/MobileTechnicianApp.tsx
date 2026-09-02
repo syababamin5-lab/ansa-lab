@@ -237,20 +237,15 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
       setSyncToastMsg(`🔒 Tersimpan di Mode Offline HP (${nextQueue.length} data pending sync).`);
       setTimeout(() => setSyncToastMsg(null), 4000);
     } else {
-      // 3. Mode Online: Broadcast & POST directly to central server API
+      // 3. Mode Online: Broadcast update across tabs
       try {
         if (typeof BroadcastChannel !== 'undefined') {
           const channel = new BroadcastChannel('ansa_lab_realtime_sync');
           channel.postMessage({ type: 'SYNC_POS', sample: updatedSample });
           channel.close();
         }
-        fetch('/api/sync-pos', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(pos),
-        }).catch(e => console.log('Sync POS API call:', e));
       } catch (e) {
-        console.error('Error posting to server:', e);
+        console.error('Error broadcasting update:', e);
       }
       setSyncToastMsg('🌐 Berhasil Di-Posting ke Web App & Server!');
       setTimeout(() => setSyncToastMsg(null), 3500);
@@ -397,6 +392,7 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
             dsRingCatalogue={dsRingCatalogue}
             dsProvingCatalogue={dsProvingCatalogue}
             uctRingCatalogue={uctRingCatalogue}
+            pycnometerCatalogue={pycnometerCatalogue}
             onBack={() => setActiveTab('tasks')}
             onSaveSample={handleSaveSample}
           />
