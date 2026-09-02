@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserProfile, USER_ROLE_LABELS, USER_ROLE_BADGE } from '../types/userTypes';
+import { UserProfile } from '../types/userTypes';
 import {
   Lock,
   Mail,
@@ -12,6 +12,8 @@ import {
   AlertCircle,
   Sparkles,
   CheckCircle2,
+  ChevronRight,
+  User
 } from 'lucide-react';
 
 interface LoginViewProps {
@@ -86,56 +88,76 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
     setErrorMessage(null);
   };
 
+  // Harmonious Executive Badge Styling (No Harsh Neon Clashing Colors)
+  const getRoleBadgeStyle = (role: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return { label: 'Super Admin', style: 'bg-slate-900 text-white border-slate-800' };
+      case 'DIRECTOR':
+        return { label: 'Direktur Operasional', style: 'bg-indigo-50 text-indigo-900 border-indigo-200' };
+      case 'HEAD_OF_LAB':
+        return { label: 'Kepala Lab', style: 'bg-emerald-50 text-emerald-900 border-emerald-200' };
+      case 'COORDINATOR':
+        return { label: 'Kepala Teknis', style: 'bg-teal-50 text-teal-900 border-teal-200' };
+      case 'FINANCE':
+        return { label: 'Admin Finance', style: 'bg-amber-50 text-amber-900 border-amber-200' };
+      case 'ANALYST':
+      default:
+        return { label: 'Analis / Teknisi Lab', style: 'bg-blue-50 text-blue-900 border-blue-200' };
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between p-4 sm:p-6 font-sans selection:bg-teal-500 selection:text-white relative overflow-hidden">
-      {/* BACKGROUND DECORATIVE GLOW */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 text-slate-800 flex flex-col justify-between p-4 sm:p-6 font-sans selection:bg-teal-500 selection:text-white relative overflow-hidden">
+      {/* BACKGROUND DECORATIVE GLOWS */}
+      <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
       {/* TOP BRANDING BAR */}
-      <header className="flex items-center justify-between max-w-6xl mx-auto w-full z-10 py-2">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-600 to-cyan-500 flex items-center justify-center text-white font-black text-sm shadow-md shadow-teal-900/40 border border-teal-400/30">
+      <header className="flex items-center justify-between max-w-6xl mx-auto w-full z-10 py-3">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-800 via-teal-700 to-slate-900 flex items-center justify-center text-white font-black text-base shadow-lg border border-white/20">
             AL
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-black tracking-tight text-white">TIMES® ANSA LIMS</span>
-              <span className="px-2 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-mono text-[9.5px] font-bold border border-teal-500/30">
+              <span className="text-base font-black tracking-tight text-white">TIMES® ANSA LIMS</span>
+              <span className="px-2.5 py-0.5 rounded-full bg-white/10 text-emerald-300 font-mono text-[10px] font-extrabold border border-white/20 backdrop-blur-md">
                 v2.0 Enterprise
               </span>
             </div>
-            <p className="text-[10.5px] text-slate-400 font-mono">PT. Terraforma Geoteknik Indonesia</p>
+            <p className="text-xs text-slate-300 font-medium">PT. Transka Dharma Konsultan — Laboratorium Mekanika Tanah</p>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400 font-mono bg-slate-800/80 px-3 py-1.5 rounded-xl border border-slate-700/80 backdrop-blur-xs">
+        <div className="hidden sm:flex items-center gap-2 text-xs text-slate-300 font-medium bg-white/10 px-4 py-2 rounded-2xl border border-white/15 backdrop-blur-md shadow-inner">
           <ShieldCheck className="w-4 h-4 text-emerald-400" />
           <span>ISO/IEC 17025 Certified System</span>
         </div>
       </header>
 
       {/* MAIN CONTENT GRID */}
-      <main className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto py-6 z-10 items-center">
-        {/* LEFT COLUMN: FORM LOGIN */}
-        <div className="lg:col-span-5 bg-slate-800/90 border border-slate-700/90 p-6 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-md space-y-6">
+      <main className="max-w-6xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-6 my-auto py-6 z-10 items-stretch">
+        
+        {/* LEFT COLUMN: EXECUTIVE FORM LOGIN (PRISTINE GLASS CONTAINER) */}
+        <div className="lg:col-span-5 bg-white/95 border border-slate-200/90 p-7 sm:p-8 rounded-3xl shadow-2xl backdrop-blur-xl space-y-6 flex flex-col justify-between">
           <div>
-            <span className="px-3 py-1 rounded-full bg-teal-500/10 text-teal-400 text-xs font-mono font-bold border border-teal-500/20 inline-flex items-center gap-1.5 mb-2">
-              <Lock className="w-3.5 h-3.5" />
+            <span className="px-3.5 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-mono font-black border border-emerald-200/80 inline-flex items-center gap-1.5 mb-3">
+              <Lock className="w-3.5 h-3.5 text-emerald-700" />
               <span>Gerbang Autentikasi Sistem</span>
             </span>
-            <h1 className="text-2xl font-black text-white tracking-tight leading-tight">
-              Masuk ke Akun Laboratorium
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight leading-tight">
+              Masuk ke Akun
             </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Gunakan Email / NIP dan Password Anda untuk masuk ke sistem.
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Gunakan Email, NIP, atau Kode Analis Anda untuk masuk.
             </p>
           </div>
 
           {/* ERROR ALERT */}
           {errorMessage && (
-            <div className="p-3 rounded-2xl bg-red-950/80 border border-red-500/50 text-red-300 text-xs font-semibold flex items-start gap-2.5 shadow-md animate-fade-in">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-start gap-2.5 shadow-sm animate-fade-in">
+              <AlertCircle className="w-4.5 h-4.5 text-rose-600 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
             </div>
           )}
@@ -143,53 +165,53 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
           {/* FORM LOGIN */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Identity Input */}
-            <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-300 block">Email / NIP / Kode Analis:</label>
+            <div className="space-y-1.5">
+              <label className="text-xs font-black text-slate-700 block">Email / NIP / Kode Analis:</label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
+                <Mail className="w-4.5 h-4.5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type="text"
                   value={identityInput}
                   onChange={e => setIdentityInput(e.target.value)}
                   placeholder="mis. admin@ansalab.com atau SA-0001"
-                  className="w-full bg-slate-900/90 border border-slate-700 rounded-2xl pl-10 pr-4 py-2.5 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all font-mono"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl pl-10 pr-4 py-3 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono shadow-xs"
                 />
               </div>
             </div>
 
             {/* Password Input */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-300">
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between text-xs font-black text-slate-700">
                 <label>Password:</label>
-                <span className="text-[10.5px] font-mono text-teal-400 font-normal">Default: 1234</span>
+                <span className="text-[11px] font-mono text-emerald-700 font-extrabold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Default: 1234</span>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3.5 pointer-events-none" />
+                <Lock className="w-4.5 h-4.5 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={passwordInput}
                   onChange={e => setPasswordInput(e.target.value)}
                   placeholder="Masukkan password..."
-                  className="w-full bg-slate-900/90 border border-slate-700 rounded-2xl pl-10 pr-10 py-2.5 text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20 transition-all font-mono"
+                  className="w-full bg-slate-50 border border-slate-300 rounded-2xl pl-10 pr-10 py-3 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-500/10 transition-all font-mono shadow-xs"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-3 text-slate-500 hover:text-slate-300 text-xs cursor-pointer"
+                  className="absolute right-3.5 top-3.5 text-slate-400 hover:text-slate-700 text-xs cursor-pointer transition"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-4.5 h-4.5" /> : <Eye className="w-4.5 h-4.5" />}
                 </button>
               </div>
             </div>
 
             {/* Remember Me */}
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 text-xs font-semibold text-slate-400 cursor-pointer select-none">
+              <label className="flex items-center gap-2 text-xs font-bold text-slate-600 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={e => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-teal-600 focus:ring-teal-500 focus:ring-offset-slate-900 cursor-pointer"
+                  className="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-500 cursor-pointer"
                 />
                 <span>Ingat akun di perangkat ini</span>
               </label>
@@ -198,79 +220,97 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-gradient-to-r from-teal-600 via-emerald-600 to-cyan-600 hover:from-teal-500 hover:to-cyan-500 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-teal-900/50 transition cursor-pointer active:scale-98"
+              className="w-full py-3.5 px-5 bg-gradient-to-r from-emerald-800 via-teal-800 to-slate-900 hover:from-emerald-900 hover:to-slate-950 text-white rounded-2xl font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-md shadow-emerald-950/20 transition cursor-pointer active:scale-98"
             >
-              <LogIn className="w-4 h-4" />
+              <LogIn className="w-4.5 h-4.5 text-emerald-300" />
               <span>Masuk ke Sistem</span>
             </button>
           </form>
+
+          <div className="pt-3 border-t border-slate-100 text-center text-[11px] text-slate-400 font-medium">
+            Sistem Terintegrasi ISO 17025 • PT. Transka Dharma Konsultan
+          </div>
         </div>
 
         {/* RIGHT COLUMN: QUICK SELECT USER HELPER CARDS FOR 8 ROLES */}
-        <div className="lg:col-span-7 space-y-3">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xs font-black uppercase text-slate-300 tracking-wider flex items-center gap-1.5">
-              <UserCheck className="w-4 h-4 text-teal-400" />
-              <span>Pilih Akun Cepat Pengguna Resmi (Password: 1234)</span>
-            </h2>
-            <span className="text-[10.5px] font-mono text-slate-400">8 Akun Terdaftar</span>
+        <div className="lg:col-span-7 bg-white/90 border border-slate-200/90 p-6 sm:p-7 rounded-3xl shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                <UserCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-xs font-black uppercase text-slate-900 tracking-wider">
+                  Pilih Akun Cepat Pengguna Resmi
+                </h2>
+                <p className="text-[11px] text-slate-500 font-medium">Klik salah satu akun di bawah untuk pengisian otomatis (Password: <b className="text-emerald-700 font-mono">1234</b>)</p>
+              </div>
+            </div>
+            <span className="text-[10.5px] font-mono font-black text-slate-700 bg-slate-100 px-3 py-1 rounded-full border border-slate-200">
+              8 Akun Terdaftar
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1">
             {users.map(user => {
-              const badgeObj = USER_ROLE_BADGE[user.role];
+              const badgeInfo = getRoleBadgeStyle(user.role);
               const isSelected = selectedQuickUser?.id === user.id;
 
               return (
                 <div
                   key={user.id}
                   onClick={() => handleSelectQuickAccount(user)}
-                  className={`p-3 rounded-2xl border transition-all cursor-pointer active:scale-95 space-y-1.5 ${
+                  className={`p-3.5 rounded-2xl border transition-all duration-200 cursor-pointer active:scale-98 flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-teal-950/80 border-teal-400 shadow-md ring-2 ring-teal-500/30'
-                      : 'bg-slate-800/60 border-slate-700/80 hover:bg-slate-800 hover:border-slate-600'
+                      ? 'bg-emerald-50/90 border-emerald-500 shadow-md ring-2 ring-emerald-500/20'
+                      : 'bg-slate-50/90 border-slate-200/90 hover:bg-white hover:border-emerald-400 hover:shadow-md'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-9 h-9 rounded-xl bg-slate-700 border border-slate-600 flex items-center justify-center font-black text-xs text-white shrink-0">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 shadow-2xs border border-slate-700">
                         {user.avatarInitials}
                       </div>
-                      <div>
-                        <div className="flex items-center gap-1 flex-wrap">
-                          <strong className="text-xs font-extrabold text-white leading-tight">{user.name}</strong>
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <strong className="text-xs font-black text-slate-900 truncate block">{user.name}</strong>
                           {user.analyistCode && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-400 text-amber-950 font-black text-[9px] font-mono">
+                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-200 font-black text-[9px] font-mono shrink-0">
                               {user.analyistCode}
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-slate-400 font-mono">NIP: {user.nip}</p>
+                        <p className="text-[10px] text-slate-500 font-mono">NIP: {user.nip}</p>
                       </div>
                     </div>
 
-                    <span className={`px-2 py-0.5 rounded-full text-[9px] font-extrabold border shrink-0 ${badgeObj.bg} ${badgeObj.text} ${badgeObj.border}`}>
-                      {USER_ROLE_LABELS[user.role]}
+                    <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border shrink-0 ${badgeInfo.style}`}>
+                      {badgeInfo.label}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[9.5px] font-mono text-slate-400 pt-1 border-t border-slate-700/50">
-                    <span className="truncate max-w-[170px]">{user.email}</span>
-                    <span className="text-teal-400 font-bold flex items-center gap-1">
-                      <span>Tap untuk Login</span>
-                      <span>➔</span>
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-2 border-t border-slate-200/60 mt-2">
+                    <span className="truncate max-w-[160px] text-slate-600 font-semibold">{user.email}</span>
+                    <span className="text-emerald-700 font-black flex items-center gap-1 shrink-0">
+                      <span>Pilih</span>
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </span>
                   </div>
                 </div>
               );
             })}
           </div>
+
+          <div className="text-[10.5px] text-slate-400 font-mono text-center pt-2 border-t border-slate-100">
+            Klik akun di atas untuk memuat identitas &amp; password secara otomatis.
+          </div>
         </div>
+
       </main>
 
       {/* FOOTER */}
-      <footer className="max-w-6xl mx-auto w-full text-center text-[10.5px] text-slate-500 font-mono py-2 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
-        <span>© 2026 TIMES® ANSA LIMS • PT. Terraforma Geoteknik Indonesia</span>
+      <footer className="max-w-6xl mx-auto w-full text-center text-xs text-slate-400 font-medium py-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
+        <span>© 2026 TIMES® ANSA LIMS • PT. Transka Dharma Konsultan</span>
         <span>Standard Operating Procedure SNI &amp; ASTM Compliant</span>
       </footer>
     </div>
