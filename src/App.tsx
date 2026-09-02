@@ -872,7 +872,7 @@ export function App() {
         if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
         if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
         if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
-        if (Array.isArray(cloudState.prepReports)) setPrepReports(cloudState.prepReports);
+        if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
         if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
         if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
         if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
@@ -903,7 +903,7 @@ export function App() {
           if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
           if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
           if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
-          if (Array.isArray(cloudState.prepReports)) setPrepReports(cloudState.prepReports);
+          if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
           if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
           if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
           if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
@@ -946,7 +946,7 @@ export function App() {
       pos,
       quotations,
       sampleReceipts,
-      prepReports,
+      prepReports: samplePrepReports,
       subcontractNotices,
       invoices,
       documents,
@@ -967,7 +967,7 @@ export function App() {
     pos,
     quotations,
     sampleReceipts,
-    prepReports,
+    samplePrepReports,
     subcontractNotices,
     invoices,
     documents,
