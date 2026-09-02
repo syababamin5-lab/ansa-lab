@@ -39,8 +39,8 @@ export const INITIAL_CLIENTS: Client[] = [];
 export const INITIAL_POS: PurchaseOrder[] = [];
 export const INITIAL_DOCUMENTS: DocumentItem[] = [];
 
-// MASTER EQUIPMENT & CALIBRATION CATALOGUES (HARAM DIHAPUS / UTUH)
 export const DEFAULT_CONTAINER_CATALOGUE: ContainerItem[] = [
+  // Cawan Direct Shear (Huruf Alfabeta A-L)
   { id: "A", weight: 9.633 },
   { id: "B", weight: 9.693 },
   { id: "C", weight: 9.800 },
@@ -53,11 +53,33 @@ export const DEFAULT_CONTAINER_CATALOGUE: ContainerItem[] = [
   { id: "J", weight: 9.578 },
   { id: "K", weight: 9.558 },
   { id: "L", weight: 9.704 },
-  { "id": "1", "weight": 9.03 },
-  { "id": "2", "weight": 8.842 },
-  { "id": "3", "weight": 9.041 },
-  { "id": "4", "weight": 8.936 },
-  { "id": "5", "weight": 8.856 }
+
+  // Cawan Kadar Air & Atterberg (Angka 1-25)
+  { id: "1", weight: 9.030 },
+  { id: "2", weight: 8.842 },
+  { id: "3", weight: 9.041 },
+  { id: "4", weight: 8.936 },
+  { id: "5", weight: 8.856 },
+  { id: "6", weight: 9.120 },
+  { id: "7", weight: 9.085 },
+  { id: "8", weight: 9.210 },
+  { id: "9", weight: 8.970 },
+  { id: "10", weight: 9.150 },
+  { id: "11", weight: 9.040 },
+  { id: "12", weight: 9.180 },
+  { id: "13", weight: 8.995 },
+  { id: "14", weight: 9.060 },
+  { id: "15", weight: 9.110 },
+  { id: "16", weight: 9.250 },
+  { id: "17", weight: 8.910 },
+  { id: "18", weight: 9.035 },
+  { id: "19", weight: 9.145 },
+  { id: "20", weight: 9.080 },
+  { id: "21", weight: 9.220 },
+  { id: "22", weight: 8.960 },
+  { id: "23", weight: 9.175 },
+  { id: "24", weight: 9.090 },
+  { id: "25", weight: 9.130 }
 ];
 
 export const DEFAULT_MOLD_CATALOGUE: MoldItem[] = [

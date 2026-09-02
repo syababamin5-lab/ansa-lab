@@ -807,9 +807,10 @@ export function App() {
     return DEFAULT_PERSONNEL_CATALOGUE;
   });
 
-  // Auto-sync personnelCatalogue with users state so Master Personil & User Management are ALWAYS 100% in sync!
+  // Auto-sync personnelCatalogue with users state so Master Personil & User Management stay in sync
   useEffect(() => {
     setPersonnelCatalogue(prevPersonnel => {
+      const userIds = new Set(users.map(u => u.id));
       const synced: PersonnelItem[] = users.map(u => {
         const existing = (prevPersonnel || []).find(p => p.id === u.id || p.name.toLowerCase() === u.name.toLowerCase() || p.name.toLowerCase() === u.shortName.toLowerCase());
 
@@ -834,7 +835,10 @@ export function App() {
         };
       });
 
-      return synced;
+      // Retain any custom added personnel items that aren't matched yet
+      const customItems = (prevPersonnel || []).filter(p => !userIds.has(p.id) && !users.some(u => u.name.toLowerCase() === p.name.toLowerCase()));
+
+      return [...synced, ...customItems];
     });
   }, [users]);
 
@@ -846,20 +850,52 @@ export function App() {
     setPersonnelCatalogue(updated);
     safeSetLocalStorage('ansa_lab_personnels', updated);
 
-    // Also persist signatures directly back into users state & localStorage
+    // Sync back into users state & localStorage so new personnel are created as User Accounts
     setUsers(prevUsers => {
-      const nextUsers = prevUsers.map(u => {
-        const p = updated.find(item => item.id === u.id || item.name.toLowerCase() === u.name.toLowerCase() || item.name.toLowerCase() === u.shortName.toLowerCase());
-        if (p) {
-          const sig = p.signatureUrl || p.digitalSignatureUrl;
-          return {
-            ...u,
-            digitalSignatureUrl: sig,
-            signatureUrl: sig
-          };
+      const userMap = new Map(prevUsers.map(u => [u.id, u]));
+      const newUsersFromPersonnel: UserProfile[] = [];
+
+      updated.forEach(p => {
+        const userMatch = prevUsers.find(u => u.id === p.id || u.name.toLowerCase() === p.name.toLowerCase());
+        if (!userMatch) {
+          let role: UserRole = 'ANALYST';
+          if (p.role === 'Approver') role = 'LAB_MANAGER';
+          else if (p.role === 'Computed') role = 'ADMIN_FINANCE';
+          else if (p.role === 'Analyst') role = 'QA_QC_COORDINATOR';
+
+          newUsersFromPersonnel.push({
+            id: p.id,
+            name: p.name,
+            shortName: p.name.split(' ')[0],
+            nip: `STAFF-${Math.floor(1000 + Math.random() * 9000)}`,
+            email: `${p.name.toLowerCase().replace(/[^a-z0-9]/g, '')}@ansalab.com`,
+            role,
+            password: '1234',
+            avatarInitials: p.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
+            digitalSignatureLabel: p.title || p.name,
+            digitalSignatureUrl: p.digitalSignatureUrl || p.signatureUrl,
+            signatureUrl: p.digitalSignatureUrl || p.signatureUrl,
+            isActive: true
+          });
         }
-        return u;
       });
+
+      const nextUsers = [
+        ...prevUsers.map(u => {
+          const p = updated.find(item => item.id === u.id || item.name.toLowerCase() === u.name.toLowerCase() || item.name.toLowerCase() === u.shortName.toLowerCase());
+          if (p) {
+            const sig = p.signatureUrl || p.digitalSignatureUrl;
+            return {
+              ...u,
+              digitalSignatureUrl: sig,
+              signatureUrl: sig
+            };
+          }
+          return u;
+        }),
+        ...newUsersFromPersonnel
+      ];
+
       safeSetLocalStorage('ansa_lab_users', nextUsers);
       return nextUsers;
     });
