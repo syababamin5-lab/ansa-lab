@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { PurchaseOrder, Sample, SampleTest } from '../../types';
 import { UserProfile, USER_ROLE_LABELS } from '../../types/userTypes';
 import {
@@ -15,9 +15,11 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  UserCheck,
+  User
 } from 'lucide-react';
 
-import { isSampleAssignedToUser } from '../../utils/userPermissions';
+import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
 
 interface MobileDashboardViewProps {
@@ -37,6 +39,7 @@ interface MobileTaskCard {
   test: SampleTest;
   testCode: string;
   testName: string;
+  assignedTechnicianName?: string;
 }
 
 const getTestBadgeProps = (code: string) => {
@@ -66,6 +69,18 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
   onNavigateTab,
   onOpenWorksheet,
 }) => {
+  const isManagement = ['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'EXECUTIVE_DIRECTOR'].includes(currentUser?.role);
+  const [selectedTechFilter, setSelectedTechFilter] = useState<string>('my_tasks');
+
+  // Helper get assigned technician name for display
+  const getAssignedName = (test: SampleTest, sample: Sample): string => {
+    const calc = test.calculationData || {};
+    const name = test.technicianName || test.assignedTechnician || test.testedBy ||
+      calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician ||
+      calc.summaryResults?.testedBy || sample.testedBy || sample.assignedTechnician;
+    return name?.trim() || '';
+  };
+
   // Collect assigned task cards (1 card per sample per test form)
   const myTaskCards: MobileTaskCard[] = [];
   let totalTestsCount = 0;
@@ -74,25 +89,54 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
 
   (pos || []).forEach(po => {
     (po.samples || []).forEach(sample => {
-      const isMySample = isSampleAssignedToUser(sample, currentUser);
       const tests = sample.tests || [];
-      totalPhotosCount += (sample.photos?.length || 0) + tests.reduce((acc, t) => acc + (t.photos?.length || 0), 0);
 
       tests.forEach(test => {
         const code = (test.testTypeCode || test.testTypeId || 'SG').toUpperCase();
         if (code === 'PP') return; // PP is a category header, not a standalone test form
 
-        totalTestsCount++;
-        const isDone = test.status === 'Selesai' || test.calculationStatus === 'Calculated';
-        if (isDone) completedTestsCount++;
+        const assignedName = getAssignedName(test, sample);
 
-        myTaskCards.push({
-          sample,
-          po,
-          test,
-          testCode: code,
-          testName: test.testTypeName || code
-        });
+        // FILTER PENUGASAN STRICT DI MENU HOME:
+        // Jika login sebagai Teknisi (ANALYST): Hanya hitung & tampilkan pengujian yang di-assign ke teknisi ini!
+        // Jika login sebagai Super Admin / Manager: Tampilkan sesuai filter pilihan
+        let shouldInclude = false;
+
+        if (!isManagement) {
+          shouldInclude = isSingleTestAssignedToUser(test, sample, currentUser);
+        } else {
+          if (selectedTechFilter === 'my_tasks') {
+            shouldInclude = isSingleTestAssignedToUser(test, sample, currentUser);
+          } else if (selectedTechFilter === 'all') {
+            shouldInclude = true;
+          } else if (selectedTechFilter === 'unassigned') {
+            shouldInclude = !assignedName;
+          } else {
+            const mockUser: Partial<UserProfile> = {
+              name: selectedTechFilter,
+              shortName: selectedTechFilter,
+              nip: selectedTechFilter,
+            };
+            shouldInclude = isSingleTestAssignedToUser(test, sample, mockUser as UserProfile);
+          }
+        }
+
+        if (shouldInclude) {
+          totalTestsCount++;
+          const isDone = test.status === 'Selesai' || test.calculationStatus === 'Calculated';
+          if (isDone) completedTestsCount++;
+
+          totalPhotosCount += (sample.photos?.length || 0) + (test.photos?.length || 0);
+
+          myTaskCards.push({
+            sample,
+            po,
+            test,
+            testCode: code,
+            testName: test.testTypeName || code,
+            assignedTechnicianName: assignedName || 'Belum Di-Assign'
+          });
+        }
       });
     });
   });
@@ -148,227 +192,247 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
         </div>
 
         {/* PROGRESS MINI BAR */}
-        <div className="pt-2 border-t border-white/20 space-y-1">
-          <div className="flex items-center justify-between text-[10.5px] text-blue-100 font-mono">
+        <div className="space-y-1.5 pt-1">
+          <div className="flex items-center justify-between text-xs font-semibold text-blue-100">
             <span>Progres Form Uji Hari Ini:</span>
-            <strong>{completedTestsCount} / {totalTestsCount} Form Selesai</strong>
+            <span className="font-mono font-bold">{completedTestsCount} / {totalTestsCount} Form Selesai</span>
           </div>
-          <div className="w-full bg-white/20 h-2 rounded-full overflow-hidden">
+          <div className="w-full bg-blue-950/60 rounded-full h-2 overflow-hidden border border-white/10">
             <div
-              className="bg-emerald-400 h-full rounded-full transition-all duration-500"
+              className="bg-gradient-to-r from-teal-400 to-emerald-400 h-full rounded-full transition-all duration-500"
               style={{ width: `${totalTestsCount > 0 ? (completedTestsCount / totalTestsCount) * 100 : 0}%` }}
-            />
+            ></div>
           </div>
         </div>
       </div>
 
-      {/* OFFLINE ACTIVE BANNER CARD */}
-      {!isOnline && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-300 rounded-2xl p-3.5 shadow-xs flex items-center justify-between gap-2.5 animate-fade-in">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 bg-amber-200/70 text-amber-900 rounded-xl">
-              <WifiOff className="w-4 h-4" />
-            </div>
-            <div>
-              <h4 className="text-xs font-black text-amber-950">Mode Pengujian Offline</h4>
-              <p className="text-[11px] text-amber-800 leading-tight mt-0.5">
-                Data disimpan aman di HP{pendingQueueCount > 0 ? ` • ${pendingQueueCount} pengujian siap di-sync` : ''}.
-              </p>
-            </div>
+      {/* MANAGEMENT FILTER OPTIONS FOR SUPER ADMIN / MANAGER */}
+      {isManagement && (
+        <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-1.5">
+          <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+            <span className="flex items-center gap-1.5 text-teal-800 font-extrabold">
+              <UserCheck className="w-4 h-4 text-teal-600" />
+              <span>Filter Ringkasan Home per Teknisi</span>
+            </span>
+            <span className="text-[10.5px] font-mono text-slate-500">Super Admin Control</span>
           </div>
-
-          <button
-            onClick={onToggleOnlineMode}
-            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1 shadow-xs transition active:scale-95 cursor-pointer shrink-0"
-          >
-            <RefreshCw className="w-3 h-3" />
-            <span>Aktifkan Online</span>
-          </button>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+            <button
+              onClick={() => setSelectedTechFilter('my_tasks')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'my_tasks' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Tugas Saya ({currentUser.shortName})
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('all')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'all' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Semua Uji Lab
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('Rafi')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'Rafi' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Rafli / Rafi (AO#1)
+            </button>
+            <button
+              onClick={() => setSelectedTechFilter('Noval')}
+              className={`px-2.5 py-1.5 rounded-xl font-bold transition cursor-pointer text-[11px] ${
+                selectedTechFilter === 'Noval' ? 'bg-teal-600 text-white shadow-xs' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              }`}
+            >
+              Noval Fadli
+            </button>
+          </div>
         </div>
       )}
 
-      {/* 4 QUICK METRICS CARDS */}
-      <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+      {/* KPI STATS CARDS */}
+      <div className="grid grid-cols-2 gap-3">
+        {/* Antrean Aktif */}
         <div
           onClick={() => onNavigateTab('tasks')}
-          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1 cursor-pointer hover:border-blue-300 active:scale-95 transition"
+          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition active:scale-98 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-amber-600">
-            <span className="text-[10px] font-bold text-slate-500">Antrean Aktif:</span>
-            <Clock className="w-4 h-4" />
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-extrabold text-slate-700">Antrean Aktif:</span>
+            <Clock className="w-4 h-4 text-amber-500" />
           </div>
-          <div className="text-2xl font-black text-slate-900 font-mono">{activeQueueCount} <span className="text-xs font-bold text-slate-400">Form Uji</span></div>
-          <span className="text-[9.5px] text-blue-600 font-extrabold flex items-center gap-0.5">Buka Antrean ➔</span>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-slate-900 leading-none">{activeQueueCount}</span>
+            <span className="text-xs font-bold text-slate-500 ml-1.5">Form Uji</span>
+          </div>
+          <div className="text-[10.5px] font-bold text-blue-600 mt-2 flex items-center gap-1">
+            <span>Buka Antrean</span>
+            <span>➔</span>
+          </div>
         </div>
 
+        {/* Mendekati Deadline */}
         <div
           onClick={() => onNavigateTab('tasks')}
-          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1 cursor-pointer hover:border-red-300 active:scale-95 transition"
+          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition active:scale-98 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-red-600">
-            <span className="text-[10px] font-bold text-slate-500">Mendekati Deadline:</span>
-            <AlertTriangle className="w-4 h-4" />
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-extrabold text-slate-700">Mendekati Deadline:</span>
+            <AlertTriangle className="w-4 h-4 text-rose-500" />
           </div>
-          <div className="text-2xl font-black text-red-600 font-mono">{urgentSamples.length} <span className="text-xs font-bold text-slate-400">Form Uji</span></div>
-          <span className="text-[9.5px] text-red-600 font-extrabold flex items-center gap-0.5">&lt; 48 Jam ➔</span>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-rose-600 leading-none">{urgentSamples.length}</span>
+            <span className="text-xs font-bold text-slate-500 ml-1.5">Form Uji</span>
+          </div>
+          <div className="text-[10.5px] font-bold text-rose-600 mt-2 flex items-center gap-1">
+            <span>&lt; 48 Jam ➔</span>
+          </div>
         </div>
 
+        {/* Selesai Diuji */}
         <div
           onClick={() => onNavigateTab('history')}
-          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1 cursor-pointer hover:border-emerald-300 active:scale-95 transition"
+          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition active:scale-98 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-emerald-600">
-            <span className="text-[10px] font-bold text-slate-500">Selesai Diuji:</span>
-            <CheckCircle2 className="w-4 h-4" />
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-extrabold text-slate-700">Selesai Diuji:</span>
+            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
           </div>
-          <div className="text-2xl font-black text-emerald-700 font-mono">{completedTestsCount} <span className="text-xs font-bold text-slate-400">Form</span></div>
-          <span className="text-[9.5px] text-emerald-600 font-extrabold flex items-center gap-0.5">Lihat Histori ➔</span>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-emerald-600 leading-none">{completedTestsCount}</span>
+            <span className="text-xs font-bold text-slate-500 ml-1.5">Form</span>
+          </div>
+          <div className="text-[10.5px] font-bold text-emerald-600 mt-2 flex items-center gap-1">
+            <span>Lihat Histori ➔</span>
+          </div>
         </div>
 
+        {/* Foto Terlampir */}
         <div
           onClick={() => onNavigateTab('tasks')}
-          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs space-y-1 cursor-pointer hover:border-purple-300 active:scale-95 transition"
+          className="bg-white p-3.5 rounded-2xl border border-slate-200 shadow-2xs hover:shadow-md transition active:scale-98 cursor-pointer flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between text-purple-600">
-            <span className="text-[10px] font-bold text-slate-500">Foto Terlampir:</span>
-            <Camera className="w-4 h-4" />
+          <div className="flex items-center justify-between text-slate-500">
+            <span className="text-xs font-extrabold text-slate-700">Foto Terlampir:</span>
+            <Camera className="w-4 h-4 text-purple-500" />
           </div>
-          <div className="text-2xl font-black text-purple-700 font-mono">{totalPhotosCount} <span className="text-xs font-bold text-slate-400">Foto</span></div>
-          <span className="text-[9.5px] text-purple-600 font-extrabold flex items-center gap-0.5">Dokumentasi ➔</span>
+          <div className="mt-2">
+            <span className="text-2xl font-black text-purple-600 leading-none">{totalPhotosCount}</span>
+            <span className="text-xs font-bold text-slate-500 ml-1.5">Foto</span>
+          </div>
+          <div className="text-[10.5px] font-bold text-purple-600 mt-2 flex items-center gap-1">
+            <span>Dokumentasi ➔</span>
+          </div>
         </div>
       </div>
 
-      {/* QUICK SHORTCUT ACTIONS */}
-      <div className="grid grid-cols-2 gap-2 text-xs">
+      {/* QUICK ACTION BANNER */}
+      <div className="grid grid-cols-2 gap-2.5">
         <button
           onClick={() => onNavigateTab('tasks')}
-          className="p-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold flex items-center justify-between shadow-sm active:scale-95 transition cursor-pointer"
+          className="p-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-xs flex items-center justify-between shadow-xs hover:shadow-md transition cursor-pointer active:scale-98"
         >
           <div className="flex items-center gap-2 text-left">
-            <FileSpreadsheet className="w-4 h-4 text-blue-200 shrink-0" />
+            <FileSpreadsheet className="w-4 h-4 text-blue-200" />
             <div>
-              <span className="block leading-tight text-xs font-black">Antrean Tugas</span>
-              <span className="text-[9px] text-blue-100 font-normal">Daftar Form Uji</span>
+              <div className="leading-tight">Antrean Tugas</div>
+              <div className="text-[10px] text-blue-200 font-normal">Daftar Form Uji</div>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-white/70" />
+          <ChevronRight className="w-4 h-4 text-blue-200" />
         </button>
 
         <button
           onClick={() => onNavigateTab('timers')}
-          className="p-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-white font-extrabold flex items-center justify-between shadow-sm active:scale-95 transition cursor-pointer"
+          className="p-3.5 rounded-2xl bg-gradient-to-r from-orange-600 to-amber-600 text-white font-extrabold text-xs flex items-center justify-between shadow-xs hover:shadow-md transition cursor-pointer active:scale-98"
         >
           <div className="flex items-center gap-2 text-left">
-            <Timer className="w-4 h-4 text-amber-200 shrink-0" />
+            <Timer className="w-4 h-4 text-orange-200" />
             <div>
-              <span className="block leading-tight text-xs font-black">Timer Lab</span>
-              <span className="text-[9px] text-amber-100 font-normal">Oven, CBR &amp; Consol</span>
+              <div className="leading-tight">Timer Lab</div>
+              <div className="text-[10px] text-orange-200 font-normal">Oven, CBR &amp; Consol</div>
             </div>
           </div>
-          <ChevronRight className="w-4 h-4 text-white/70" />
+          <ChevronRight className="w-4 h-4 text-orange-200" />
         </button>
       </div>
 
-      {/* PRIORITY TEST TASK CARDS (1 CARD = 1 SAMPLE CODE + 1 TEST FORM) */}
-      <div className="space-y-2.5">
-        {(() => {
-          const pendingTaskCards = myTaskCards.filter(({ test }) => getTestStatus3State(test).state !== 'completed');
+      {/* PRIORITY TODAY TASK LIST (FILERED STRICTLY PER ASSIGNED TECHNICIAN) */}
+      <div className="space-y-3 pt-1">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-black uppercase text-slate-800 tracking-wider flex items-center gap-1.5">
+            <Sparkles className="w-4 h-4 text-amber-500" />
+            <span>Tugas Form Uji Prioritas Hari Ini</span>
+          </h2>
+          <button
+            onClick={() => onNavigateTab('tasks')}
+            className="text-xs font-extrabold text-blue-600 hover:text-blue-800 transition"
+          >
+            Lihat Semua Antrean ({myTaskCards.length}) ➔
+          </button>
+        </div>
 
-          return (
-            <>
-              <div className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <h3 className="text-xs font-black uppercase text-slate-900 tracking-wider">
-                    Tugas Form Uji Prioritas Hari Ini
-                  </h3>
-                </div>
-                <button
-                  onClick={() => onNavigateTab('tasks')}
-                  className="text-[11px] font-extrabold text-blue-600 hover:text-blue-700"
+        {myTaskCards.length === 0 ? (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 text-center space-y-2">
+            <UserCheck className="w-6 h-6 text-teal-600 mx-auto" />
+            <h3 className="text-xs font-extrabold text-slate-900">Belum Ada Tugas Ditugaskan di Home</h3>
+            <p className="text-[11px] text-slate-500 font-medium max-w-xs mx-auto">
+              {isManagement
+                ? 'Tidak ada tugas yang di-assign untuk filter teknisi ini.'
+                : `Halo ${currentUser.shortName}, belum ada form pengujian yang di-assign khusus kepada Anda (Tested By).`}
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {myTaskCards.slice(0, 5).map(({ sample, po, test, testCode, assignedTechnicianName }) => {
+              const badgeProps = getTestBadgeProps(testCode);
+
+              return (
+                <div
+                  key={`${sample.id}-${testCode}-${test.id}`}
+                  onClick={() => onOpenWorksheet(sample, po, testCode)}
+                  className="bg-white border border-slate-200 hover:border-blue-500 rounded-3xl p-4 shadow-2xs hover:shadow-md transition-all cursor-pointer active:scale-98 space-y-3"
                 >
-                  Lihat Semua Antrean ({pendingTaskCards.length}) ➔
-                </button>
-              </div>
-
-              {pendingTaskCards.length === 0 ? (
-                <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-2xl text-center space-y-1.5 animate-fade-in">
-                  <CheckCircle2 className="w-7 h-7 text-emerald-600 mx-auto" />
-                  <h4 className="text-xs font-black text-emerald-950 uppercase tracking-wide">
-                    Semua Tugas Form Uji Hari Ini Telah Selesai!
-                  </h4>
-                  <p className="text-[10.5px] text-emerald-700 font-mono">
-                    Seluruh formulir pengujian telah diselesaikan oleh teknisi. Anda dapat melihat arsip hasil di menu Histori.
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  {pendingTaskCards.slice(0, 10).map(({ sample, po, test, testCode }, idx) => {
-                    const badge = getTestBadgeProps(testCode);
-                    const isRunning = test.status === 'Sedang Diuji' || test.calculationStatus === 'Draft Data';
-
-                    return (
-                      <div
-                        key={`${sample.id}-${testCode}-${idx}`}
-                        onClick={() => onOpenWorksheet(sample, po, testCode)}
-                        className="bg-white p-3.5 rounded-2xl border border-slate-200 hover:border-blue-500 shadow-2xs hover:shadow-md cursor-pointer transition active:scale-[0.99] space-y-2.5"
-                      >
-                        {/* HEADER: 1. UJI APA + 3. KODE SAMPEL & 2. NO PO (HIGHLIGHTED) + ACTION BUTTON */}
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-start gap-2.5 min-w-0">
-                            {/* 1. UJI APA */}
-                            <span className={`px-2.5 py-1.5 rounded-xl text-xs font-black uppercase font-mono shadow-xs border shrink-0 ${badge.bg} ${badge.text} ${badge.border}`}>
-                              {testCode}
-                            </span>
-                            <div className="min-w-0">
-                              {/* 3. KODE SAMPEL */}
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <h4 className="text-xs font-black text-slate-900 leading-tight truncate">{sample.sampleCode}</h4>
-                                {sample.idLab && (
-                                  <span className="text-[9.5px] text-slate-400 font-mono">({sample.idLab})</span>
-                                )}
-                              </div>
-                              
-                              {/* 2. NO PO (PROMINENTLY HIGHLIGHTED) */}
-                              <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 font-mono font-black text-[10px] border border-amber-300 shadow-2xs">
-                                  <span className="text-amber-600 font-bold">PO:</span>
-                                  <span>{po.poNumber}</span>
-                                </span>
-                                <span className="text-[10px] text-slate-400 font-medium truncate max-w-[140px]" title={po.clientName}>
-                                  {po.clientName}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <span className={`px-2.5 py-1 rounded-xl font-black text-[10px] flex items-center gap-1 shadow-xs shrink-0 ${
-                            isRunning
-                              ? 'bg-amber-500 text-white animate-pulse'
-                              : 'bg-blue-600 text-white hover:bg-blue-700'
-                          }`}>
-                            <span>{isRunning ? `Lanjutkan` : `Input Uji`}</span>
-                          </span>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-10 h-10 rounded-2xl ${badgeProps.bg} text-white flex items-center justify-center font-black text-xs shrink-0 shadow-2xs`}>
+                        {testCode}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <strong className="text-sm font-black text-slate-900 leading-tight">{sample.sampleCode}</strong>
+                          <span className="text-[10px] text-slate-400 font-mono">({sample.sampleLabCode})</span>
                         </div>
-
-                        {/* SUBTITLE TEST TYPE & 4. KEDALAMAN (HIGHLIGHTED) */}
-                        <div className="flex items-center justify-between text-[10.5px] pt-1.5 border-t border-slate-100 font-sans">
-                          <span className="text-slate-600 font-semibold truncate max-w-[190px]">
-                            {test.testTypeName || testCode}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          <span className="px-2 py-0.2 rounded-full bg-amber-50 text-amber-900 border border-amber-200 text-[9.5px] font-extrabold font-mono">
+                            PO: {po.poNumber}
                           </span>
-                          {/* 4. KEDALAMAN BERAPA */}
-                          <span className="text-blue-900 font-mono font-black bg-blue-50 border border-blue-200/80 px-2 py-0.5 rounded-md shrink-0">
-                            Kedalaman: {sample.depthStart.toFixed(1)}-{sample.depthEnd.toFixed(1)}m
-                          </span>
+                          <span className="text-[10.5px] text-slate-500 font-medium truncate max-w-[130px]">{po.clientName}</span>
                         </div>
                       </div>
-                    );
-                  })}
+                    </div>
+
+                    <button className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold shrink-0 shadow-2xs">
+                      Input Uji
+                    </button>
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs pt-1">
+                    <span className="font-bold text-slate-700 truncate max-w-[190px]">{badgeProps.label}</span>
+                    {sample.depth && (
+                      <span className="px-2 py-0.5 rounded-full bg-blue-50 text-blue-900 font-mono font-bold text-[10px] shrink-0 border border-blue-200">
+                        Kedalaman: {sample.depth}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              )}
-            </>
-          );
-        })()}
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
