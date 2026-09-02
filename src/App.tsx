@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { PurchaseOrder, Sample, SampleTest, DocumentItem, TestStatus, MatrixTestInfo, MATRIX_TEST_CATALOGUE, DEFAULT_SAMPLE_TYPES, ContainerItem, RingItem, ConsolRingItem, DsProvingItem, DsRingItem, TrxRingItem, UctRingItem, PycnometerItem, PersonnelItem, MoldItem, ReamerItem } from './types';
-import { INITIAL_POS, INITIAL_DOCUMENTS, MASTER_TEST_TYPES, DEFAULT_CONTAINER_CATALOGUE, DEFAULT_RING_CATALOGUE, DEFAULT_CONSOL_RING_CATALOGUE, DEFAULT_DS_PROVING_CATALOGUE, DEFAULT_DS_RING_CATALOGUE, DEFAULT_TRX_RING_CATALOGUE, DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE, DEFAULT_PERSONNEL_CATALOGUE, DEFAULT_MOLD_CATALOGUE, DEFAULT_REAMER_CATALOGUE } from './data/initialData';
+import { INITIAL_POS, INITIAL_CLIENTS, INITIAL_DOCUMENTS, MASTER_TEST_TYPES, DEFAULT_CONTAINER_CATALOGUE, DEFAULT_RING_CATALOGUE, DEFAULT_CONSOL_RING_CATALOGUE, DEFAULT_DS_PROVING_CATALOGUE, DEFAULT_DS_RING_CATALOGUE, DEFAULT_TRX_RING_CATALOGUE, DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE, DEFAULT_PERSONNEL_CATALOGUE, DEFAULT_MOLD_CATALOGUE, DEFAULT_REAMER_CATALOGUE } from './data/initialData';
 import { getPODeadlineStatus, normalizeTestCode, migrateRemoveSumartadji, migrateEnsureAllSampleTestStatuses, migrateStandardizeDsUu, migrateCanonicalTestCodes, ensurePrepReportsForPOs } from './utils/helpers';
 import { ExcelImportResult } from './utils/excelParser';
 import { UserProfile, INITIAL_USERS } from './types/userTypes';
@@ -417,8 +417,13 @@ export function App() {
   // Master Data: Client & Lab Rekanan
   const [clients, setClients] = useState<Client[]>(() => {
     const saved = localStorage.getItem('ansa_lab_clients');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return [];
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      } catch (e) {}
+    }
+    return INITIAL_CLIENTS;
   });
   const [labRekanans, setLabRekanans] = useState<LabRekanan[]>(() => {
     const saved = localStorage.getItem('ansa_lab_lab_rekanans');
