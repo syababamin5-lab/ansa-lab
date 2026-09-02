@@ -3401,41 +3401,9 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
                     />
                   </td>
                 </tr>
-
-                {/* 5. Wt. Pyc + Water (C) [g] */}
-                <tr className="bg-slate-50 text-slate-700">
-                  <td className="py-2 px-1 font-medium">Wt. Pyc + Water (C) [g]</td>
-                  <td className="py-1 px-1 text-center font-mono font-bold text-slate-700 text-xs">
-                    {sgC1 > 0 ? sgC1.toFixed(3) : '-'}
-                  </td>
-                  <td className="py-1 px-1 text-center font-mono font-bold text-slate-700 text-xs">
-                    {sgC2 > 0 ? sgC2.toFixed(3) : '-'}
-                  </td>
-                </tr>
-
-                {/* 6. Live Calculated Specific Gravity (Gs) */}
-                {(computedGs1 > 0 || computedGs2 > 0) && (
-                  <tr className="bg-blue-50/70 border-t border-blue-200">
-                    <td className="py-2 px-1 text-blue-900 font-extrabold">Hasil Specific Gravity (Gs)</td>
-                    <td className="py-2 px-1 text-center font-bold font-mono text-blue-700 text-xs">
-                      {computedGs1 > 0 ? computedGs1.toFixed(3) : '-'}
-                    </td>
-                    <td className="py-2 px-1 text-center font-bold font-mono text-blue-700 text-xs">
-                      {computedGs2 > 0 ? computedGs2.toFixed(3) : '-'}
-                    </td>
-                  </tr>
-                )}
               </tbody>
             </table>
           </div>
-
-          {/* GS RATA-RATA BANNER */}
-          {computedGsAvg > 0 && (
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-3 rounded-xl text-white flex items-center justify-between shadow-xs">
-              <span className="text-xs font-bold uppercase tracking-wider">Gs Rata-rata (Specific Gravity):</span>
-              <span className="text-lg font-black font-mono tracking-tight">{computedGsAvg.toFixed(3)}</span>
-            </div>
-          )}
         </div>
       )}
 
