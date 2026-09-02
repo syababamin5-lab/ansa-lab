@@ -270,16 +270,15 @@ export function App() {
     setTimeout(() => setGlobalToastMsg(null), 3500);
   };
 
-  // Persistent PO state with initial seed fallback & ATT -> ATB reconciliation & deduplication
+  // Persistent PO state with clean initial fallback
   const [pos, setPos] = useState<PurchaseOrder[]>(() => {
     let initialList = INITIAL_POS;
     const saved = localStorage.getItem('ansa_lab_pos');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const hasSandbox = parsed.some(p => p.id === 'po-sandbox-all-in-one' || p.poNumber === 'PO-SANDBOX-TEST');
-          initialList = hasSandbox ? parsed : [INITIAL_POS[0], ...parsed];
+        if (Array.isArray(parsed)) {
+          initialList = parsed;
         }
       } catch (e) { console.error(e); }
     }

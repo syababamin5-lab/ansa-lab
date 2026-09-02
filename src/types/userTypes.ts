@@ -50,10 +50,10 @@ export interface UserProfile {
 }
 
 // =====================================================================
-// DAFTAR PENGGUNA RESMI ANSA LIMS — PT. TERRAFORMA GEOTEKNIK INDONESIA
+// DAFTAR PENGGUNA RESMI ANSA LIMS — MEMUTUSKAN HANYA SUPER ADMIN
 // =====================================================================
 export const INITIAL_USERS: UserProfile[] = [
-  // ─── 1. SUPER ADMIN ────────────────────────────────────────────────
+  // ─── 1. SUPER ADMIN (SATU-SATUNYA AKUN AKTIF) ──────────────────────
   {
     id: 'user-super-admin',
     name: 'Super Admin',
@@ -65,113 +65,5 @@ export const INITIAL_USERS: UserProfile[] = [
     avatarInitials: 'SA',
     digitalSignatureLabel: 'Super Administrator',
     isActive: true,
-  },
-
-  // ─── 2. DIREKTUR OPERASIONAL ────────────────────────────────────────
-  {
-    id: 'user-yustiaji',
-    name: 'Yustiaji, S.T., M.T.',
-    shortName: 'Pak Yustiaji',
-    nip: 'DIR-0001',
-    email: 'yustiaji@ansalab.com',
-    role: 'EXECUTIVE_DIRECTOR',
-    password: '1234',
-    specialization: 'Geotechnical Engineering & Business Operations',
-    avatarInitials: 'YJ',
-    digitalSignatureLabel: 'Direktur Operasional',
-    isActive: true,
-  },
-
-  // ─── 3. KEPALA LAB ──────────────────────────────────────────────────
-  {
-    id: 'user-alan',
-    name: 'Ir. Alan Suherman, M.T.',
-    shortName: 'Pak Alan',
-    nip: 'MNG-0001',
-    email: 'alan@ansalab.com',
-    role: 'LAB_MANAGER',
-    password: '1234',
-    specialization: 'Soil Mechanics & Laboratory Management',
-    avatarInitials: 'AL',
-    digitalSignatureLabel: 'Kepala Laboratorium',
-    isActive: true,
-  },
-
-  // ─── 4. KEPALA TEKNIS / KOORDINATOR TEKNISI ─────────────────────────
-  {
-    id: 'user-noval',
-    name: 'Rakean Dhafin Nouval, S.T.',
-    shortName: 'Noval',
-    nip: 'KOR-0001',
-    email: 'noval@ansalab.com',
-    role: 'QA_QC_COORDINATOR',
-    password: '1234',
-    specialization: 'Geotechnical Testing — Triaxial, Consolidation, Direct Shear',
-    avatarInitials: 'NV',
-    digitalSignatureLabel: 'Kepala Teknis / Koordinator',
-    isActive: true,
-  },
-
-  // ─── 5. ADMIN FINANCE & MARKETING ───────────────────────────────────
-  {
-    id: 'user-syabaab',
-    name: 'Syabaab, S.E.',
-    shortName: 'Syabaab',
-    nip: 'ADM-0001',
-    email: 'syabaab@ansalab.com',
-    role: 'ADMIN_FINANCE',
-    password: '1234',
-    specialization: 'Finance, Marketing & Documentation',
-    avatarInitials: 'SY',
-    digitalSignatureLabel: 'Admin Finance & Marketing',
-    isActive: true,
-  },
-
-  // ─── 6. TEKNISI / PENGUJI — AO#1 ────────────────────────────────────
-  {
-    id: 'user-rafi',
-    name: 'Rafi, A.Md.',
-    shortName: 'Rafi',
-    nip: 'AO-0001',
-    email: 'rafi@ansalab.com',
-    role: 'ANALYST',
-    password: '1234',
-    analyistCode: 'AO#1',
-    specialization: 'Sifat Fisik Tanah (SG, MC, Unit Weight, Atterberg, Gradasi)',
-    avatarInitials: 'RF',
-    digitalSignatureLabel: 'Penguji / Analis Lab (AO#1)',
-    isActive: true,
-  },
-
-  // ─── 7. TEKNISI / PENGUJI — AO#2 ────────────────────────────────────
-  {
-    id: 'user-rizki',
-    name: 'Rizki, A.Md.',
-    shortName: 'Rizki',
-    nip: 'AO-0002',
-    email: 'rizki@ansalab.com',
-    role: 'ANALYST',
-    password: '1234',
-    analyistCode: 'AO#2',
-    specialization: 'Uji Mekanik — Triaxial CU/CD, Direct Shear, UCT',
-    avatarInitials: 'RZ',
-    digitalSignatureLabel: 'Penguji / Analis Lab (AO#2)',
-    isActive: true,
-  },
-
-  // ─── 8. TEKNISI / PENGUJI — AO#3 ────────────────────────────────────
-  {
-    id: 'user-rasya',
-    name: 'Rasya, A.Md.',
-    shortName: 'Rasya',
-    nip: 'AO-0003',
-    email: 'rasya@ansalab.com',
-    role: 'ANALYST',
-    password: '1234',
-    analyistCode: 'AO#3',
-    specialization: 'Pemadatan (Compaction), CBR, Konsolidasi, Preparasi Sampel',
-    avatarInitials: 'RS',
-    digitalSignatureLabel: 'Penguji / Analis Lab (AO#3)',
-    isActive: true,
-  },
+  }
 ];
