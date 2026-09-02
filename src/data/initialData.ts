@@ -34,12 +34,162 @@ export const MASTER_TEST_TYPES: TestType[] = [
   { id: 'tt-cbr-sok', code: 'CBR-SOK', name: 'CBR Lab Soaked', standard: 'ASTM D1883 / SNI 1744:2012', defaultDurationHours: 96, category: 'Pemadatan' }
 ];
 
-// Pristine Empty Initial Data Lists for Production Clean State
-export const INITIAL_CLIENTS: Client[] = [];
-export const INITIAL_POS: PurchaseOrder[] = [];
+const now = new Date();
+const hoursAgo = (h: number) => new Date(now.getTime() - h * 3600 * 1000).toISOString();
+const hoursAhead = (h: number) => new Date(now.getTime() + h * 3600 * 1000).toISOString();
+
+// Master Clients Data (5 Master Klien Resmi Bawaan)
+export const INITIAL_CLIENTS: Client[] = [
+  {
+    id: 'client-gqt',
+    clientCode: 'GQT',
+    companyName: 'PT. Geoland Quattro Technolab',
+    address: 'Jl. Geologi No. 45, Bandung',
+    contactPerson: 'Bapa Eka',
+    phone: '081291910611',
+    email: 'eka.gqt@gmail.com',
+    taxId: '121244411102525',
+    defaultPriceTier: 'priceGeoland',
+    notes: 'Klien Tier 1 Geoland Technolab'
+  },
+  {
+    id: 'client-sml',
+    clientCode: 'SML',
+    companyName: 'PT. Simbion Mono Lab',
+    address: 'Jl. Riset Industri No. 12, Jakarta',
+    contactPerson: 'Ibu Windy',
+    phone: '08125725121',
+    email: 'windy.sml@gmail.com',
+    taxId: '12121545454210001',
+    defaultPriceTier: 'priceUmum',
+    notes: 'Klien umum mitra laboratorium'
+  },
+  {
+    id: 'client-khm',
+    clientCode: 'KHM',
+    companyName: 'PT. Karam Hexa Mandiri',
+    address: 'Jl. Hexa No. 88, Bekasi',
+    contactPerson: 'Rudi',
+    phone: '0821545124501',
+    email: 'rudi@karam.co.id',
+    taxId: '2121521212',
+    defaultPriceTier: 'priceUmum',
+    notes: 'Klien pekerjaan mekanika tanah'
+  },
+  {
+    id: 'client-brs',
+    clientCode: 'BRS',
+    companyName: 'PT. Bukit Raya Sekawan',
+    address: 'Jl. Bukit Raya No. 99, Bogor',
+    contactPerson: 'Ibu Siti Nuraliza',
+    phone: '08221541215',
+    email: 'brs@gmail.com',
+    taxId: '312154545',
+    defaultPriceTier: 'priceBRS',
+    notes: 'Klien Tier 2 Bukit Raya'
+  },
+  {
+    id: 'client-tdk',
+    clientCode: 'TDK',
+    companyName: 'PT. Transka Dharma Konsultan',
+    address: 'Jl. Ir. H. Juanda No. 128, Bandung',
+    contactPerson: 'Bapa Doni',
+    phone: '0814141484141',
+    email: 'doni.tdk@gmail.com',
+    taxId: '9984141484141',
+    defaultPriceTier: 'priceUmum',
+    notes: 'Klien Utama Penyelidikan Geoteknik'
+  }
+];
+
+// Helper to create sample item
+const createTdkSample = (idx: number, boreCode: string, depthStart: number, depthEnd: number) => {
+  const labCodeNum = String(idx).padStart(3, '0');
+  const sampleId = `smp-tdk-${idx}`;
+  const labId = `LAB-DA-9650-${labCodeNum}`;
+
+  const testsList = [
+    { code: 'SG', name: 'Specific Gravity (Berat Jenis)', status: 'Sedang Diuji' },
+    { code: 'MC', name: 'Moisture Content (Kadar Air)', status: 'Sedang Diuji' },
+    { code: 'UW', name: 'Unit Weight (Berat Volume)', status: 'Sedang Diuji' },
+    { code: 'ATB', name: 'Atterberg Limits Test (LL, PL, PI)', status: 'Sedang Diuji' },
+    { code: 'SIEVE-HYDRO', name: 'Sieve Analysis & Hydrometer Test', status: 'Sedang Diuji' },
+    { code: 'PB', name: 'Permeability Falling/Constant Head', status: 'Sedang Diuji' },
+    { code: 'DS-UU', name: 'Direct Shear UU', status: 'Sedang Diuji' },
+    { code: 'TRX-UU', name: 'Triaxial Compression Test (UU)', status: 'Sedang Diuji' }
+  ];
+
+  return {
+    id: sampleId,
+    poId: 'po-tdk-001',
+    sampleCode: boreCode,
+    reportNumber: `REP-2026-TDK-${labCodeNum}`,
+    idLab: labId,
+    depthStart: depthStart,
+    depthEnd: depthEnd,
+    lithology: 'CH',
+    soilType: 'Lempung Plastisitas Tinggi (Fat Clay)',
+    sampleType: 'Undisturbed Sample / UDS',
+    testedBy: 'Rafi, A.Md.',
+    assignedTechnician: 'Rafi, A.Md.',
+    locationTag: `Rak Cold-Room A-${labCodeNum}`,
+    sampleDescription: `Sampel UDS ${boreCode} kedalaman ${depthStart.toFixed(2)}-${depthEnd.toFixed(2)}m`,
+    status: 'In Progress',
+    createdAt: hoursAgo(100),
+    tests: testsList.map((t) => ({
+      id: `t-tdk-${t.code.toLowerCase()}-${idx}`,
+      sampleId: sampleId,
+      testTypeId: `tt-${t.code.toLowerCase()}`,
+      testTypeName: t.name,
+      testTypeCode: t.code,
+      technicianName: 'Rafi, A.Md.',
+      assignedTechnician: 'Rafi, A.Md.',
+      status: t.status as any,
+      startTime: hoursAgo(24),
+      estimatedDurationHours: 24,
+      calculationStatus: 'Draft Data'
+    }))
+  };
+};
+
+// Initial PO Data (PO-TDK-001 dengan 13 Sampel)
+export const INITIAL_POS: PurchaseOrder[] = [
+  {
+    id: 'po-tdk-001',
+    poNumber: 'PO-TDK-001',
+    clientName: 'PT. Transka Dharma Konsultan',
+    clientAddress: 'Jl. Ir. H. Juanda No. 128, Bandung',
+    projectName: 'Air Baku Terabek',
+    projectLocation: 'Bandung, Jawa Barat',
+    status: 'Running',
+    startDate: '2026-08-01T08:00:00.000Z',
+    deadline: hoursAhead(120),
+    sampleArrivalDate: '2026-08-01T08:00:00.000Z',
+    totalSamplesCount: 13,
+    notes: 'Penyelidikan Geoteknik Air Baku Terabek - PT. Transka Dharma Konsultan.',
+    createdAt: hoursAgo(100),
+    updatedAt: hoursAgo(1),
+    samples: [
+      createTdkSample(1, 'Bor1-UDS-1', 5.00, 5.55),
+      createTdkSample(2, 'Bor1-UDS-2', 8.00, 8.55),
+      createTdkSample(3, 'Bor1-UDS-3', 11.00, 11.55),
+      createTdkSample(4, 'Bor2-UDS-1', 5.00, 5.55),
+      createTdkSample(5, 'Bor2-UDS-2', 8.00, 8.55),
+      createTdkSample(6, 'Bor2-UDS-3', 11.00, 11.55),
+      createTdkSample(7, 'Bor3-UDS-1', 2.00, 2.55),
+      createTdkSample(8, 'Bor3-UDS-2', 5.00, 5.55),
+      createTdkSample(9, 'Bor3-UDS-3', 8.00, 8.55),
+      createTdkSample(10, 'Bor4-UDS-1', 2.00, 2.55),
+      createTdkSample(11, 'Bor4-UDS-2', 5.00, 5.55),
+      createTdkSample(12, 'Bor5-UDS-1', 2.00, 2.55),
+      createTdkSample(13, 'Bor5-UDS-2', 5.00, 5.55),
+    ]
+  }
+];
+
 export const INITIAL_DOCUMENTS: DocumentItem[] = [];
 
-// MASTER EQUIPMENT & CALIBRATION CATALOGUES (KATALOG LENGKAP 142 CAWAN KADAR AIR + 12 CAWAN DS)
+// MASTER EQUIPMENT & CALIBRATION CATALOGUES (142 CAWAN KADAR AIR + 12 CAWAN DS)
 export const DEFAULT_CONTAINER_CATALOGUE: ContainerItem[] = [
   // Cawan Direct Shear (Huruf Alfabeta A-L)
   { id: "A", weight: 9.633 },

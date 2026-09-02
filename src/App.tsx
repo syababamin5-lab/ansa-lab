@@ -172,11 +172,19 @@ export function App() {
     sessionStorage.setItem('ansa_mobile_mode', String(isMobileMode));
   }, [isMobileMode]);
 
-  // Users State with LocalStorage Persistence
+  // Users State with LocalStorage Persistence & Smart Default Recovery
   const [users, setUsers] = useState<UserProfile[]>(() => {
     try {
       const saved = localStorage.getItem('ansa_lab_users');
-      return saved ? JSON.parse(saved) : INITIAL_USERS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((u: any) => u.id));
+          const missingDefaults = INITIAL_USERS.filter(u => !existingIds.has(u.id));
+          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+        }
+      }
+      return INITIAL_USERS;
     } catch (e) {
       return INITIAL_USERS;
     }
@@ -277,7 +285,7 @@ export function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           initialList = parsed;
         }
       } catch (e) { console.error(e); }
@@ -419,7 +427,11 @@ export function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((c: any) => c.id));
+          const missingDefaults = INITIAL_CLIENTS.filter(c => !existingIds.has(c.id));
+          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+        }
       } catch (e) {}
     }
     return INITIAL_CLIENTS;
