@@ -41,7 +41,7 @@ export function getLHUHeader(
     if (sheetCode === 'LHU_Sieve & Hidro') return ['SVE-HYD', 'S&H', 'SVE'].includes(tCode);
     if (sheetCode === 'LHU_standard proctor') return ['CMP-STD', 'CMP'].includes(tCode);
     if (sheetCode === 'LHU_modified proctor') return ['CMP-MOD'].includes(tCode);
-    if (sheetCode === 'LHU PFH') return ['PRM', 'PFH'].includes(tCode);
+    if (sheetCode === 'LHU PFH') return ['PB', 'PRM', 'PFH'].includes(tCode);
     if (sheetCode === 'LHU_Konsolidasi') return ['CT', 'CONSOL'].includes(tCode);
     if (sheetCode === 'LHU_UCT') return ['UCT'].includes(tCode);
     if (sheetCode === 'LHU_DS-UU') return ['DS-UU', 'DS'].includes(tCode);
@@ -670,7 +670,7 @@ export function bindLHUData(
     }
 
     case 'LHU PFH': {
-      const prmTest = getTestObj('PRM') || getTestObj('PFH');
+      const prmTest = getTestObj('PB') || getTestObj('PRM') || getTestObj('PFH');
       const inputs = prmTest?.calculationData?.inputValues || {};
       const results = prmTest?.calculationData?.summaryResults || {};
 
@@ -744,7 +744,7 @@ export function bindLHUData(
 
       return {
         header,
-        testCode: 'PRM',
+        testCode: 'PB',
         testTypeName: 'UJI PERMEABILITAS - METODE FALLING HEAD',
         standard: 'SNI 03-6870-2002',
         parameters: {

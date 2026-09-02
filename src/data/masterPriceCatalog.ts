@@ -25,7 +25,7 @@ export const INITIAL_MASTER_PRICE_CATALOG: MasterPriceItem[] = [
   { id: 'mp-18', code: 'CMP-STD', name: 'Compaction Standard (Standard Proctor)', standard: 'SNI 1742 : 2008', unit: 'Sample', priceGeoland: 250000, priceBRS: 250000, priceUmum: 350000, category: 'physical' },
   { id: 'mp-19', code: 'CMP-MOD', name: 'Compaction Modified (Modified Proctor)', standard: 'SNI 1743 : 2008', unit: 'Sample', priceGeoland: 350000, priceBRS: 350000, priceUmum: 450000, category: 'physical' },
   { id: 'mp-23', code: 'SND-CONE', name: 'Sand Cone', standard: '-', unit: 'Sample', priceGeoland: 250000, priceBRS: 250000, priceUmum: 250000, category: 'physical' },
-  { id: 'mp-24', code: 'PRM', name: 'Permeability', standard: 'SNI 03-6870-2002', unit: 'Sample', priceGeoland: 100000, priceBRS: 125000, priceUmum: 150000, category: 'physical' },
+  { id: 'mp-24', code: 'PB', name: 'Permeability Falling Head (PB)', standard: 'SNI 03-6870-2002', unit: 'Sample', priceGeoland: 100000, priceBRS: 125000, priceUmum: 150000, category: 'physical' },
   { id: 'mp-26', code: 'SWELLING', name: 'Swelling Test', standard: 'SNI 2812 : 2011', unit: 'Sample', priceGeoland: 250000, priceBRS: 250000, priceUmum: 250000, category: 'physical' },
   { id: 'mp-27', code: 'SHRINKAGE', name: 'Shrinkage Limit', standard: '-', unit: 'Sample', priceGeoland: 125000, priceBRS: 125000, priceUmum: 125000, category: 'physical' },
   { id: 'mp-28', code: 'PH', name: 'pH Test', standard: '-', unit: 'Sample', priceGeoland: 200000, priceBRS: 200000, priceUmum: 200000, category: 'physical' },

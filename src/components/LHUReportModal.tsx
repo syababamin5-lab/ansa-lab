@@ -20,7 +20,7 @@ const ALL_LHU_CATALOGUE: { code: LHUSheetCode; label: string; testCode: string; 
   { code: 'LHU_Sieve & Hidro', label: '3. Sieve & Hydrometer (SVE-HYD)', testCode: 'SVE-HYD', category: 'Fisik' },
   { code: 'LHU_standard proctor', label: '4. Standard Proctor Compaction', testCode: 'CMP-STD', category: 'Pemadatan' },
   { code: 'LHU_modified proctor', label: '5. Modified Proctor Compaction', testCode: 'CMP-MOD', category: 'Pemadatan' },
-  { code: 'LHU PFH', label: '6. Permeability Falling Head (PFH)', testCode: 'PRM', category: 'Permeabilitas' },
+  { code: 'LHU PFH', label: '6. Permeability Falling Head (PB)', testCode: 'PB', category: 'Permeabilitas' },
   { code: 'LHU_Konsolidasi', label: '7. Consolidation Oedometer (CT)', testCode: 'CT', category: 'Konsolidasi' },
   { code: 'LHU_UCT', label: '8. Unconfined Compression (UCT)', testCode: 'UCT', category: 'Mekanis' },
   { code: 'LHU_DS-UU', label: '9. Direct Shear UU (DS-UU)', testCode: 'DS-UU', category: 'Mekanis' },
@@ -40,7 +40,7 @@ export function getAssignedLHUSheets(sample: Sample): { code: LHUSheetCode; labe
     if (raw.toUpperCase().startsWith('TT-')) return raw.toUpperCase().slice(3);
     if (raw.toUpperCase() === 'ATT') return 'ATB';
     if (raw.toUpperCase() === 'S&H' || raw.toUpperCase() === 'SVE') return 'SVE-HYD';
-    if (raw.toUpperCase() === 'PB') return 'PRM';
+    if (raw.toUpperCase() === 'PRM' || raw.toUpperCase() === 'PERM') return 'PB';
     if (raw.toUpperCase() === 'CNS' || raw.toUpperCase() === 'CONSOL') return 'CT';
     if (raw.toUpperCase() === 'DSH' || raw.toUpperCase() === 'DS') return 'DS-UU';
     return raw.toUpperCase();
@@ -52,7 +52,7 @@ export function getAssignedLHUSheets(sample: Sample): { code: LHUSheetCode; labe
     if (item.code === 'LHU_Sieve & Hidro') return assignedCodes.includes('SVE-HYD');
     if (item.code === 'LHU_standard proctor') return assignedCodes.includes('CMP-STD') || assignedCodes.includes('CMP');
     if (item.code === 'LHU_modified proctor') return assignedCodes.includes('CMP-MOD');
-    if (item.code === 'LHU PFH') return assignedCodes.includes('PRM');
+    if (item.code === 'LHU PFH') return assignedCodes.includes('PB') || assignedCodes.includes('PRM');
     if (item.code === 'LHU_Konsolidasi') return assignedCodes.includes('CT');
     if (item.code === 'LHU_UCT') return assignedCodes.includes('UCT');
     if (item.code === 'LHU_DS-UU') return assignedCodes.includes('DS-UU');

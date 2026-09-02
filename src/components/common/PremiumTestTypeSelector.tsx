@@ -29,7 +29,6 @@ const DEFAULT_CATEGORIZED_TESTS: PremiumTestTypeOption[] = [
   { code: 'MC', name: 'Moisture Content (MC) - Kadar Air', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D2216 / SNI 1965:2008' },
   { code: 'BD-DD', name: 'Bulk Density & Dry Density (BD-DD)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D7263' },
   { code: 'SND-CONE', name: 'Sand Cone Density Test (SND-CONE)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D1556' },
-  { code: 'PRM', name: 'Permeability Falling / Constant Head (PRM)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D2434' },
   { code: 'SWELLING', name: 'Free Swelling Test (SWELLING)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D4546' },
   { code: 'SHRINKAGE', name: 'Shrinkage Limit Test (SHRINKAGE)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D427' },
   { code: 'PH', name: 'pH Value Test Tanah (PH)', category: 'Sifat Fisik Tanah (Physical Properties)', standard: 'ASTM D4972' },

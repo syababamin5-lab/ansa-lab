@@ -1869,7 +1869,7 @@ export function App() {
               status: 'Pending',
               createdAt: new Date().toISOString(),
               tests: [
-                'PP','SG','MC','UW','ATB','SVE-HYD','PRM','CT','UCT',
+                'PP','SG','MC','UW','ATB','SVE-HYD','PB','CT','UCT',
                 'CMP-STD','CMP-MOD','TRX-UU','DS-UU','DS-CD','DS-CD-RES',
                 'TRX-CU','TRX-CD','CBR-UNS','CBR-SOK','PLI','UCS-ROCK'
               ].map((code, idx) => ({

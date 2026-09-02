@@ -5587,6 +5587,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         PP: 'Physical Properties (SG, MC, UW)',
         ATB: 'Atterberg Limits (LL, PL, PI)',
         'S&H': 'Sieve & Hydrometer Analysis',
+        PB: 'Permeability Test (PB)',
         PRM: 'Permeability Test (PB)',
         CT: 'Consolidation Test 1-D (CT)',
         UCT: 'Unconfined Compression Test (UCT)',

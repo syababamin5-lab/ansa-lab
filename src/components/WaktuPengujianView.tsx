@@ -37,7 +37,7 @@ function getTestDisplayName(code: string): string {
     'SG': 'Specific Gravity', 'MC': 'Moisture Content', 'UW': 'Unit Weight',
     'ATB': 'Atterberg Limit', 'SVE-HYD': 'Sieve & Hydrometer',
     'CMP-STD': 'Compaction Std', 'CMP-MOD': 'Compaction Mod',
-    'PRM': 'Permeability', 'CT': 'Consolidation', 'UCT': 'Unconfined Compression',
+    'PB': 'Permeability Falling Head', 'PRM': 'Permeability Falling Head', 'CT': 'Consolidation', 'UCT': 'Unconfined Compression',
     'DS-UU': 'Direct Shear UU', 'DS-CU': 'Direct Shear CU', 'DS-CD': 'Direct Shear CD',
     'DS-RES': 'Direct Shear Residual',
     'TRX-UU': 'Triaxial UU', 'TRX-CU': 'Triaxial CU', 'TRX-CD': 'Triaxial CD',

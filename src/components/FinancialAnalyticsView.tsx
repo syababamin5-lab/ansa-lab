@@ -137,7 +137,7 @@ export const FinancialAnalyticsView: React.FC<FinancialAnalyticsViewProps> = ({
       { code: 'TRX-UU', name: 'Triaxial UU Multi-Stage', defaultCompleted: 30, defaultTarget: 35 },
       { code: 'CMP-STD', name: 'Compaction Standard Proctor', defaultCompleted: 25, defaultTarget: 30 },
       { code: 'CT', name: 'Consolidation Test 1-D', defaultCompleted: 20, defaultTarget: 20 },
-      { code: 'PRM', name: 'Permeability Falling Head', defaultCompleted: 15, defaultTarget: 20 }
+      { code: 'PB', name: 'Permeability Falling Head', defaultCompleted: 15, defaultTarget: 20 }
     ];
 
     const parameterPerformance = keyTestParameters.map(param => {

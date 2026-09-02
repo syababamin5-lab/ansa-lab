@@ -1151,14 +1151,14 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const [cbrSwelling, setCbrSwelling] = useState(activeTest?.calculationData?.inputValues?.cbrSwelling || '0.15');
   const [cbrPctVal, setCbrPctVal] = useState(activeTest?.calculationData?.inputValues?.cbrPctVal || '');
 
-  // 8. Permeability Test (PRM)
+  // 8. Permeability Falling Head Test (PB)
   const [prmKVal, setPrmKVal] = useState(activeTest?.calculationData?.inputValues?.prmKVal || '');
 
   // 9. Unit Weight / Density (UW)
   const [uwRingNo, setUwRingNo] = useState(activeTest?.calculationData?.inputValues?.ringNo ?? '');
   const [uwRingWetWeight, setUwRingWetWeight] = useState(activeTest?.calculationData?.inputValues?.ringWetWeight || '');
 
-  // FIX: Re-sync UW, TRX, UCT, CT, CBR, PRM states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft)
+  // FIX: Re-sync UW, TRX, UCT, CT, CBR, PB states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft)
   useEffect(() => {
     const iv = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
 

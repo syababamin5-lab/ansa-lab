@@ -54,7 +54,7 @@ const SANDBOX_TEST_CATALOGUE = [
   { code: 'UW', label: 'Unit Weight (Berat Isi / Kepadatan)', sni: 'SNI 03-3637-1994', cat: 'Fisik', status: 'ready' },
   { code: 'ATB', label: 'Atterberg Limits (LL, PL, PI, USCS)', sni: 'SNI 1966:2008 & 1967:2008', cat: 'Fisik', status: 'ready' },
   { code: 'SVE-HYD', label: 'Sieve Analysis & Hydrometer', sni: 'SNI 3423:2008', cat: 'Fisik', status: 'ready' },
-  { code: 'PRM', label: 'Permeability Falling Head', sni: 'SNI 03-6870-2002', cat: 'Permeabilitas', status: 'ready' },
+  { code: 'PB', label: 'Permeability Falling Head (PB)', sni: 'SNI 03-6870-2002', cat: 'Permeabilitas', status: 'ready' },
   { code: 'CT', label: 'Consolidation Oedometer (Pc, Cc, Cr, e0)', sni: 'SNI 2812:2011', cat: 'Konsolidasi', status: 'ready' },
   { code: 'UCT', label: 'Unconfined Compression / UCS Tanah', sni: 'SNI 3638:2012', cat: 'Mekanis', status: 'ready' },
   { code: 'CMP-STD', label: 'Compaction Standard Proctor', sni: 'SNI 1742:2008', cat: 'Pemadatan', status: 'ready' },
@@ -195,7 +195,7 @@ export const SandboxTestView: React.FC<SandboxTestViewProps> = ({
       } else if (code === 'SVE-HYD') {
         summaryResults = { sievePercentPassing: [100, 98.5, 92.4, 85.0, 72.1, 58.4], hydroPercentPassing: [45.2, 38.1, 29.4, 18.2, 9.5] };
         inputValues = { shSieveRetained: ['0', '0.75', '3.8', '3.7', '6.45', '6.85'], shHydroReadings: ['42', '35', '27', '17', '9'] };
-      } else if (code === 'PRM') {
+      } else if (code === 'PB' || code === 'PRM') {
         summaryResults = { kAvg: 2.45e-6, status: 'Calculated' };
         inputValues = { prmH1: ['100', '100', '100'], prmH2: ['45', '46', '45.5'], prmTime: ['120', '120', '120'] };
       } else if (code === 'CT') {
