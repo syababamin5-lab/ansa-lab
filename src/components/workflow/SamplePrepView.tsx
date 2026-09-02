@@ -900,11 +900,37 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                             <th className="p-2 text-center w-20">Thickness</th>
                             <th className="p-2 text-center w-20">Recovery</th>
                             <th className="p-2 text-center w-16">% Rec</th>
-                            {visibleTestKeys.map(({ label }) => (
-                              <th key={label} className="p-1 text-center font-extrabold text-amber-900 bg-amber-100/60 border-x border-slate-300 min-w-[42px]">
-                                {label}
-                              </th>
-                            ))}
+                            {visibleTestKeys.map(({ key, label }) => {
+                              const allChecked = formItems.length > 0 && formItems.every(item => !!(item.testEligible && item.testEligible[key]));
+                              const someChecked = formItems.some(item => !!(item.testEligible && item.testEligible[key]));
+                              return (
+                                <th key={label} className="p-1 text-center font-extrabold text-amber-900 bg-amber-100/60 border-x border-slate-300 min-w-[56px]">
+                                  <div className="flex flex-col items-center gap-0.5">
+                                    <span>{label}</span>
+                                    <button
+                                      type="button"
+                                      title={allChecked ? `Batal pilih semua ${label}` : `Pilih semua ${label}`}
+                                      onClick={() => {
+                                        const newVal = !allChecked;
+                                        setFormItems(items => items.map(item => ({
+                                          ...item,
+                                          testEligible: { ...(item.testEligible || {}), [key]: newVal }
+                                        })));
+                                      }}
+                                      className={`text-[9px] font-bold px-1.5 py-0.5 rounded transition cursor-pointer border ${
+                                        allChecked
+                                          ? 'bg-amber-600 text-white border-amber-700 hover:bg-amber-700'
+                                          : someChecked
+                                          ? 'bg-amber-100 text-amber-800 border-amber-400 hover:bg-amber-200'
+                                          : 'bg-white text-slate-500 border-slate-300 hover:bg-amber-50 hover:text-amber-700'
+                                      }`}
+                                    >
+                                      {allChecked ? '✓ Semua' : someChecked ? '− Sebagian' : '+ Semua'}
+                                    </button>
+                                  </div>
+                                </th>
+                              );
+                            })}
                             <th className="p-2 text-left min-w-[120px]">Keterangan</th>
                             <th className="p-2 text-center w-10">Hapus</th>
                           </tr>
