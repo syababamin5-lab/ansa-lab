@@ -255,18 +255,30 @@ export function App() {
   };
 
   const handleAddUser = (newUser: UserProfile) => {
-    setUsers(prev => [newUser, ...prev]);
+    setUsers(prev => {
+      const updated = [newUser, ...prev];
+      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
   };
 
   const handleUpdateUser = (updatedUser: UserProfile) => {
-    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
+    setUsers(prev => {
+      const updated = prev.map(u => u.id === updatedUser.id ? updatedUser : u);
+      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
     if (currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
     }
   };
 
   const handleDeleteUser = (userId: string) => {
-    setUsers(prev => prev.filter(u => u.id !== userId));
+    setUsers(prev => {
+      const updated = prev.filter(u => u.id !== userId);
+      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
+      return updated;
+    });
   };
 
   // Global Atom Sync Loader & Toast Feedback State

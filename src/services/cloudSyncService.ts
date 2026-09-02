@@ -14,10 +14,10 @@ import {
   DEFAULT_PERSONNEL_CATALOGUE
 } from '../data/initialData';
 
-// Dedicated Cloud Storage Object ID on HTTPS Rest API
-const CLOUD_OBJECT_ID = 'ff808181a058d43f01a0615d96ab1b61';
-const CLOUD_API_URL = `https://api.restful-api.dev/objects/${CLOUD_OBJECT_ID}`;
-const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v3';
+// Active REST API Cloud Store Endpoint
+const CRUD_API_BASE = 'https://crudcrud.com/api/0a010bdb162249a7bd44a10a9e0fb17e';
+const LOCAL_CACHE_KEY = 'ansa_lab_cloud_db_v4';
+let cachedDocumentId: string | null = '6a97f90780971203e84819dd';
 
 export interface CloudDatabaseState {
   users: UserProfile[];
@@ -68,18 +68,37 @@ export async function saveStateToCloud(state: CloudDatabaseState): Promise<boole
     // 1. Simpan ke local cache untuk kecepatan UI
     localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
 
-    // 2. Kirim langsung ke Server Cloud Database HTTPS
-    const res = await fetch(CLOUD_API_URL, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: 'ANSA_LIMS_PRODUCTION_CLOUD_DATABASE',
-        data: state
-      })
-    });
+    if (!cachedDocumentId) {
+      // POST baru
+      const res = await fetch(`${CRUD_API_BASE}/main_store`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      });
+      if (res.ok) {
+        const created = await res.json();
+        if (created._id) cachedDocumentId = created._id;
+      }
+    } else {
+      // PUT update
+      const res = await fetch(`${CRUD_API_BASE}/main_store/${cachedDocumentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      });
 
-    if (!res.ok) {
-      console.warn('[Cloud Sync Warning] Server HTTP status:', res.status);
+      if (!res.ok) {
+        // Fallback POST jika ID hilang/reset
+        const postRes = await fetch(`${CRUD_API_BASE}/main_store`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(state)
+        });
+        if (postRes.ok) {
+          const created = await postRes.json();
+          if (created._id) cachedDocumentId = created._id;
+        }
+      }
     }
     return true;
   } catch (e) {
@@ -93,28 +112,29 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   const defaultState = getInitialMasterState();
 
   try {
-    const res = await fetch(CLOUD_API_URL);
+    const res = await fetch(`${CRUD_API_BASE}/main_store`);
     if (res.ok) {
       const result = await res.json();
-      if (result && result.data) {
-        const cloudData = result.data as CloudDatabaseState;
-        
+      if (Array.isArray(result) && result.length > 0) {
+        const doc = result[result.length - 1]; // Ambil snapshot terbaru
+        if (doc._id) cachedDocumentId = doc._id;
+
         // Simpan snapshot cloud terbaru ke local cache
-        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cloudData));
+        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(doc));
 
         return {
           ...defaultState,
-          ...cloudData,
-          users: mergeUsers(cloudData.users || []),
-          containers: mergeContainers(cloudData.containers || []),
-          pos: cloudData.pos || [],
-          clients: cloudData.clients || [],
-          quotations: cloudData.quotations || [],
-          sampleReceipts: cloudData.sampleReceipts || [],
-          prepReports: cloudData.prepReports || [],
-          subcontractNotices: cloudData.subcontractNotices || [],
-          invoices: cloudData.invoices || [],
-          documents: cloudData.documents || []
+          ...doc,
+          users: mergeUsers(doc.users),
+          containers: mergeContainers(doc.containers),
+          pos: doc.pos || [],
+          clients: doc.clients || [],
+          quotations: doc.quotations || [],
+          sampleReceipts: doc.sampleReceipts || [],
+          prepReports: doc.prepReports || [],
+          subcontractNotices: doc.subcontractNotices || [],
+          invoices: doc.invoices || [],
+          documents: doc.documents || []
         };
       }
     }
@@ -131,8 +151,8 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
         return {
           ...defaultState,
           ...parsed,
-          users: mergeUsers(parsed.users || []),
-          containers: mergeContainers(parsed.containers || []),
+          users: mergeUsers(parsed.users),
+          containers: mergeContainers(parsed.containers),
           pos: parsed.pos || [],
           clients: parsed.clients || [],
           quotations: parsed.quotations || [],
@@ -149,7 +169,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   return defaultState;
 }
 
-function mergeContainers(existing: ContainerItem[]): ContainerItem[] {
+function mergeContainers(existing: ContainerItem[] | undefined): ContainerItem[] {
   if (!existing || existing.length === 0) return DEFAULT_CONTAINER_CATALOGUE;
   const defaultMap = new Map(DEFAULT_CONTAINER_CATALOGUE.map(c => [String(c.id).toUpperCase(), c.weight]));
   const updated = existing.map(c => {
@@ -161,9 +181,7 @@ function mergeContainers(existing: ContainerItem[]): ContainerItem[] {
   return missing.length > 0 ? [...updated, ...missing] : updated;
 }
 
-function mergeUsers(existing: UserProfile[]): UserProfile[] {
+function mergeUsers(existing: UserProfile[] | undefined): UserProfile[] {
   if (!existing || existing.length === 0) return INITIAL_USERS;
-  const existingIds = new Set(existing.map(u => u.id));
-  const missing = INITIAL_USERS.filter(u => !existingIds.has(u.id));
-  return missing.length > 0 ? [...existing, ...missing] : existing;
+  return existing; // DO NOT OVERWRITE EDITED USER PROFILES!
 }
