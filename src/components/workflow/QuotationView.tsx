@@ -6,6 +6,7 @@ import { getNextDocNo } from '../../utils/docNumbering';
 import { Plus, Printer, FileText, CheckCircle2, DollarSign, Building, Calendar, Edit3, Trash2, X, Download, Tag, Users, ChevronDown, AlertTriangle } from 'lucide-react';
 
 import { PersonnelItem } from '../../types';
+import { PremiumTestTypeSelector } from '../common/PremiumTestTypeSelector';
 
 interface QuotationViewProps {
   quotations: Quotation[];
@@ -467,19 +468,16 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                     {formItems.map((item, idx) => {
                       return (
                         <tr key={item.id}>
-                          <td className="p-1.5">
-                            <select
-                              value={(() => {
+                          <td className="p-1.5 min-w-[220px]">
+                            <PremiumTestTypeSelector
+                              value={item.testCode}
+                              onChange={(selectedCode) => {
+                                setIsFormDirty(true);
                                 const masterList = getStoredMasterPrices();
-                                return masterList.find(m => m.code === item.testCode || m.name === item.testName)?.id || '';
-                              })()}
-                              onChange={(e) => {
-                                const masterList = getStoredMasterPrices();
-                                const master = masterList.find(m => m.id === e.target.value);
+                                const master = masterList.find(m => m.code.toUpperCase() === selectedCode.toUpperCase() || m.id === selectedCode);
                                 if (!master) return;
                                 const unitPrice = master[priceTier] || 0;
                                 const updated = [...formItems];
-                                // qty & freq tetap seperti sebelumnya (jangan auto-isi)
                                 const qty  = updated[idx]?.quantity ?? 0;
                                 const freq = updated[idx]?.freq ?? 0;
                                 updated[idx] = {
@@ -493,28 +491,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                                 };
                                 setFormItems(updated);
                               }}
-                              className="w-full p-1 border border-slate-300 rounded font-semibold bg-white text-slate-900"
-                            >
-                              <option value="">-- Pilih Jenis Pengujian --</option>
-                              <optgroup label="📦 Sifat Fisik Tanah (Physical Properties)">
-                                {getStoredMasterPrices()
-                                  .filter(m => m.category === 'physical' || (!m.category && ['PREP','SVE-HYD','SG','UW','ATB','MC','BD-DD','CMP-STD','CMP-MOD','SND-CONE','PERM','SWELLING','SHRINKAGE','PH','CHLORID','SULFAT','CARBONAT','RESISTIVITY'].includes(m.code)))
-                                  .map((m) => (
-                                    <option key={m.id} value={m.id}>
-                                      {m.name} ({m.code})
-                                    </option>
-                                  ))}
-                              </optgroup>
-                              <optgroup label="⚙️ Sifat Mekanis Tanah (Mechanical Properties)">
-                                {getStoredMasterPrices()
-                                  .filter(m => m.category === 'mechanical' || (!m.category && !['PREP','SVE-HYD','SG','UW','ATB','MC','BD-DD','CMP-STD','CMP-MOD','SND-CONE','PERM','SWELLING','SHRINKAGE','PH','CHLORID','SULFAT','CARBONAT','RESISTIVITY'].includes(m.code)))
-                                  .map((m) => (
-                                    <option key={m.id} value={m.id}>
-                                      {m.name} ({m.code})
-                                    </option>
-                                  ))}
-                              </optgroup>
-                            </select>
+                            />
                           </td>
 
                           {/* Standar — LOCKED */}
