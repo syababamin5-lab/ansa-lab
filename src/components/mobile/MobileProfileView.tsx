@@ -20,6 +20,7 @@ import {
   FileSpreadsheet,
   Layers,
   FolderCheck,
+  Download,
 } from 'lucide-react';
 import { normalizeTestCode, getTestStatus3State } from '../../utils/helpers';
 import { isSampleAssignedToUser, isSingleTestAssignedToUser } from '../../utils/userPermissions';
@@ -35,6 +36,7 @@ interface MobileProfileViewProps {
   onManualSync?: () => void;
   onUpdateUser?: (updated: UserProfile) => void;
   onLogout?: () => void;
+  onInstallPWA?: () => void;
 }
 
 const getTestStatProps = (code: string) => {
@@ -70,6 +72,7 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
   onManualSync,
   onUpdateUser,
   onLogout,
+  onInstallPWA,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -587,6 +590,15 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
         <p className="text-[11px] text-slate-300 leading-relaxed border-t border-slate-700/60 pt-2">
           Aplikasi ini dirancang khusus untuk Teknisi Lab Soil Mechanics. Mendukung <strong>Mode Online &amp; Offline</strong> di lapangan. Data pengujian tersimpan aman dan disinkronkan saat terhubung kembali ke jaringan.
         </p>
+        {onInstallPWA && (
+          <button
+            onClick={onInstallPWA}
+            className="w-full mt-2 py-2 px-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition active:scale-95 cursor-pointer"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Install Aplikasi ke Layar Utama (PWA)</span>
+          </button>
+        )}
       </div>
 
       <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">

@@ -24,7 +24,6 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
-  Download,
   CheckCircle2,
 } from 'lucide-react';
 
@@ -316,68 +315,6 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
         </div>
       )}
 
-      {/* MOBILE TOP BAR (EXCEPT WHEN INSIDE WORKSHEET) */}
-      {activeTab !== 'worksheet' && (
-        <header className="sticky top-0 z-30 bg-slate-900 text-white px-4 py-3 shadow-md flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-xs shadow-sm">
-              AL
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-xs font-black tracking-tight text-white">ANSA LIMS</span>
-                <span className="px-1.5 py-0.2 bg-blue-500 text-[9px] font-black rounded text-white uppercase font-mono">
-                  Mobile
-                </span>
-              </div>
-              <div className="flex items-center gap-1.5 -mt-0.5">
-                <span className="text-[10px] text-slate-400 font-mono">Portal Teknisi</span>
-                <button
-                  onClick={() => handleToggleOnlineMode()}
-                  className={`inline-flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full font-bold cursor-pointer transition active:scale-95 ${
-                    isEffectiveOnline
-                      ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30'
-                      : 'bg-amber-500/25 text-amber-200 border border-amber-500/40 hover:bg-amber-500/35'
-                  }`}
-                  title="Klik untuk beralih mode Online / Offline"
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${isEffectiveOnline ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'}`} />
-                  <span>{isEffectiveOnline ? 'Mode Online' : 'Mode Offline'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            {pendingQueue.length > 0 && isEffectiveOnline && (
-              <button
-                onClick={handleManualSync}
-                className="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[10.5px] font-black flex items-center gap-1 shadow-sm active:scale-95 transition cursor-pointer"
-                title="Sinkronkan Data Offline ke Server"
-              >
-                <RefreshCw className="w-3 h-3" />
-                <span>Sync ({pendingQueue.length})</span>
-              </button>
-            )}
-
-            <button
-              onClick={triggerPWAInstall}
-              className="p-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-blue-200 border border-white/20 flex items-center justify-center active:scale-95 transition cursor-pointer"
-              title="Install Aplikasi Mobile APK / App"
-            >
-              <Download className="w-4 h-4 text-blue-300" />
-            </button>
-
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="w-8 h-8 rounded-xl bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center border border-blue-400 shadow-sm cursor-pointer active:scale-95"
-            >
-              {currentUser.avatarInitials || 'RF'}
-            </button>
-          </div>
-        </header>
-      )}
-
       {/* MAIN BODY CONTAINER */}
       <main className="flex-1 p-3.5 sm:p-4 max-w-lg mx-auto w-full">
         {/* 1. DASHBOARD */}
@@ -464,6 +401,7 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
             pendingQueueCount={pendingQueue.length}
             onManualSync={handleManualSync}
             onLogout={onLogout}
+            onInstallPWA={triggerPWAInstall}
           />
         )}
       </main>
