@@ -2158,12 +2158,12 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: summaryData.testedBy || s.testedBy,
+                  testedBy: activeNormSubTab === 'PP' ? (summaryData.testedBy || s.testedBy) : (s.testedBy || summaryData.testedBy),
                   checkedBy: summaryData.checkedBy || s.checkedBy,
                   approvedBy: summaryData.approvedBy || s.approvedBy,
                   dateTested: summaryData.dateTested || s.dateTested,
                   dateTestedEnd: summaryData.dateTestedEnd || s.dateTestedEnd,
-                  assignedTechnician: summaryData.testedBy || s.assignedTechnician,
+                  assignedTechnician: activeNormSubTab === 'PP' ? (summaryData.testedBy || s.assignedTechnician) : (s.assignedTechnician || summaryData.testedBy),
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };
@@ -2230,8 +2230,8 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: technicianName || s.testedBy,
-                  assignedTechnician: technicianName || s.assignedTechnician,
+                  testedBy: normTestCode === 'PP' ? technicianName : (s.testedBy || technicianName),
+                  assignedTechnician: normTestCode === 'PP' ? technicianName : (s.assignedTechnician || technicianName),
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };
