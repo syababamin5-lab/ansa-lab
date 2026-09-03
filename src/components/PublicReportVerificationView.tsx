@@ -76,6 +76,28 @@ const sheetCodeToTestType = (sheetCode: LHUSheetCode): { name: string; standard:
   }
 };
 
+const getSampleDepthDisplay = (sample: any): string => {
+  if (!sample) return '-';
+  if (sample.rawDepthStr && typeof sample.rawDepthStr === 'string' && sample.rawDepthStr.trim()) {
+    return sample.rawDepthStr.trim();
+  }
+  if (sample.depth && String(sample.depth).trim()) {
+    const d = String(sample.depth).trim();
+    return d.endsWith('m') ? d : `${d} m`;
+  }
+  const hasStart = sample.depthStart !== undefined && sample.depthStart !== null && sample.depthStart !== '' && !isNaN(Number(sample.depthStart));
+  const hasEnd = sample.depthEnd !== undefined && sample.depthEnd !== null && sample.depthEnd !== '' && !isNaN(Number(sample.depthEnd));
+  if (hasStart && hasEnd) {
+    const start = Number(sample.depthStart);
+    const end = Number(sample.depthEnd);
+    return `${start.toFixed(2)} - ${end.toFixed(2)} m`;
+  }
+  if (hasStart) {
+    return `${Number(sample.depthStart).toFixed(2)} m`;
+  }
+  return '-';
+};
+
 export const PublicReportVerificationView: React.FC<PublicReportVerificationViewProps> = ({
   initialReportNo = '',
   pos,
@@ -84,7 +106,6 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>(initialReportNo);
   const [activeQuery, setActiveQuery] = useState<string>(initialReportNo);
-  const [copied, setCopied] = useState<boolean>(false);
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
 
   useEffect(() => {
@@ -220,15 +241,6 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
     }
   };
 
-  const handleCopyLink = () => {
-    if (!resolvedTarget) return;
-    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:5175';
-    const verifyLink = `${origin}/?verify=${encodeURIComponent(resolvedTarget.barcodeCode)}&po=${encodeURIComponent(resolvedTarget.po.poNumber)}&sample=${encodeURIComponent(resolvedTarget.sample.sampleCode || resolvedTarget.sample.idLab)}&test=${encodeURIComponent(getShortSheetCode(resolvedTarget.sheetCode))}`;
-    navigator.clipboard.writeText(verifyLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   return (
     <div className="min-h-screen bg-slate-100 text-slate-900 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
       {/* TOP OFFICIAL BRANDING HEADER */}
@@ -299,9 +311,6 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="bg-emerald-400/30 text-emerald-100 text-[10px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full border border-emerald-300/40">
-                        1 Barcode = 1 Uji Sah
-                      </span>
                       <span className="text-[10px] font-mono text-emerald-100 bg-emerald-900/40 px-2 py-0.5 rounded-md font-bold">
                         {resolvedTarget.barcodeCode}
                       </span>
@@ -309,25 +318,14 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                     <h2 className="text-lg sm:text-xl font-black tracking-tight mt-1">
                       LEMBAR UJI ASLI &amp; TERVERIFIKASI SAH
                     </h2>
-                    <p className="text-xs text-emerald-100 font-medium mt-0.5">
-                      Verifikasi khusus untuk <strong className="text-white underline">{resolvedTarget.testInfo.name}</strong> pada Sampel <strong className="text-white font-mono">{resolvedTarget.sample.sampleCode}</strong> ({resolvedTarget.po.poNumber}).
-                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 sm:flex-none px-3.5 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-bold backdrop-blur-xs border border-white/20 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                  >
-                    {copied ? <Check className="w-4 h-4 text-emerald-300" /> : <Copy className="w-4 h-4" />}
-                    <span>{copied ? 'Tersalin!' : 'Salin Tautan'}</span>
-                  </button>
-
                   {onOpenLHU && (
                     <button
                       onClick={() => onOpenLHU(resolvedTarget.sample, resolvedTarget.po, resolvedTarget.sheetCode)}
-                      className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer"
+                      className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-white text-emerald-800 hover:bg-emerald-50 text-xs font-black shadow-md flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                     >
                       <FileText className="w-4 h-4 text-emerald-700" />
                       <span>Buka Lembar LHU</span>
@@ -343,13 +341,13 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
               {/* LEFT 2 COLS: SPECIFIC PO, SPECIFIC SAMPLE, AND SPECIFIC TEST DETAILS ONLY */}
               <div className="md:col-span-2 space-y-6">
                 
-                {/* 1. DETAIL PENGUJIAN KHUSUS LEMBAR INI */}
+                {/* 1. DETAIL PENGUJIAN LEMBAR INI */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
                   <div className="flex items-center justify-between pb-2 border-b border-slate-100">
                     <div className="flex items-center gap-2 text-[#1e40af]">
                       <FlaskConical className="w-4 h-4" />
                       <h3 className="font-extrabold text-xs uppercase tracking-wider">
-                        Pengujian Terkait Barcode Ini (1 Uji)
+                        Detail Pengujian (LHU)
                       </h3>
                     </div>
                     <span className="font-mono text-[10px] font-extrabold px-2 py-0.5 bg-blue-100 text-blue-800 rounded-md">
@@ -389,12 +387,12 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                   </div>
                 </div>
 
-                {/* 2. IDENTITAS CONTOH TANAH TERKAIT (1 SAMPEL) */}
+                {/* 2. IDENTITAS CONTOH TANAH */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-[#1e40af]">
                     <Layers className="w-4 h-4" />
                     <h3 className="font-extrabold text-xs uppercase tracking-wider">
-                      Identitas Sampel Terkait (1 Sampel)
+                      Identitas Sampel
                     </h3>
                   </div>
 
@@ -414,9 +412,9 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                     </div>
 
                     <div>
-                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Titik Bor / Kedalaman</span>
-                      <span className="font-bold text-slate-900 block mt-0.5">
-                        {resolvedTarget.header.sampleSource}
+                      <span className="text-[10px] uppercase font-bold text-slate-400 block">Kedalaman Sampel</span>
+                      <span className="font-bold font-mono text-slate-900 block mt-0.5">
+                        {getSampleDepthDisplay(resolvedTarget.sample)}
                       </span>
                     </div>
 
@@ -450,12 +448,12 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                   </div>
                 </div>
 
-                {/* 3. IDENTITAS PEKERJAAN & PO TERKAIT (1 PO) */}
+                {/* 3. IDENTITAS PEKERJAAN & PO */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-4">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-[#1e40af]">
                     <Building2 className="w-4 h-4" />
                     <h3 className="font-extrabold text-xs uppercase tracking-wider">
-                      Identitas Pekerjaan &amp; Purchase Order (1 PO)
+                      Identitas Pekerjaan &amp; Purchase Order
                     </h3>
                   </div>
 
@@ -506,7 +504,7 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs text-center space-y-3">
                   <div className="flex items-center justify-center gap-1.5 text-xs font-bold text-[#1e40af] uppercase">
                     <QrCode className="w-4 h-4" />
-                    <span>Barcode Khusus Lembar Ini</span>
+                    <span>Kode QR Verifikasi</span>
                   </div>
 
                   <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 inline-block shadow-2xs">
@@ -523,17 +521,17 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                     {resolvedTarget.barcodeCode}
                   </div>
 
-                  <p className="text-[10px] text-slate-500 font-mono leading-tight">
-                    Kode barcode ini bersifat unik untuk kombinasi 1 Uji, 1 Sampel, dan 1 PO ini saja.
+                  <p className="text-[10px] text-slate-500 leading-tight">
+                    Pindai kode QR untuk memvalidasi keaslian dokumen Laporan Hasil Uji (LHU).
                   </p>
                 </div>
 
-                {/* 2. TIM OTORISASI KHUSUS UJI INI */}
+                {/* 2. TIM OTORISASI LEMBAR INI */}
                 <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-xs space-y-3">
                   <div className="flex items-center gap-2 pb-2 border-b border-slate-100 text-[#1e40af]">
                     <UserCheck className="w-4 h-4" />
                     <h3 className="font-extrabold text-xs uppercase tracking-wider">
-                      Tim Penguji &amp; Otorisasi Lembar Ini
+                      Tim Penguji &amp; Otorisasi
                     </h3>
                   </div>
 
