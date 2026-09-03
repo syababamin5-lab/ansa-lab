@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PurchaseOrder, Sample, SampleTest, DocumentItem, TestStatus, MatrixTestInfo, MATRIX_TEST_CATALOGUE, DEFAULT_SAMPLE_TYPES, ContainerItem, RingItem, ConsolRingItem, DsProvingItem, DsRingItem, TrxRingItem, UctRingItem, PycnometerItem, PersonnelItem, MoldItem, ReamerItem } from './types';
 import { INITIAL_POS, INITIAL_CLIENTS, INITIAL_DOCUMENTS, MASTER_TEST_TYPES, DEFAULT_CONTAINER_CATALOGUE, DEFAULT_RING_CATALOGUE, DEFAULT_CONSOL_RING_CATALOGUE, DEFAULT_DS_PROVING_CATALOGUE, DEFAULT_DS_RING_CATALOGUE, DEFAULT_TRX_RING_CATALOGUE, DEFAULT_UCT_RING_CATALOGUE, DEFAULT_PYCNOMETER_CATALOGUE, DEFAULT_PERSONNEL_CATALOGUE, DEFAULT_MOLD_CATALOGUE, DEFAULT_REAMER_CATALOGUE } from './data/initialData';
 import { getPODeadlineStatus, normalizeTestCode, migrateRemoveSumartadji, migrateEnsureAllSampleTestStatuses, migrateStandardizeDsUu, migrateCanonicalTestCodes, ensurePrepReportsForPOs } from './utils/helpers';
+import { isSieveHydroCode, getArrayOrFlatSync } from './utils/mobileSync';
 import { ExcelImportResult } from './utils/excelParser';
 import { UserProfile, INITIAL_USERS } from './types/userTypes';
 
@@ -1969,6 +1970,7 @@ export function App() {
                 targetCodes.forEach(targetCode => {
                   const existingIndex = updatedTests.findIndex(t => {
                     const norm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
+                    if (isSieveHydroCode(targetCode) && isSieveHydroCode(norm)) return true;
                     return norm === targetCode;
                   });
 
@@ -2016,12 +2018,13 @@ export function App() {
                       const pl = parseFloat(mergedInputs.computedPL || 0);
                       isComplete = ll > 0 && pl > 0 && blows.length >= 3 && plWet.length >= 2;
                       hasData = blows.length > 0 || plWet.length > 0 || ll > 0;
-                    } else if (['SVE-HYD', 'S&H', 'SVE'].includes(normTCode)) {
-                      const hasSieve = Array.isArray(mergedInputs.shSieveRetained) && mergedInputs.shSieveRetained.filter((v: string) => v !== '' && parseFloat(v) > 0).length >= 3;
-                      const hasHydro = Array.isArray(mergedInputs.shHydroReadings) && mergedInputs.shHydroReadings.filter((v: string) => v !== '' && parseFloat(v) > 0).length >= 3;
-                      isComplete = hasSieve || hasHydro;
-                      hasData = (Array.isArray(mergedInputs.shSieveRetained) && mergedInputs.shSieveRetained.some((v: string) => v !== '' && parseFloat(v) > 0)) ||
-                                (Array.isArray(mergedInputs.shHydroReadings) && mergedInputs.shHydroReadings.some((v: string) => v !== '' && parseFloat(v) > 0));
+                    } else if (isSieveHydroCode(normTCode)) {
+                      const sieveArr = getArrayOrFlatSync(mergedInputs, 'shSieveRetained', 'shSieveRetained', 15);
+                      const hydroArr = getArrayOrFlatSync(mergedInputs, 'shHydroReadings', 'shHydroReadings', 9);
+                      const validSieveCount = Array.isArray(sieveArr) ? sieveArr.filter((v: string) => v !== '' && parseFloat(v) > 0).length : 0;
+                      const validHydroCount = Array.isArray(hydroArr) ? hydroArr.filter((v: string) => v !== '' && parseFloat(v) > 0).length : 0;
+                      isComplete = validSieveCount >= 3 || validHydroCount >= 3;
+                      hasData = validSieveCount > 0 || validHydroCount > 0 || parseFloat(mergedInputs.shHydroSoilWeight || 0) > 0;
                     } else if (normTCode === 'DS-UU' || normTCode === 'DS') {
                       const normalLoads = mergedInputs.dsUuNormalLoads || mergedInputs.dsNormalLoads || [];
                       const wetSoil = mergedInputs.dsUuWetSoilPlusRing || mergedInputs.dsWetSoilPlusRing || [];
@@ -2209,7 +2212,7 @@ export function App() {
               if (s.id.toLowerCase() === normSampleId || (s.sampleCode && s.sampleCode.toLowerCase() === normSampleId) || (s.idLab && s.idLab.toLowerCase() === normSampleId)) {
                 const updatedTests = (s.tests || []).map(t => {
                   const tNorm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
-                  const isMatch = normTestCode === 'PP' ? ['SG', 'MC', 'UW', 'PP'].includes(tNorm) : tNorm === normTestCode;
+                  const isMatch = normTestCode === 'PP' ? ['SG', 'MC', 'UW', 'PP'].includes(tNorm) : (isSieveHydroCode(normTestCode) ? isSieveHydroCode(tNorm) : tNorm === normTestCode);
                   if (isMatch) {
                     return {
                       ...t,

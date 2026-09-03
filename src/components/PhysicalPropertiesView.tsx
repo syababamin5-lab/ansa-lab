@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LHUReportModal } from './LHUReportModal';
-import { cleanIndoNumStr, parseIndoFloat, safeUpper, getArrayOrFlatSync, buildDualKeyPayload } from '../utils/mobileSync';
+import { cleanIndoNumStr, parseIndoFloat, safeUpper, getArrayOrFlatSync, buildDualKeyPayload, isSieveHydroCode } from '../utils/mobileSync';
 import { LHUSheetCode } from '../types/lhuTypes';
 import {
   PurchaseOrder,
@@ -2195,7 +2195,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
     const norm = (subTab || '').toUpperCase().trim();
     if (norm === 'PP' || norm === 'SG' || norm === 'MC' || norm === 'UW') return 'LHU_PP';
     if (norm === 'ATB' || norm === 'ATT') return 'LHU_ATB';
-    if (norm === 'S&H' || norm === 'SVE' || norm === 'SVE-HYD') return 'LHU_Sieve & Hidro';
+    if (isSieveHydroCode(norm)) return 'LHU_Sieve & Hidro';
     if (norm === 'PRM' || norm === 'PB') return 'LHU PFH';
     if (norm === 'CT' || norm === 'CNS' || norm === 'CONSOL') return 'LHU_Konsolidasi';
     if (norm === 'UCT') return 'LHU_UCT';
@@ -3275,12 +3275,18 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         setAtbPlDry(loadedPlDry);
 
         // Sieve & Hydrometer (S&H)
-        if (inputs.shSieveRetained && Array.isArray(inputs.shSieveRetained)) setShSieveRetained(inputs.shSieveRetained);
-        if (inputs.shHydroSoilWeight !== undefined) setShHydroSoilWeight(inputs.shHydroSoilWeight);
-        if (inputs.shHydroTemp !== undefined) setShHydroTemp(inputs.shHydroTemp);
-        if (inputs.shHydroReadings && Array.isArray(inputs.shHydroReadings)) setShHydroReadings(inputs.shHydroReadings);
-        if (inputs.shHydroMeniscus !== undefined) setShHydroMeniscus(inputs.shHydroMeniscus);
-        if (inputs.shHydroDispersant !== undefined) setShHydroDispersant(inputs.shHydroDispersant);
+        const loadedSieve = getArrayOrFlatSync(inputs, 'shSieveRetained', 'shSieveRetained', 15);
+        if (inputs.shSieveRetained !== undefined || loadedSieve.some(v => v !== '')) {
+          setShSieveRetained(loadedSieve);
+        }
+        if (inputs.shHydroSoilWeight !== undefined && inputs.shHydroSoilWeight !== '') setShHydroSoilWeight(String(inputs.shHydroSoilWeight));
+        if (inputs.shHydroTemp !== undefined && inputs.shHydroTemp !== '') setShHydroTemp(String(inputs.shHydroTemp));
+        const loadedHydro = getArrayOrFlatSync(inputs, 'shHydroReadings', 'shHydroReadings', 9);
+        if (inputs.shHydroReadings !== undefined || loadedHydro.some(v => v !== '')) {
+          setShHydroReadings(loadedHydro);
+        }
+        if (inputs.shHydroMeniscus !== undefined && inputs.shHydroMeniscus !== '') setShHydroMeniscus(String(inputs.shHydroMeniscus));
+        if (inputs.shHydroDispersant !== undefined && inputs.shHydroDispersant !== '') setShHydroDispersant(String(inputs.shHydroDispersant));
 
         // Direct Shear UU (DS-UU)
         if (inputs.dsUuRingNo !== undefined) setDsUuRingNo(String(inputs.dsUuRingNo)); else if (inputs.dsRingNo !== undefined) setDsUuRingNo(String(inputs.dsRingNo));
@@ -3593,6 +3599,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
       const currentSubTabTest = (activeSample.tests || []).find(t => {
         const tNorm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
         if (currentSubTabNorm === 'PP') return ['SG', 'MC', 'UW', 'PP'].includes(tNorm);
+        if (isSieveHydroCode(currentSubTabNorm) && isSieveHydroCode(tNorm)) return true;
         return tNorm === currentSubTabNorm;
       });
 
@@ -3646,6 +3653,22 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
 
       setSoilColourCode(currentSubTabInputs.soilColourCode ?? currentSubTabTest?.soilColourCode ?? (activeSample.colourCode || 0));
       setSoilColourName(currentSubTabInputs.soilColourName ?? currentSubTabTest?.soilColourName ?? (activeSample.colourName || ''));
+
+      // If switching to Sieve-Hydro subtab, automatically hydrate Sieve & Hydrometer state from test inputs
+      if (isSieveHydroCode(currentSubTabNorm)) {
+        const sieveData = getArrayOrFlatSync(currentSubTabInputs, 'shSieveRetained', 'shSieveRetained', 15);
+        if (sieveData.some(v => v !== '')) {
+          setShSieveRetained(sieveData);
+        }
+        const hydroData = getArrayOrFlatSync(currentSubTabInputs, 'shHydroReadings', 'shHydroReadings', 9);
+        if (hydroData.some(v => v !== '')) {
+          setShHydroReadings(hydroData);
+        }
+        if (currentSubTabInputs.shHydroSoilWeight !== undefined && currentSubTabInputs.shHydroSoilWeight !== '') setShHydroSoilWeight(String(currentSubTabInputs.shHydroSoilWeight));
+        if (currentSubTabInputs.shHydroTemp !== undefined && currentSubTabInputs.shHydroTemp !== '') setShHydroTemp(String(currentSubTabInputs.shHydroTemp));
+        if (currentSubTabInputs.shHydroMeniscus !== undefined && currentSubTabInputs.shHydroMeniscus !== '') setShHydroMeniscus(String(currentSubTabInputs.shHydroMeniscus));
+        if (currentSubTabInputs.shHydroDispersant !== undefined && currentSubTabInputs.shHydroDispersant !== '') setShHydroDispersant(String(currentSubTabInputs.shHydroDispersant));
+      }
     }
   }, [activeTestSubTab, activeSampleId, activeSample]);
 
@@ -5162,11 +5185,13 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
 
   const isTestAssigned = (code: string) => {
     if (previewAllForms) return true;
+    if (isSieveHydroCode(code)) {
+      return assignedTestCodes.some(c => isSieveHydroCode(c));
+    }
     const targetNorm = normalizeTestCode(code);
     return assignedTestCodes.some(c => c === targetNorm);
   };
 
-  // Helper to get 3-color status for individual test badge: Green (Done), Orange (Partial/Draft), Gray (Unstarted)
   // Helper to get 3-color status for individual test badge: Green (Done), Orange (Partial/Draft), Gray (Unstarted)
   const getTestBadgeStatus = (s: Sample | undefined, code: string) => {
     if (!s || !s.tests) {
@@ -5175,7 +5200,11 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
     const codeUpper = normalizeTestCode(code);
     const isCurrentActive = s.id === activeSampleId;
 
-    let testObj = s.tests.find(t => normalizeTestCode(t.testTypeCode || t.testTypeId || '') === codeUpper);
+    let testObj = s.tests.find(t => {
+      const tCode = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
+      if (isSieveHydroCode(codeUpper) && isSieveHydroCode(tCode)) return true;
+      return tCode === codeUpper;
+    });
     if (!testObj && ['SG', 'MC', 'UW'].includes(codeUpper)) {
       testObj = s.tests.find(t => normalizeTestCode(t.testTypeCode || t.testTypeId || '') === 'PP');
     }
@@ -6300,11 +6329,11 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                         </button>
                       )}
 
-                      {(isTestAssigned('Sieve-Hydro') || isTestAssigned('SVE-HYD') || isTestAssigned('S&H')) && (
+                      {(isTestAssigned('Sieve-Hydro') || isSieveHydroCode(activeTestSubTab)) && (
                         <button
                           onClick={() => navigateSafely(() => setActiveTestSubTab('Sieve-Hydro'))}
                           className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'Sieve-Hydro' || activeTestSubTab === 'S&H' || activeTestSubTab === 'SVE-HYD'
+                            isSieveHydroCode(activeTestSubTab)
                               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
                               : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
                           }`}
@@ -7813,7 +7842,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
           )}
 
           {/* TAB 2: SIEVE & HYDROMETER (Sieve-Hydro) - SNI 3423:2008 */}
-          {(activeTestSubTab === 'Sieve-Hydro' || activeTestSubTab === 'S&H' || activeTestSubTab === 'SVE-HYD') && (
+          {isSieveHydroCode(activeTestSubTab) && (
             <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 space-y-4">
               {/* Header */}
               <div className="flex items-center justify-between border-b border-slate-100 pb-3">
