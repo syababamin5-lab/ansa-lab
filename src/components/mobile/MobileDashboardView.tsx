@@ -21,7 +21,7 @@ import {
   Plus
 } from 'lucide-react';
 
-import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
+import { isSingleTestAssignedToUser, getTestAssignedTechnician } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
 import { getMobileTestButtonState, isSieveHydroCode } from '../../utils/mobileSync';
 
@@ -75,15 +75,6 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
   const isManagement = ['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'EXECUTIVE_DIRECTOR'].includes(currentUser?.role);
   const [selectedTechFilter, setSelectedTechFilter] = useState<string>('my_tasks');
 
-  // Helper get assigned technician name for display
-  const getAssignedName = (test: SampleTest, sample: Sample): string => {
-    const calc = test.calculationData || {};
-    const name = test.technicianName || test.assignedTechnician || test.testedBy ||
-      calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician ||
-      calc.summaryResults?.testedBy || sample.testedBy || sample.assignedTechnician;
-    return name?.trim() || '';
-  };
-
   // Collect assigned task cards (1 card per sample per test form)
   const myTaskCards: MobileTaskCard[] = [];
   let totalTestsCount = 0;
@@ -98,7 +89,7 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
         const code = (test.testTypeCode || test.testTypeId || 'SG').toUpperCase();
         if (code === 'PP') return; // PP is a category header, not a standalone test form
 
-        const assignedName = getAssignedName(test, sample);
+        const assignedName = getTestAssignedTechnician(test, sample);
 
         // FILTER PENUGASAN STRICT DI MENU HOME:
         // Jika login sebagai Teknisi (ANALYST): Hanya hitung & tampilkan pengujian yang di-assign ke teknisi ini!
@@ -129,7 +120,14 @@ export const MobileDashboardView: React.FC<MobileDashboardViewProps> = ({
           const isDone = test.status === 'Selesai' || test.calculationStatus === 'Calculated';
           if (isDone) completedTestsCount++;
 
-          totalPhotosCount += (sample.photos?.length || 0) + (test.photos?.length || 0);
+          const testPhotos = (test.photos || []).concat(
+            (sample.photos || []).filter(p => {
+              const pCode = (p.testTypeCode || '').toUpperCase();
+              return pCode === code || (['MC', 'UW', 'SG', 'ATB'].includes(code) && pCode === 'PP');
+            })
+          );
+          const uniquePhotos = new Set(testPhotos.map(p => p.url || p.dataUrl || p.id));
+          totalPhotosCount += uniquePhotos.size;
 
           myTaskCards.push({
             sample,

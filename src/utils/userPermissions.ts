@@ -90,65 +90,127 @@ export function isAnalyst(role: UserRole): boolean {
   return role === 'ANALYST';
 }
 
-/** Helper penentuan nama teknisi match */
-const getMatchingTerms = (user: UserProfile): string[] => {
-  if (!user) return [];
-  const terms = [
-    user.name?.toLowerCase(),
-    user.shortName?.toLowerCase(),
-    user.nip?.toLowerCase(),
-    user.analyistCode?.toLowerCase(),
-    user.id?.toLowerCase()
-  ].filter(Boolean) as string[];
+/**
+ * Normalisasi nama personil / teknisi:
+ * - Huruf kecil
+ * - Hapus tanda baca
+ * - Hapus gelar akademik (S.T., M.T., A.Md., S.E., Ir., Dr., dll)
+ * - Rapikan spasi
+ */
+export function normalizePersonName(name: string): string {
+  if (!name || typeof name !== 'string') return '';
+  return name
+    .toLowerCase()
+    .replace(/[,._#\-\/\\]/g, ' ')
+    .replace(/\b(s\.?t|m\.?t|a\.?md|s\.?e|ir|dr|dra|drs)\b/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
 
-  // Add alias synonyms for seamless legacy data matching
-  if (user.shortName?.toLowerCase() === 'rafi' || user.name?.toLowerCase().includes('rafi')) {
-    terms.push('rafly', 'rafly reza', 'ao#1', 'ao-0001', 'rafil', 'rafi, a.md.', 'rafi, a. md.');
-  }
-  if (user.shortName?.toLowerCase() === 'rizki' || user.name?.toLowerCase().includes('rizki')) {
-    terms.push('rizki', 'ao#2', 'ao-0002');
-  }
-  if (user.shortName?.toLowerCase() === 'rasya' || user.name?.toLowerCase().includes('rasya')) {
-    terms.push('rasya', 'ao#3', 'ao-0003');
-  }
-  if (user.shortName?.toLowerCase() === 'noval' || user.name?.toLowerCase().includes('nouval')) {
-    terms.push('m noval', 'noval fadli', 'nouval', 'kor-0001');
-  }
-  return terms;
-};
+/**
+ * Resolves the single authoritative assigned technician name for a specific test item.
+ * Strictly prioritizes test-level explicit assignment to guarantee 1 test = 1 technician.
+ */
+export function getTestAssignedTechnician(test: any, sample?: any): string {
+  if (!test) return '';
 
-/** Cek apakah PENGUJIAN SPESIFIK (Single Test Item) ditugaskan ke teknisi tertentu */
+  // 1. Prioritas tertinggi: Penugasan langsung di tingkat pengujian (Test Level)
+  const testAssigned = (test.assignedTechnician || test.technicianName || '').trim();
+  if (testAssigned) return testAssigned;
+
+  // 2. Prioritas kedua: Penugasan di tingkat sampel (Sample Level) jika pengujian belum punya teknisi spesifik
+  const sampleAssigned = (sample?.assignedTechnician || sample?.testedBy || '').trim();
+  if (sampleAssigned) return sampleAssigned;
+
+  // 3. Prioritas ketiga: Calculation data worksheet jika ada tercatat penugasan
+  const calc = test.calculationData || {};
+  const calcAssigned = (
+    calc.inputValues?.assignedTechnician ||
+    calc.inputValues?.technicianName ||
+    calc.summaryResults?.assignedTechnician ||
+    calc.summaryResults?.technicianName ||
+    ''
+  ).trim();
+  if (calcAssigned) return calcAssigned;
+
+  // 4. Fallback jika ada test.testedBy
+  const testedBy = (test.testedBy || calc.inputValues?.testedBy || calc.summaryResults?.testedBy || '').trim();
+  if (testedBy) return testedBy;
+
+  return '';
+}
+
+/**
+ * Memeriksa apakah string nama teknisi (assignedTech) cocok dengan user tertentu.
+ * Didesain secara ketat dan saling eksklusif (mutually exclusive) agar tidak ada pengujian yang tumpang tindih.
+ */
+export function isTechnicianNameMatchingUser(assignedTech: string, user: UserProfile): boolean {
+  if (!assignedTech || !user) return false;
+
+  const rawAssigned = assignedTech.trim().toLowerCase();
+  const normAssigned = normalizePersonName(assignedTech);
+  const assignedWords = normAssigned.split(' ').filter(w => w.length >= 2);
+
+  // 1. Cek kecocokan ID atau NIP secara eksak
+  if (user.id && rawAssigned === user.id.toLowerCase()) return true;
+  if (user.nip && (rawAssigned === user.nip.toLowerCase() || normAssigned === normalizePersonName(user.nip))) return true;
+
+  // 2. Koleksi token / kata kunci unik untuk user ini
+  const userShort = (user.shortName || '').toLowerCase().trim();
+  const userNameNorm = normalizePersonName(user.name || '');
+
+  const distinctKeywords: string[] = [];
+  if (userShort) distinctKeywords.push(userShort);
+  
+  // Ambil kata-kata dari nama lengkap yang panjangnya >= 3 karakter
+  userNameNorm.split(' ').filter(w => w.length >= 3).forEach(w => distinctKeywords.push(w));
+
+  // Tambahkan sinonim khusus per personil
+  if (userShort === 'rafi' || userNameNorm.includes('rafi')) {
+    distinctKeywords.push('rafly', 'rafil', 'ao#1', 'ao 0001');
+  } else if (userShort === 'rizki' || userNameNorm.includes('rizki')) {
+    distinctKeywords.push('riski', 'wiharyadi', 'ao#2', 'ao 0002');
+  } else if (userShort === 'rasya' || userNameNorm.includes('rasya')) {
+    distinctKeywords.push('ao#3', 'ao 0003');
+  } else if (userShort === 'noval' || userNameNorm.includes('noval') || userNameNorm.includes('nouval')) {
+    distinctKeywords.push('nouval', 'rakean', 'dhafin', 'kor 0001');
+  } else if (userShort === 'alan' || userNameNorm.includes('alan')) {
+    distinctKeywords.push('suherman', 'mng 0001');
+  } else if (userShort === 'yustiaji' || userNameNorm.includes('yustiaji')) {
+    distinctKeywords.push('dir 0001');
+  } else if (userShort === 'syabaab' || userNameNorm.includes('syabaab')) {
+    distinctKeywords.push('adm 0001');
+  }
+
+  // 3. Periksa kecocokan kata: apakah ada keyword user di dalam assignedWords
+  // Menggunakan pencocokan kata (word match), bukan substring bebas, untuk mencegah 'a' cocok dengan 'rafi'
+  const hasWordMatch = distinctKeywords.some(keyword => {
+    const normKeyword = normalizePersonName(keyword);
+    if (!normKeyword) return false;
+    
+    // Jika keyword terdiri dari multi-kata (e.g. "ao 0001" atau "super admin")
+    if (normKeyword.includes(' ')) {
+      return normAssigned.includes(normKeyword);
+    }
+    
+    // Jika keyword single word: cocok jika salah satu kata persis sama atau diawali keyword
+    return assignedWords.some(w => w === normKeyword || (w.length >= 4 && normKeyword.length >= 4 && (w.startsWith(normKeyword) || normKeyword.startsWith(w))));
+  });
+
+  return hasWordMatch;
+}
+
+/**
+ * Cek apakah PENGUJIAN SPESIFIK (Single Test Item) ditugaskan ke teknisi tertentu.
+ * Menjamin 1 pengujian HANYA masuk ke 1 akun teknisi sesuai penugasan di Web App.
+ */
 export function isSingleTestAssignedToUser(test: any, sample: any, user: UserProfile): boolean {
   if (!user || !test) return false;
 
-  const terms = getMatchingTerms(user);
+  const assignedTech = getTestAssignedTechnician(test, sample);
+  if (!assignedTech) return false;
 
-  const isMatch = (val?: string) => {
-    if (!val || typeof val !== 'string') return false;
-    const lVal = val.toLowerCase().trim();
-    if (!lVal) return false;
-    return terms.some(t => lVal.includes(t) || t.includes(lVal));
-  };
-
-  // 1. Direct assignment on test object
-  if (isMatch(test.technicianName) || isMatch(test.assignedTechnician) || isMatch(test.testedBy)) {
-    return true;
-  }
-
-  // 2. Calculation data / worksheet values
-  const calc = test.calculationData || {};
-  const inputVal = calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician;
-  const summaryVal = calc.summaryResults?.testedBy || calc.summaryResults?.assignedTechnician;
-  if (isMatch(inputVal) || isMatch(summaryVal)) {
-    return true;
-  }
-
-  // 3. Fallback to sample level testedBy if sample-wide assignment
-  if (isMatch(sample?.testedBy) || isMatch(sample?.assignedTechnician)) {
-    return true;
-  }
-
-  return false;
+  return isTechnicianNameMatchingUser(assignedTech, user);
 }
 
 /** Cek apakah sampel atau pengujian di dalamnya ditugaskan ke pengguna tertentu */

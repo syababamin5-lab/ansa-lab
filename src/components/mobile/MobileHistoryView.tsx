@@ -13,7 +13,7 @@ import {
   FileSpreadsheet,
 } from 'lucide-react';
 import { normalizeTestCode, getTestStatus3State } from '../../utils/helpers';
-import { isSampleAssignedToUser } from '../../utils/userPermissions';
+import { isSampleAssignedToUser, isSingleTestAssignedToUser } from '../../utils/userPermissions';
 
 interface MobileHistoryViewProps {
   pos: PurchaseOrder[];
@@ -77,6 +77,9 @@ export const MobileHistoryView: React.FC<MobileHistoryViewProps> = ({
         const rawCode = test.testTypeCode || test.testTypeId || '';
         const normCode = normalizeTestCode(rawCode);
         if (normCode === 'PP') return;
+
+        const isMyTest = isSingleTestAssignedToUser(test, sample, currentUser);
+        if (!isMyTest) return;
 
         const isDone = getTestStatus3State(test).state === 'completed';
         if (!isDone) return;

@@ -18,7 +18,7 @@ import {
   Plus
 } from 'lucide-react';
 
-import { isSingleTestAssignedToUser } from '../../utils/userPermissions';
+import { isSingleTestAssignedToUser, getTestAssignedTechnician } from '../../utils/userPermissions';
 import { getTestStatus3State } from '../../utils/helpers';
 import { getMobileTestButtonState, isSieveHydroCode } from '../../utils/mobileSync';
 
@@ -75,15 +75,6 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
 
   const isManagement = ['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'EXECUTIVE_DIRECTOR'].includes(currentUser?.role);
 
-  // Helper get assigned technician name for display
-  const getAssignedName = (test: SampleTest, sample: Sample): string => {
-    const calc = test.calculationData || {};
-    const name = test.technicianName || test.assignedTechnician || test.testedBy ||
-      calc.inputValues?.testedBy || calc.inputValues?.assignedTechnician ||
-      calc.summaryResults?.testedBy || sample.testedBy || sample.assignedTechnician;
-    return name?.trim() || '';
-  };
-
   // Collect all task cards (1 card per sample per test form)
   const allTaskCards: MobileTaskCard[] = [];
 
@@ -94,7 +85,7 @@ export const MobileTaskQueueView: React.FC<MobileTaskQueueViewProps> = ({
         const code = (test.testTypeCode || test.testTypeId || 'SG').toUpperCase();
         if (code === 'PP') return; // PP is a category header
 
-        const assignedName = getAssignedName(test, sample);
+        const assignedName = getTestAssignedTechnician(test, sample);
 
         // FILTER PENUGASAN STRICT:
         // Jika login sebagai Teknisi (ANALYST): Hanya tampilkan pengujian yang Tested By nya di-assign ke teknisi ini!

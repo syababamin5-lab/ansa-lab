@@ -2205,8 +2205,8 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: technicianName || s.testedBy,
-                  assignedTechnician: technicianName || s.assignedTechnician,
+                  testedBy: normTestCode === 'PP' ? (technicianName || s.testedBy) : s.testedBy,
+                  assignedTechnician: normTestCode === 'PP' ? (technicianName || s.assignedTechnician) : (s.assignedTechnician || technicianName),
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };
