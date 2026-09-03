@@ -2113,6 +2113,7 @@ export function App() {
                       status: isComplete ? ('Selesai' as const) : hasData ? ('Sedang Diuji' as const) : t.status,
                       calculationStatus: isComplete ? ('Calculated' as const) : hasData ? ('Draft Data' as const) : t.calculationStatus,
                       technicianName: summaryData.testedBy || t.technicianName || '',
+                      assignedTechnician: summaryData.testedBy || t.assignedTechnician || '',
                       checkerName: summaryData.checkedBy || t.checkerName || '',
                       approverName: summaryData.approvedBy || t.approverName || '',
                       dateTested: summaryData.dateTested || t.dateTested || '',
@@ -2139,6 +2140,7 @@ export function App() {
                       testTypeName: masterMatch.name,
                       testTypeCode: masterMatch.code,
                       technicianName: summaryData.testedBy || s.testedBy || '',
+                      assignedTechnician: summaryData.testedBy || s.assignedTechnician || '',
                       checkerName: summaryData.checkedBy || s.checkedBy || '',
                       approverName: summaryData.approvedBy || s.approvedBy || '',
                       dateTested: summaryData.dateTested || s.dateTested || '',
@@ -2174,6 +2176,21 @@ export function App() {
       });
 
       safeSetLocalStorage('ansa_lab_pos', nextPOs);
+
+      // Broadcast update across tabs
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const channel = new BroadcastChannel('ansa_lab_realtime_sync');
+          channel.postMessage({
+            type: 'SYNC_POS',
+            pos: nextPOs
+          });
+          channel.close();
+        }
+      } catch (e) {
+        console.error('Error broadcasting calculation update:', e);
+      }
+
       return nextPOs;
     });
   };
@@ -2198,6 +2215,14 @@ export function App() {
                       ...t,
                       technicianName,
                       assignedTechnician: technicianName,
+                      calculationData: {
+                        ...(t.calculationData || {}),
+                        inputValues: {
+                          ...(t.calculationData?.inputValues || {}),
+                          testedBy: technicianName,
+                          assignedTechnician: technicianName,
+                        }
+                      }
                     };
                   }
                   return t;
@@ -2205,8 +2230,8 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: normTestCode === 'PP' ? (technicianName || s.testedBy) : s.testedBy,
-                  assignedTechnician: normTestCode === 'PP' ? (technicianName || s.assignedTechnician) : (s.assignedTechnician || technicianName),
+                  testedBy: technicianName || s.testedBy,
+                  assignedTechnician: technicianName || s.assignedTechnician,
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };
@@ -2219,6 +2244,21 @@ export function App() {
       });
 
       safeSetLocalStorage('ansa_lab_pos', nextPOs);
+
+      // Broadcast update across tabs
+      try {
+        if (typeof BroadcastChannel !== 'undefined') {
+          const channel = new BroadcastChannel('ansa_lab_realtime_sync');
+          channel.postMessage({
+            type: 'SYNC_POS',
+            pos: nextPOs
+          });
+          channel.close();
+        }
+      } catch (e) {
+        console.error('Error broadcasting personnel update:', e);
+      }
+
       return nextPOs;
     });
   };

@@ -177,46 +177,53 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
   const handleSaveSample = (updatedSample: Sample) => {
     const targetCode = (updatedSample.sampleCode || '').trim().toUpperCase();
     const targetId = (updatedSample.id || '').trim();
+    const targetPoId = updatedSample.poId || selectedSample?.po.id || '';
 
-    let computedNextPos: PurchaseOrder[] = [];
-
-    // 1. Update React state locally so technician sees their inputs immediately
-    setPos(prevPos => {
-      const nextPos = prevPos.map(po => {
-        const sampleIndex = po.samples.findIndex(s => {
-          const sCode = (s.sampleCode || '').trim().toUpperCase();
-          const sId = (s.id || '').trim();
-          return (targetId && sId === targetId) || (targetCode && sCode === targetCode);
-        });
-
-        if (sampleIndex === -1) return po;
-
-        const updatedSamples = [...po.samples];
-        updatedSamples[sampleIndex] = {
-          ...updatedSamples[sampleIndex],
-          ...updatedSample,
-          tests: updatedSample.tests || updatedSamples[sampleIndex].tests,
-        };
-
-        return {
-          ...po,
-          samples: updatedSamples,
-          updatedAt: new Date().toISOString(),
-        };
-      });
-
-      computedNextPos = nextPos;
-
-      try {
-        localStorage.setItem('ansa_lab_pos', JSON.stringify(nextPos));
-      } catch (e) {
-        console.error('Failed to persist POS to localStorage:', e);
+    // 1. Synchronously compute nextPos so we have it available immediately for storage, broadcast & cloud
+    const currentPosList = pos || [];
+    const nextPos = currentPosList.map(po => {
+      const isPOMatch = !targetPoId || po.id === targetPoId || (po.poNumber && po.poNumber === targetPoId);
+      if (!isPOMatch && !po.samples.some(s => {
+        const sCode = (s.sampleCode || '').trim().toUpperCase();
+        const sId = (s.id || '').trim();
+        return (targetId && sId === targetId) || (targetCode && sCode === targetCode);
+      })) {
+        return po;
       }
 
-      return nextPos;
+      const sampleIndex = po.samples.findIndex(s => {
+        const sCode = (s.sampleCode || '').trim().toUpperCase();
+        const sId = (s.id || '').trim();
+        return (targetId && sId === targetId) || (targetCode && sCode === targetCode);
+      });
+
+      if (sampleIndex === -1) return po;
+
+      const updatedSamples = [...po.samples];
+      updatedSamples[sampleIndex] = {
+        ...updatedSamples[sampleIndex],
+        ...updatedSample,
+        tests: updatedSample.tests || updatedSamples[sampleIndex].tests,
+      };
+
+      return {
+        ...po,
+        samples: updatedSamples,
+        updatedAt: new Date().toISOString(),
+      };
     });
 
-    // 1.1 Also update selectedSample if it matches so subsequent views have freshest data
+    // 2. Persist synchronously to localStorage so refresh never loses data
+    try {
+      localStorage.setItem('ansa_lab_pos', JSON.stringify(nextPos));
+    } catch (e) {
+      console.error('Failed to persist POS to localStorage:', e);
+    }
+
+    // 3. Update React state locally
+    setPos(nextPos);
+
+    // 4. Also update selectedSample if it matches so subsequent views have freshest data
     setSelectedSample(prev => {
       if (!prev) return null;
       const prevCode = (prev.sample.sampleCode || '').trim().toUpperCase();
@@ -235,20 +242,19 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
     });
 
     if (!isEffectiveOnline) {
-      // 2. Mode Offline: Queue update in offline storage
-      const targetPoId = updatedSample.poId || selectedSample?.po.id || '';
+      // Mode Offline: Queue update in offline storage
       const nextQueue = queueOfflineSampleUpdate(targetPoId, updatedSample);
       setPendingQueue(nextQueue);
       setSyncToastMsg(`🔒 Tersimpan di Mode Offline HP (${nextQueue.length} data pending sync).`);
       setTimeout(() => setSyncToastMsg(null), 4000);
     } else {
-      // 3. Mode Online: Broadcast update across tabs (send BOTH pos array & sample object)
+      // Mode Online: Broadcast update across tabs (send BOTH pos array & sample object)
       try {
         if (typeof BroadcastChannel !== 'undefined') {
           const channel = new BroadcastChannel('ansa_lab_realtime_sync');
           channel.postMessage({
             type: 'SYNC_POS',
-            pos: computedNextPos.length > 0 ? computedNextPos : undefined,
+            pos: nextPos,
             sample: updatedSample
           });
           channel.close();
@@ -257,12 +263,12 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
         console.error('Error broadcasting update:', e);
       }
 
-      // 4. Immediately sync to Cloud Database (Vercel KV REST) so Web App on desktop receives it
+      // Immediately sync to Cloud Database (Vercel KV REST) so Web App on desktop receives it
       loadStateFromCloud().then(cloudState => {
-        if (cloudState && computedNextPos.length > 0) {
+        if (cloudState) {
           saveStateToCloud({
             ...cloudState,
-            pos: computedNextPos,
+            pos: nextPos,
             updatedAt: new Date().toISOString(),
           }).catch(err => console.error('Immediate cloud save error:', err));
         }

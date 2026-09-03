@@ -212,7 +212,14 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   const computedMcPct = drySoilWeight > 0 ? (waterWeight / drySoilWeight) * 100 : 0;
 
   // 2. Specific Gravity (SG) - Trial 1 & Trial 2
-  const initialIv = activeTest?.originalTechnicianInput?.inputValues || activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+  const ppInitialTest = sample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP');
+  const initialIv = {
+    ...(ppInitialTest?.calculationData?.inputValues || {}),
+    ...(ppInitialTest?.originalTechnicianInput?.inputValues || {}),
+    ...(activeTest?.calculationData?.inputValues || {}),
+    ...(activeTest?.calculationData || {}),
+    ...(activeTest?.originalTechnicianInput?.inputValues || {})
+  };
   const [pycNo, setPycNo] = useState(initialIv.pycNo || initialIv.pycNo1 || '');
   const [pycWaterTemp, setPycWaterTemp] = useState(initialIv.pycWaterTemp || initialIv.temp1 || '');
   const [pycGsVal, setPycGsVal] = useState(initialIv.pycGsVal || initialIv.gsAvg || '');
@@ -443,10 +450,17 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
   // FIX: Re-sync ALL test form states setiap kali activeTest berubah (mencegah stale state setelah Simpan Draft & buka ulang)
   useEffect(() => {
     const origSnapshot = activeTest?.originalTechnicianInput;
-    const isLocked = Boolean(activeTest?.lockedByTechnician || activeTest?.status === 'Selesai');
-    const iv = (isLocked && origSnapshot?.inputValues)
-      ? origSnapshot.inputValues
-      : (activeTest?.calculationData?.inputValues || activeTest?.calculationData || {});
+    const ppTest = currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP');
+    const ppIv = {
+      ...(ppTest?.calculationData?.inputValues || {}),
+      ...(ppTest?.originalTechnicianInput?.inputValues || {})
+    };
+    const iv = {
+      ...ppIv,
+      ...(activeTest?.calculationData?.inputValues || {}),
+      ...(activeTest?.calculationData || {}),
+      ...(origSnapshot?.inputValues || {})
+    };
 
     // SG
     const valPyc1 = iv.pycNo1 || iv.pycNo || '';
@@ -1649,10 +1663,17 @@ export const MobileWorksheetView: React.FC<MobileWorksheetViewProps> = ({
 
     if (test) {
       const origSnapshot = test.originalTechnicianInput;
-      const isLocked = Boolean(test.lockedByTechnician || test.status === 'Selesai');
-      const inputs = isLocked && origSnapshot?.inputValues
-        ? origSnapshot.inputValues
-        : (test.calculationData?.inputValues || test.calculationData || {});
+      const ppTest = currentSample.tests.find(t => (t.testTypeCode || t.testTypeId || '').toUpperCase().trim() === 'PP');
+      const ppIv = {
+        ...(ppTest?.calculationData?.inputValues || {}),
+        ...(ppTest?.originalTechnicianInput?.inputValues || {})
+      };
+      const inputs = {
+        ...ppIv,
+        ...(test.calculationData?.inputValues || {}),
+        ...(test.calculationData || {}),
+        ...(origSnapshot?.inputValues || {})
+      };
 
       // Strictly prefer test.photos (most authoritative — what was explicitly saved for this test)
       // Fall through only when test.photos is genuinely empty (never uploaded yet)

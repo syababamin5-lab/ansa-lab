@@ -2270,6 +2270,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
   const [dateTestedEnd, setDateTestedEnd] = useState('');
   const [soilColourCode, setSoilColourCode] = useState<number>(0);
   const [soilColourName, setSoilColourName] = useState<string>('');
+  const prevLoadedSampleIdRef = useRef<string | null>(null);
 
   // --- FORM STATES ---
   // 1. Specific Gravity Inputs
@@ -3123,7 +3124,10 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
   // Load saved data when activeSampleId or activePOId changes
   useEffect(() => {
     if (activeSample) {
-      handleClearForm();
+      if (prevLoadedSampleIdRef.current !== activeSample.id) {
+        handleClearForm();
+        prevLoadedSampleIdRef.current = activeSample.id;
+      }
 
       // Initialize default personnel from sample object
       if (activeSample.testedBy) setTestedBy(activeSample.testedBy);
@@ -3142,7 +3146,9 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
       });
 
       sortedTests.forEach(test => {
+        const origInputs = test.originalTechnicianInput?.inputValues || {};
         const calcInputs = test.calculationData?.inputValues || test.calculationData || {};
+        const combinedInputs = { ...origInputs, ...calcInputs };
         
         const hasActualValue = (val: any): boolean => {
           if (val === undefined || val === null || val === '') return false;
@@ -3155,11 +3161,19 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
           return true;
         };
 
-        Object.entries(calcInputs).forEach(([k, v]) => {
+        Object.entries(combinedInputs).forEach(([k, v]) => {
           if (hasActualValue(v)) {
             mergedInputs[k] = v;
           }
         });
+
+        if (test.calculationData?.summaryResults) {
+          Object.entries(test.calculationData.summaryResults).forEach(([k, v]) => {
+            if (hasActualValue(v) && !(k in mergedInputs)) {
+              mergedInputs[k] = v;
+            }
+          });
+        }
       });
 
       const cleanNum = (v: any) => {
@@ -3169,15 +3183,25 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
       const inputs = mergedInputs;
 
       // Laboratory Personnel & Dates
-      if (mergedInputs.testedBy) setTestedBy(mergedInputs.testedBy);
+      const testLevelTester = sortedTests.find(t => (t.technicianName || t.assignedTechnician))?.technicianName || sortedTests.find(t => t.assignedTechnician)?.assignedTechnician;
+      const initialTestedBy = (
+        (typeof mergedInputs.testedBy === 'string' && mergedInputs.testedBy.trim()) ||
+        (typeof testLevelTester === 'string' && testLevelTester.trim()) ||
+        (typeof activeSample.testedBy === 'string' && activeSample.testedBy.trim()) ||
+        (typeof activeSample.assignedTechnician === 'string' && activeSample.assignedTechnician.trim()) ||
+        ''
+      );
+      if (initialTestedBy) setTestedBy(initialTestedBy);
       if (mergedInputs.analystBy) setAnalystBy(mergedInputs.analystBy);
       if (mergedInputs.computedBy) setComputedBy(mergedInputs.computedBy);
-      if (mergedInputs.checkedBy) setCheckedBy(mergedInputs.checkedBy);
-      if (mergedInputs.approvedBy) setApprovedBy(mergedInputs.approvedBy);
+      if (mergedInputs.checkedBy || activeSample.checkedBy) setCheckedBy(mergedInputs.checkedBy || activeSample.checkedBy || '');
+      if (mergedInputs.approvedBy || activeSample.approvedBy) setApprovedBy(mergedInputs.approvedBy || activeSample.approvedBy || '');
       if (mergedInputs.dateStarted) setDateTested(mergedInputs.dateStarted);
       else if (mergedInputs.dateTested) setDateTested(mergedInputs.dateTested);
+      else if (activeSample.dateTested) setDateTested(activeSample.dateTested);
       if (mergedInputs.dateCompleted) setDateTestedEnd(mergedInputs.dateCompleted);
       else if (mergedInputs.dateTestedEnd) setDateTestedEnd(mergedInputs.dateTestedEnd);
+      else if (activeSample.dateTestedEnd) setDateTestedEnd(activeSample.dateTestedEnd);
 
       // 1. Specific Gravity (SG)
       if (mergedInputs.pycNo1) setPycNo1(String(mergedInputs.pycNo1));
@@ -3572,13 +3596,54 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         return tNorm === currentSubTabNorm;
       });
 
-      const currentSubTabInputs = currentSubTabTest?.calculationData?.inputValues || currentSubTabTest?.calculationData || {};
+      const origInputs = currentSubTabTest?.originalTechnicianInput?.inputValues || {};
+      const calcInputs = currentSubTabTest?.calculationData?.inputValues || currentSubTabTest?.calculationData || {};
+      const currentSubTabInputs = { ...origInputs, ...calcInputs };
 
-      setTestedBy(currentSubTabInputs.testedBy ?? currentSubTabTest?.technicianName ?? (activeSample.testedBy || ''));
-      setCheckedBy(currentSubTabInputs.checkedBy ?? currentSubTabTest?.checkerName ?? '');
-      setApprovedBy(currentSubTabInputs.approvedBy ?? currentSubTabTest?.approverName ?? '');
-      setDateTested(currentSubTabInputs.dateStarted ?? currentSubTabInputs.dateTested ?? '');
-      setDateTestedEnd(currentSubTabInputs.dateCompleted ?? currentSubTabInputs.dateTestedEnd ?? '');
+      const resolvedTestedBy = (
+        (typeof currentSubTabInputs.testedBy === 'string' && currentSubTabInputs.testedBy.trim()) ||
+        (typeof currentSubTabTest?.technicianName === 'string' && currentSubTabTest.technicianName.trim()) ||
+        (typeof currentSubTabTest?.assignedTechnician === 'string' && currentSubTabTest.assignedTechnician.trim()) ||
+        (typeof activeSample.testedBy === 'string' && activeSample.testedBy.trim()) ||
+        (typeof activeSample.assignedTechnician === 'string' && activeSample.assignedTechnician.trim()) ||
+        ''
+      );
+      setTestedBy(resolvedTestedBy);
+
+      const resolvedCheckedBy = (
+        (typeof currentSubTabInputs.checkedBy === 'string' && currentSubTabInputs.checkedBy.trim()) ||
+        (typeof currentSubTabTest?.checkerName === 'string' && currentSubTabTest.checkerName.trim()) ||
+        (typeof activeSample.checkedBy === 'string' && activeSample.checkedBy.trim()) ||
+        ''
+      );
+      setCheckedBy(resolvedCheckedBy);
+
+      const resolvedApprovedBy = (
+        (typeof currentSubTabInputs.approvedBy === 'string' && currentSubTabInputs.approvedBy.trim()) ||
+        (typeof currentSubTabTest?.approverName === 'string' && currentSubTabTest.approverName.trim()) ||
+        (typeof activeSample.approvedBy === 'string' && activeSample.approvedBy.trim()) ||
+        ''
+      );
+      setApprovedBy(resolvedApprovedBy);
+
+      const resolvedDateTested = (
+        (typeof currentSubTabInputs.dateStarted === 'string' && currentSubTabInputs.dateStarted.trim()) ||
+        (typeof currentSubTabInputs.dateTested === 'string' && currentSubTabInputs.dateTested.trim()) ||
+        (typeof currentSubTabTest?.dateTested === 'string' && currentSubTabTest.dateTested.trim()) ||
+        (typeof activeSample.dateTested === 'string' && activeSample.dateTested.trim()) ||
+        ''
+      );
+      setDateTested(resolvedDateTested);
+
+      const resolvedDateTestedEnd = (
+        (typeof currentSubTabInputs.dateCompleted === 'string' && currentSubTabInputs.dateCompleted.trim()) ||
+        (typeof currentSubTabInputs.dateTestedEnd === 'string' && currentSubTabInputs.dateTestedEnd.trim()) ||
+        (typeof currentSubTabTest?.dateTestedEnd === 'string' && currentSubTabTest.dateTestedEnd.trim()) ||
+        (typeof activeSample.dateTestedEnd === 'string' && activeSample.dateTestedEnd.trim()) ||
+        resolvedDateTested
+      );
+      setDateTestedEnd(resolvedDateTestedEnd);
+
       setSoilColourCode(currentSubTabInputs.soilColourCode ?? currentSubTabTest?.soilColourCode ?? (activeSample.colourCode || 0));
       setSoilColourName(currentSubTabInputs.soilColourName ?? currentSubTabTest?.soilColourName ?? (activeSample.colourName || ''));
     }
