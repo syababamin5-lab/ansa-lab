@@ -313,8 +313,19 @@ export function App() {
       };
     }
 
+    let guestChannel: BroadcastChannel | null = null;
+    if (typeof BroadcastChannel !== 'undefined') {
+      guestChannel = new BroadcastChannel('ansa_lab_guestbook_sync');
+      guestChannel.onmessage = (e) => {
+        if (e.data?.entries && Array.isArray(e.data.entries)) {
+          setGuestEntries(e.data.entries);
+        }
+      };
+    }
+
     return () => {
       if (channel) channel.close();
+      if (guestChannel) guestChannel.close();
     };
   }, []);
 

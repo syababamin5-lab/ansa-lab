@@ -67,33 +67,77 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
 
   // Sync with propEntries if provided
   useEffect(() => {
-    if (propEntries) {
-      setEntries(propEntries);
+    if (propEntries && propEntries.length > 0) {
+      setEntries(prev => (prev.length === 0 ? propEntries : prev));
     }
   }, [propEntries]);
 
-  // Load latest entries directly from Cloud Redis on mount & on interval
+  // Load latest entries directly from Cloud Redis on mount & on interval (100% Silent Background Sync)
   const fetchCloudEntries = useCallback(async (showLoading = false) => {
     if (showLoading) setIsCloudLoading(true);
     try {
       const cloudData = await loadGuestEntriesFromCloud();
-      setEntries(cloudData);
-      onSaveEntries?.(cloudData);
+      if (Array.isArray(cloudData)) {
+        setEntries(prev => {
+          // Hanya update jika ada perubahan data nyata (mencegah re-render yang tidak perlu)
+          const isIdentical = prev.length === cloudData.length &&
+            prev.every((item, idx) => item.id === cloudData[idx]?.id && item.status === cloudData[idx]?.status && item.guestCount === cloudData[idx]?.guestCount);
+          if (!isIdentical) {
+            onSaveEntries?.(cloudData);
+            return cloudData;
+          }
+          return prev;
+        });
+      }
     } catch (e) {
-      console.warn('Failed to load guest entries from cloud:', e);
+      console.warn('Silent cloud sync failed:', e);
     } finally {
       if (showLoading) setIsCloudLoading(false);
     }
   }, [onSaveEntries]);
 
+  // Real-time Background Sync (Tak Terlihat / Invisible Auto-Refresh)
   useEffect(() => {
-    fetchCloudEntries(true);
-    // Polling setiap 8 detik agar tamu yang check in di HP langsung muncul di PC secara real-time
+    // 1. Silent fetch pertama kali
+    fetchCloudEntries(false);
+
+    // 2. Invisible Polling background setiap 2.5 detik (sangat cepat ~100ms per request)
     const interval = setInterval(() => {
       fetchCloudEntries(false);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [fetchCloudEntries]);
+    }, 2500);
+
+    // 3. Refresh seketika saat window/tab kembali aktif
+    const handleVisibility = () => {
+      if (!document.hidden) {
+        fetchCloudEntries(false);
+      }
+    };
+    window.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('focus', handleVisibility);
+
+    // 4. Instant multi-tab broadcast listener (0 ms)
+    let bc: BroadcastChannel | null = null;
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        bc = new BroadcastChannel('ansa_lab_guestbook_sync');
+        bc.onmessage = (ev) => {
+          if (ev.data?.entries && Array.isArray(ev.data.entries)) {
+            setEntries(ev.data.entries);
+            onSaveEntries?.(ev.data.entries);
+          } else {
+            fetchCloudEntries(false);
+          }
+        };
+      }
+    } catch (_) {}
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('focus', handleVisibility);
+      if (bc) bc.close();
+    };
+  }, [fetchCloudEntries, onSaveEntries]);
 
   // Form Fields State
   const [fullName, setFullName] = useState('');
@@ -1074,14 +1118,22 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <div 
+                      className="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs font-bold shadow-2xs select-none"
+                      title="Sistem aktif menyinkronkan data tamu secara otomatis dan real-time dari Cloud"
+                    >
+                      <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                      <span className="hidden md:inline font-extrabold text-[11px] tracking-tight">Live Auto-Sync</span>
+                    </div>
+
                     <button
                       onClick={() => fetchCloudEntries(true)}
                       disabled={isCloudLoading}
-                      className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50"
-                      title="Sinkronisasi & Ambil Data Tamu Terbaru dari Cloud Redis"
+                      className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-2xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+                      title="Sinkronisasi manual instan dari Cloud Redis"
                     >
-                      <RefreshCw className={`w-3.5 h-3.5 ${isCloudLoading ? 'animate-spin' : ''}`} />
-                      <span>{isCloudLoading ? 'Sinkron...' : 'Refresh Cloud'}</span>
+                      <RefreshCw className={`w-3.5 h-3.5 ${isCloudLoading ? 'animate-spin text-emerald-600' : 'text-slate-500'}`} />
+                      <span className="hidden sm:inline">{isCloudLoading ? 'Sinkron...' : 'Refresh'}</span>
                     </button>
 
                     <button

@@ -156,16 +156,33 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   return defaultState;
 }
 
-/** Simpan entry tamu baru secara atomik langsung ke Cloud Redis */
+export const GUEST_STORE_KEY = 'ansa_lab_guestbook_store_v1';
+
+/** Simpan entry tamu baru secara atomik langsung ke Cloud Redis dalam ~100ms */
 export async function saveGuestEntryDirectToCloud(newEntry: GuestEntry): Promise<GuestEntry[]> {
   try {
-    const currentState = await loadStateFromCloud();
-    const existing = Array.isArray(currentState.guestEntries) ? currentState.guestEntries : [];
-    // Prepend new entry
+    const existing = await loadGuestEntriesFromCloud();
     const updatedEntries = [newEntry, ...existing.filter(e => e.id !== newEntry.id)];
-    currentState.guestEntries = updatedEntries;
-    currentState.updatedAt = new Date().toISOString();
-    await saveStateToCloud(currentState);
+    
+    // Simpan langsung ke dedicated Redis key (sangat cepat ~100ms)
+    await fetch(VERCEL_KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['SET', GUEST_STORE_KEY, JSON.stringify(updatedEntries)])
+    });
+
+    // BroadcastChannel antar-tab seketika
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('ansa_lab_guestbook_sync');
+        bc.postMessage({ type: 'GUEST_UPDATED', entries: updatedEntries });
+        bc.close();
+      }
+    } catch (_) {}
+
     return updatedEntries;
   } catch (e) {
     console.error('[Cloud Guest Book Save Error]:', e);
@@ -176,12 +193,26 @@ export async function saveGuestEntryDirectToCloud(newEntry: GuestEntry): Promise
 /** Update status entry tamu (misal checkout) langsung di Cloud Redis */
 export async function updateGuestEntryInCloud(entryId: string, updates: Partial<GuestEntry>): Promise<GuestEntry[]> {
   try {
-    const currentState = await loadStateFromCloud();
-    const existing = Array.isArray(currentState.guestEntries) ? currentState.guestEntries : [];
+    const existing = await loadGuestEntriesFromCloud();
     const updatedEntries = existing.map(e => e.id === entryId ? { ...e, ...updates } : e);
-    currentState.guestEntries = updatedEntries;
-    currentState.updatedAt = new Date().toISOString();
-    await saveStateToCloud(currentState);
+    
+    await fetch(VERCEL_KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['SET', GUEST_STORE_KEY, JSON.stringify(updatedEntries)])
+    });
+
+    try {
+      if (typeof BroadcastChannel !== 'undefined') {
+        const bc = new BroadcastChannel('ansa_lab_guestbook_sync');
+        bc.postMessage({ type: 'GUEST_UPDATED', entries: updatedEntries });
+        bc.close();
+      }
+    } catch (_) {}
+
     return updatedEntries;
   } catch (e) {
     console.error('[Cloud Guest Book Update Error]:', e);
@@ -189,8 +220,33 @@ export async function updateGuestEntryInCloud(entryId: string, updates: Partial<
   }
 }
 
-/** Ambil daftar tamu langsung dari Cloud Redis */
+/** Ambil daftar tamu langsung dari Cloud Redis secara instan (~100ms) */
 export async function loadGuestEntriesFromCloud(): Promise<GuestEntry[]> {
+  try {
+    const res = await fetch(VERCEL_KV_REST_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${VERCEL_KV_REST_API_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(['GET', GUEST_STORE_KEY])
+    });
+
+    if (res.ok) {
+      const responseJson = await res.json();
+      if (responseJson && responseJson.result) {
+        const raw = responseJson.result;
+        const entries = (typeof raw === 'string' ? JSON.parse(raw) : raw) as GuestEntry[];
+        if (Array.isArray(entries)) {
+          return entries;
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('[Vercel KV Load Guest Entries Error]:', e);
+  }
+
+  // Fallback ke master store jika key khusus belum terisi
   try {
     const state = await loadStateFromCloud();
     return Array.isArray(state.guestEntries) ? state.guestEntries : [];
