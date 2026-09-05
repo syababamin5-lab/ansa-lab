@@ -273,24 +273,30 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
             <div className="flex flex-col justify-between w-64 text-center h-18 border-l border-slate-200 pl-3">
               <div>
                 <div className="font-bold uppercase text-[7.5px] text-slate-700">DISETUJUI OLEH / APPROVED BY</div>
-                <div className="text-[7px] text-slate-500">{header.approvedByTitle}</div>
+                <div className="text-[7px] text-slate-500 min-h-[9px]">{header.approvedByName ? header.approvedByTitle : '\u00A0'}</div>
               </div>
 
               <div className="my-0.5 h-8 flex items-center justify-center">
-                {header.approvedBySignatureUrl ? (
-                  <img src={header.approvedBySignatureUrl} alt="TTD Kepala Lab" className="max-h-8 max-w-full object-contain" />
+                {header.approvedByName ? (
+                  header.approvedBySignatureUrl ? (
+                    <img src={header.approvedBySignatureUrl} alt="TTD Kepala Lab" className="max-h-8 max-w-full object-contain" />
+                  ) : (
+                    <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
+                      (Tanda Tangan)
+                    </div>
+                  )
                 ) : (
-                  <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
-                    (Tanda Tangan)
-                  </div>
+                  <div className="w-20 border-b border-dashed border-slate-300 h-4"></div>
                 )}
               </div>
 
               <div>
-                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400">
-                  {header.approvedByName}
+                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400 min-h-[11px]">
+                  {header.approvedByName || '\u00A0'}
                 </div>
-                <div className="text-[7px] text-slate-500 font-mono">Tgl: {header.reportDate}</div>
+                <div className="text-[7px] text-slate-500 font-mono min-h-[10px]">
+                  {header.approvedByName ? `Tgl: ${header.reportDate || header.dateTested || ''}` : '\u00A0'}
+                </div>
               </div>
             </div>
 
@@ -311,24 +317,30 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
             <div className="flex flex-col justify-between border-r border-slate-300 pr-1 h-18">
               <div>
                 <div className="font-bold uppercase text-[7.5px] text-slate-700">DIUJI OLEH / TESTED BY</div>
-                <div className="text-[7px] text-slate-500">{header.testedByTitle}</div>
+                <div className="text-[7px] text-slate-500 min-h-[9px]">{header.testedByName ? header.testedByTitle : '\u00A0'}</div>
               </div>
 
               <div className="my-0.5 h-8 flex items-center justify-center">
-                {header.testedBySignatureUrl ? (
-                  <img src={header.testedBySignatureUrl} alt="TTD Penguji" className="max-h-8 max-w-full object-contain" />
+                {header.testedByName ? (
+                  header.testedBySignatureUrl ? (
+                    <img src={header.testedBySignatureUrl} alt="TTD Penguji" className="max-h-8 max-w-full object-contain" />
+                  ) : (
+                    <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
+                      (Tanda Tangan)
+                    </div>
+                  )
                 ) : (
-                  <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
-                    (Tanda Tangan)
-                  </div>
+                  <div className="w-20 border-b border-dashed border-slate-300 h-4"></div>
                 )}
               </div>
 
               <div>
-                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400">
-                  {header.testedByName}
+                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400 min-h-[11px]">
+                  {header.testedByName || '\u00A0'}
                 </div>
-                <div className="text-[7px] text-slate-500 font-mono">Tgl: {header.dateTested}</div>
+                <div className="text-[7px] text-slate-500 font-mono min-h-[10px]">
+                  {header.testedByName && header.dateTested ? `Tgl: ${header.dateTested}` : '\u00A0'}
+                </div>
               </div>
             </div>
 
@@ -336,24 +348,30 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
             <div className="flex flex-col justify-between border-r border-slate-300 px-1 h-18">
               <div>
                 <div className="font-bold uppercase text-[7.5px] text-slate-700">DIPERIKSA OLEH / CHECKED BY</div>
-                <div className="text-[7px] text-slate-500">{header.checkedByTitle}</div>
+                <div className="text-[7px] text-slate-500 min-h-[9px]">{header.checkedByName ? header.checkedByTitle : '\u00A0'}</div>
               </div>
 
               <div className="my-0.5 h-8 flex items-center justify-center">
-                {header.checkedBySignatureUrl ? (
-                  <img src={header.checkedBySignatureUrl} alt="TTD Checker" className="max-h-8 max-w-full object-contain" />
+                {header.checkedByName ? (
+                  header.checkedBySignatureUrl ? (
+                    <img src={header.checkedBySignatureUrl} alt="TTD Checker" className="max-h-8 max-w-full object-contain" />
+                  ) : (
+                    <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
+                      (Tanda Tangan)
+                    </div>
+                  )
                 ) : (
-                  <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
-                    (Tanda Tangan)
-                  </div>
+                  <div className="w-20 border-b border-dashed border-slate-300 h-4"></div>
                 )}
               </div>
 
               <div>
-                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400">
-                  {header.checkedByName}
+                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400 min-h-[11px]">
+                  {header.checkedByName || '\u00A0'}
                 </div>
-                <div className="text-[7px] text-slate-500 font-mono">Tgl: {header.reportDate}</div>
+                <div className="text-[7px] text-slate-500 font-mono min-h-[10px]">
+                  {header.checkedByName ? `Tgl: ${header.reportDate || header.dateTested || ''}` : '\u00A0'}
+                </div>
               </div>
             </div>
 
@@ -361,24 +379,30 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
             <div className="flex flex-col justify-between pl-1 h-18">
               <div>
                 <div className="font-bold uppercase text-[7.5px] text-slate-700">DISETUJUI OLEH / APPROVED BY</div>
-                <div className="text-[7px] text-slate-500">{header.approvedByTitle}</div>
+                <div className="text-[7px] text-slate-500 min-h-[9px]">{header.approvedByName ? header.approvedByTitle : '\u00A0'}</div>
               </div>
 
               <div className="my-0.5 h-8 flex items-center justify-center">
-                {header.approvedBySignatureUrl ? (
-                  <img src={header.approvedBySignatureUrl} alt="TTD Kepala Lab" className="max-h-8 max-w-full object-contain" />
+                {header.approvedByName ? (
+                  header.approvedBySignatureUrl ? (
+                    <img src={header.approvedBySignatureUrl} alt="TTD Kepala Lab" className="max-h-8 max-w-full object-contain" />
+                  ) : (
+                    <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
+                      (Tanda Tangan)
+                    </div>
+                  )
                 ) : (
-                  <div className="w-20 border-b border-dashed border-slate-400 text-[7px] text-slate-400 italic">
-                    (Tanda Tangan)
-                  </div>
+                  <div className="w-20 border-b border-dashed border-slate-300 h-4"></div>
                 )}
               </div>
 
               <div>
-                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400">
-                  {header.approvedByName}
+                <div className="font-bold text-[8px] text-slate-900 uppercase underline decoration-slate-400 min-h-[11px]">
+                  {header.approvedByName || '\u00A0'}
                 </div>
-                <div className="text-[7px] text-slate-500 font-mono">Tgl: {header.reportDate}</div>
+                <div className="text-[7px] text-slate-500 font-mono min-h-[10px]">
+                  {header.approvedByName ? `Tgl: ${header.reportDate || header.dateTested || ''}` : '\u00A0'}
+                </div>
               </div>
             </div>
 

@@ -539,22 +539,28 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
                     {/* 1. Penguji */}
                     <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="text-[9px] uppercase font-bold text-slate-400">Diuji Oleh (Tested By)</div>
-                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.testedByName}</div>
-                      <div className="text-[10px] text-slate-500">{resolvedTarget.header.testedByTitle}</div>
+                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.testedByName || '— (Belum Diisi) —'}</div>
+                      {resolvedTarget.header.testedByName && resolvedTarget.header.testedByTitle && (
+                        <div className="text-[10px] text-slate-500">{resolvedTarget.header.testedByTitle}</div>
+                      )}
                     </div>
 
                     {/* 2. Pemeriksa */}
                     <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="text-[9px] uppercase font-bold text-slate-400">Diperiksa Oleh (Checked By)</div>
-                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.checkedByName}</div>
-                      <div className="text-[10px] text-slate-500">{resolvedTarget.header.checkedByTitle}</div>
+                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.checkedByName || '— (Belum Diisi) —'}</div>
+                      {resolvedTarget.header.checkedByName && resolvedTarget.header.checkedByTitle && (
+                        <div className="text-[10px] text-slate-500">{resolvedTarget.header.checkedByTitle}</div>
+                      )}
                     </div>
 
                     {/* 3. Penyetuju */}
                     <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
                       <div className="text-[9px] uppercase font-bold text-slate-400">Disetujui Oleh (Approved By)</div>
-                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.approvedByName}</div>
-                      <div className="text-[10px] text-slate-500">{resolvedTarget.header.approvedByTitle}</div>
+                      <div className="font-bold text-slate-900 text-xs mt-0.5">{resolvedTarget.header.approvedByName || '— (Belum Diisi) —'}</div>
+                      {resolvedTarget.header.approvedByName && resolvedTarget.header.approvedByTitle && (
+                        <div className="text-[10px] text-slate-500">{resolvedTarget.header.approvedByTitle}</div>
+                      )}
                     </div>
                   </div>
                 </div>

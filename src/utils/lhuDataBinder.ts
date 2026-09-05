@@ -59,12 +59,26 @@ export function getLHUHeader(
   const sampleAny = sample as any;
   const testInputs = relevantTest?.calculationData?.inputValues || {};
 
-  // Helper to find person from personnelList by name, id, or partial match
-  const findPerson = (nameOrId?: string, fallbackRole?: string): PersonnelItem | undefined => {
-    if (!nameOrId || typeof nameOrId !== 'string' || nameOrId.trim() === '') {
-      if (fallbackRole) {
-        return personnelList.find(p => p.role === fallbackRole);
-      }
+  // Helper to validate whether a selected/entered person is truly filled (not placeholder or empty)
+  const isValidPersonSelection = (val?: string): boolean => {
+    if (!val || typeof val !== 'string') return false;
+    const trimmed = val.trim();
+    if (
+      !trimmed || 
+      trimmed === '-' || 
+      trimmed === '—' || 
+      trimmed.toLowerCase().includes('pilih personil') || 
+      trimmed.toLowerCase().includes('belum dipilih') || 
+      trimmed.toLowerCase().includes('kosongkan')
+    ) {
+      return false;
+    }
+    return true;
+  };
+
+  // Helper to find person from personnelList by name, id, or partial match (ONLY if nameOrId is provided)
+  const findPerson = (nameOrId?: string): PersonnelItem | undefined => {
+    if (!nameOrId || !isValidPersonSelection(nameOrId)) {
       return undefined;
     }
     const clean = nameOrId.trim().toLowerCase();
@@ -80,49 +94,70 @@ export function getLHUHeader(
     );
   };
 
-  // 1. Tested By (Penguji)
-  const rawTestedByName = 
+  // 1. Tested By (Penguji) - Kosongkan jika belum dipilih/diisi
+  const rawTestedByName = (
     testInputs.testedBy || 
     relevantTest?.technicianName || 
     sample.testedBy || 
     sample.assignedTechnician || 
     sampleAny.summaryData?.testedBy ||
-    '';
-  const testedByPerson = findPerson(rawTestedByName, 'Penguji') || personnelList.find(p => p.role === 'Penguji') || personnelList[0];
-  const testedByName = rawTestedByName || testedByPerson?.name || 'Rafi, A.Md.';
-  const testedByTitle = testedByPerson?.title || (testedByPerson as any)?.digitalSignatureLabel || 'Penguji / Analis Lab';
-  const testedBySignatureUrl = testedByPerson?.digitalSignatureUrl || testedByPerson?.signatureUrl;
+    ''
+  ).trim();
 
-  // 2. Checked By (Pemeriksa)
-  const rawCheckedByName = 
+  const isTestedByFilled = isValidPersonSelection(rawTestedByName);
+  const testedByPerson = isTestedByFilled ? findPerson(rawTestedByName) : undefined;
+  const testedByName = isTestedByFilled ? (testedByPerson?.name || rawTestedByName) : '';
+  const testedByTitle = isTestedByFilled 
+    ? (testedByPerson?.title || (testedByPerson as any)?.digitalSignatureLabel || 'Penguji / Analis Lab') 
+    : '';
+  const testedBySignatureUrl = isTestedByFilled 
+    ? (testedByPerson?.digitalSignatureUrl || testedByPerson?.signatureUrl) 
+    : undefined;
+
+  // 2. Checked By (Pemeriksa) - Kosongkan jika belum dipilih/diisi
+  const rawCheckedByName = (
     testInputs.checkedBy || 
     relevantTest?.checkerName || 
     sample.checkedBy || 
     sampleAny.summaryData?.checkedBy || 
     sampleAny.calculationData?.checkedBy || 
     po.checkedBy || 
-    '';
-  const checkedByPerson = findPerson(rawCheckedByName, 'Analyst') || findPerson(rawCheckedByName, 'Computed') || personnelList.find(p => p.role === 'Analyst') || personnelList.find(p => p.role === 'Computed') || personnelList[4];
-  const checkedByName = rawCheckedByName || checkedByPerson?.name || 'Muhammad Nouval, S.T.';
-  const checkedByTitle = checkedByPerson?.title || (checkedByPerson as any)?.digitalSignatureLabel || 'Kepala Teknis / Koordinator';
-  const checkedBySignatureUrl = checkedByPerson?.digitalSignatureUrl || checkedByPerson?.signatureUrl;
+    ''
+  ).trim();
 
-  // 3. Approved By (Penyetuju)
-  const rawApprovedByName = 
+  const isCheckedByFilled = isValidPersonSelection(rawCheckedByName);
+  const checkedByPerson = isCheckedByFilled ? findPerson(rawCheckedByName) : undefined;
+  const checkedByName = isCheckedByFilled ? (checkedByPerson?.name || rawCheckedByName) : '';
+  const checkedByTitle = isCheckedByFilled 
+    ? (checkedByPerson?.title || (checkedByPerson as any)?.digitalSignatureLabel || 'Kepala Teknis / Koordinator') 
+    : '';
+  const checkedBySignatureUrl = isCheckedByFilled 
+    ? (checkedByPerson?.digitalSignatureUrl || checkedByPerson?.signatureUrl) 
+    : undefined;
+
+  // 3. Approved By (Penyetuju) - Kosongkan jika belum dipilih/diisi
+  const rawApprovedByName = (
     testInputs.approvedBy || 
     relevantTest?.approverName || 
     sample.approvedBy || 
     sampleAny.summaryData?.approvedBy || 
     sampleAny.calculationData?.approvedBy || 
     (po as any).approvedBy || 
-    '';
-  const approvedByPerson = findPerson(rawApprovedByName, 'Approver') || personnelList.find(p => p.role === 'Approver') || personnelList[1];
-  const approvedByName = rawApprovedByName || approvedByPerson?.name || 'Yustiaji, S.T., M.T.';
-  const approvedByTitle = approvedByPerson?.title || (approvedByPerson as any)?.digitalSignatureLabel || 'Direktur Operasional / Kepala Lab';
-  const approvedBySignatureUrl = approvedByPerson?.digitalSignatureUrl || approvedByPerson?.signatureUrl;
+    ''
+  ).trim();
+
+  const isApprovedByFilled = isValidPersonSelection(rawApprovedByName);
+  const approvedByPerson = isApprovedByFilled ? findPerson(rawApprovedByName) : undefined;
+  const approvedByName = isApprovedByFilled ? (approvedByPerson?.name || rawApprovedByName) : '';
+  const approvedByTitle = isApprovedByFilled 
+    ? (approvedByPerson?.title || (approvedByPerson as any)?.digitalSignatureLabel || 'Direktur Operasional / Kepala Lab') 
+    : '';
+  const approvedBySignatureUrl = isApprovedByFilled 
+    ? (approvedByPerson?.digitalSignatureUrl || approvedByPerson?.signatureUrl) 
+    : undefined;
 
   const formattedDate = (dStr?: string) => {
-    if (!dStr) return formatDate(new Date().toISOString());
+    if (!dStr || typeof dStr !== 'string' || !dStr.trim() || dStr === '-' || dStr.toLowerCase().includes('pilih tanggal')) return '';
     try { return formatDate(dStr); } catch (e) { return dStr; }
   };
 
