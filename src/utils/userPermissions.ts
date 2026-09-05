@@ -28,7 +28,10 @@ const MENU_PERMISSIONS: Record<string, UserRole[]> = {
   // ─── SISTEM ─────────────────────────────────────────────────────
   file_explorer:       ['SUPER_ADMIN', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'ADMIN_FINANCE'],
   schema_viewer:       ['SUPER_ADMIN'],
+  db_schema:           ['SUPER_ADMIN'],
   settings:            ['SUPER_ADMIN', 'LAB_MANAGER'],
+  user_management:     ['SUPER_ADMIN', 'LAB_MANAGER'],
+  public_verification: ['SUPER_ADMIN', 'EXECUTIVE_DIRECTOR', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'ANALYST', 'ADMIN_FINANCE'],
 };
 
 /** Cek apakah role dapat melihat menu tertentu */

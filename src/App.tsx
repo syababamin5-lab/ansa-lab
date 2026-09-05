@@ -2019,6 +2019,7 @@ export function App() {
         urgentPOCount={urgentPOCount}
         runningPOCount={runningPOCount}
         currentUser={currentUser}
+        onOpenSchemaModal={() => setIsSchemaModalOpen(true)}
       />
 
       {/* Main App Content Area */}
