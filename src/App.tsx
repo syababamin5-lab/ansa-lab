@@ -2065,6 +2065,7 @@ export function App() {
               <SampleReceiptView
                 receipts={sampleReceipts}
                 quotations={quotations}
+                clients={clients}
                 personnelCatalogue={personnelCatalogue}
                 companyProfile={companyProfile}
                 onSaveReceipt={(r) => {

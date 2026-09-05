@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
-import { SampleReceipt, SampleReceiptItem, SampleReceiptPhoto, Quotation } from '../../types/workflowTypes';
+import { SampleReceipt, SampleReceiptItem, SampleReceiptPhoto, Quotation, Client } from '../../types/workflowTypes';
 import { PackageCheck, Plus, Printer, FileText, CheckCircle2, User, Truck, X, Image as ImageIcon, Trash2, Edit3, Search, FileSpreadsheet, Upload, Download, AlertTriangle } from 'lucide-react';
-import { getNextDocNo, getNextSampleReceiptNo } from '../../utils/docNumbering';
+import { getNextDocNo, getNextSampleReceiptNo, getNextCustomerPoNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
 
 import { PersonnelItem } from '../../types';
@@ -10,6 +10,7 @@ import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProf
 interface SampleReceiptViewProps {
   receipts: SampleReceipt[];
   quotations?: Quotation[];
+  clients?: Client[];
   personnelCatalogue?: PersonnelItem[];
   companyProfile?: CompanyProfile;
   onSaveReceipt: (receipt: SampleReceipt) => void;
@@ -19,7 +20,7 @@ interface SampleReceiptViewProps {
 const DAYS_INDO = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const MONTHS_INDO = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, quotations = [], personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveReceipt, onDeleteReceipt }) => {
+export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, quotations = [], clients = [], personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveReceipt, onDeleteReceipt }) => {
   const [selectedReceipt, setSelectedReceipt] = useState<SampleReceipt | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -34,6 +35,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
   const [formDate, setFormDate] = useState('5 September 2026');
   const [formTime, setFormTime] = useState('14:00 WIB');
   const [formClient, setFormClient] = useState('');
+  const [formClientCode, setFormClientCode] = useState('');
   const [formProjectCode, setFormProjectCode] = useState('');
   const [formProjectName, setFormProjectName] = useState('');
   const [formReceiver, setFormReceiver] = useState('Syabaab Amin A');
@@ -57,9 +59,10 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
     setFormDay(dayName);
     setFormDate(`${dayNum} ${monthName} ${yearNum}`);
 
-    // Jika form baru, perbarui nomor COC.SMP sesuai tanggal yang dipilih
+    // Jika form baru, perbarui nomor COC.SMP dan Customer PO sesuai tanggal yang dipilih
     if (!editingReceiptId) {
       setFormNo(getNextSampleReceiptNo(receipts.map(r => r.receiptNo), isoDate));
+      setFormProjectCode(getNextCustomerPoNo(receipts.map(r => r.projectCode), formClientCode, isoDate));
     }
   };
   
@@ -152,14 +155,16 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
     setSelectedQuoId('');
+    setFormClientCode('');
     setFormDocCode('COC.SMP');
     const todayIso = new Date().toISOString().split('T')[0];
     const nextNo = getNextSampleReceiptNo(receipts.map(r => r.receiptNo), todayIso);
     setFormNo(nextNo);
+    const nextPo = getNextCustomerPoNo(receipts.map(r => r.projectCode), '', todayIso);
+    setFormProjectCode(nextPo);
     handleDateInputChange(todayIso);
     setFormTime('14:00 WIB');
     setFormClient('');
-    setFormProjectCode('');
     setFormProjectName('');
     setFormReceiver('Syabaab Amin A');
     setFormItems([
@@ -174,6 +179,16 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
     setEditingReceiptId(receipt.id);
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
+
+    // Deteksi kode client dari projectCode (CPO.[KODE].[YYMMDD]) atau dari data master clients
+    const cpoMatch = (receipt.projectCode || '').match(/^CPO\.([A-Z0-9]+)\./i);
+    if (cpoMatch && cpoMatch[1]) {
+      setFormClientCode(cpoMatch[1]);
+    } else {
+      const cl = clients.find(c => c.companyName.toLowerCase().trim() === (receipt.clientName || '').toLowerCase().trim());
+      setFormClientCode(cl?.clientCode || '');
+    }
+
     setFormDocCode(receipt.docCode || 'SKS-23-002');
     setFormNo(receipt.receiptNo);
     setFormDay(receipt.dayName);
@@ -285,6 +300,17 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
       }
     }
 
+    // Pastikan nomor PO (Customer PO) tidak kosong dan tidak duplikat jika menggunakan format CPO
+    let finalPoNo = formProjectCode.trim();
+    if (!finalPoNo) {
+      finalPoNo = getNextCustomerPoNo(receipts.map(r => r.projectCode), formClientCode, formRawDate || new Date());
+    } else if (!editingReceiptId && finalPoNo.toUpperCase().startsWith('CPO.')) {
+      const isDup = receipts.some(r => (r.projectCode || '').trim().toUpperCase() === finalPoNo.toUpperCase());
+      if (isDup) {
+        finalPoNo = getNextCustomerPoNo(receipts.map(r => r.projectCode), formClientCode, formRawDate || new Date());
+      }
+    }
+
     const receiptToSave: SampleReceipt = {
       id: editingReceiptId || `batt-${Date.now()}`,
       docCode: formDocCode,
@@ -293,7 +319,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
       date: formDate,
       timeStr: formTime,
       clientName: formClient,
-      projectCode: formProjectCode,
+      projectCode: finalPoNo,
       projectName: formProjectName,
       labReceiverName: formReceiver,
       items: formItems,
@@ -437,7 +463,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                 <div className="flex items-center justify-between">
                   <label className="font-extrabold text-teal-900 flex items-center gap-2 text-xs">
                     <FileText className="w-4 h-4 text-teal-600" />
-                    <span>Pilih Surat Penawaran Harga / Quotation (Otomatis Pull Data Klien &amp; PO)</span>
+                    <span>Pilih Surat Penawaran Harga / Quotation (Tarik Data Klien &amp; PO)</span>
                   </label>
                   {selectedQuoId && (
                     <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-teal-600 text-white flex items-center gap-1">
@@ -453,9 +479,33 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                     const q = quotations.find(item => item.id === qId);
                     if (q) {
                       setFormClient(q.clientName || '');
-                      setFormProjectCode(q.poNumber || q.quotationNo);
+                      
+                      // Dapatkan kode klien dari nomor penawaran (mis: Q-TDK-001-IX-26 -> TDK) atau master clients
+                      let clientCode = '';
+                      const qMatch = (q.quotationNo || '').match(/^Q-([A-Z0-9]+)-\d{3}-/i);
+                      if (qMatch && qMatch[1]) {
+                        clientCode = qMatch[1];
+                      } else if (clients && clients.length > 0) {
+                        const cl = clients.find(c => c.companyName.toLowerCase().trim() === (q.clientName || '').toLowerCase().trim());
+                        if (cl && cl.clientCode) clientCode = cl.clientCode;
+                      }
+                      setFormClientCode(clientCode);
+
+                      // Buat Nomor Customer PO otomatis: CPO.[KODE].[YYMMDD].[001]
+                      const autoPoNo = getNextCustomerPoNo(
+                        receipts.map(r => r.projectCode),
+                        clientCode,
+                        formRawDate || new Date()
+                      );
+                      setFormProjectCode(autoPoNo);
+
                       if (q.projectName) {
                         setFormProjectName(q.projectLocation ? `${q.projectName} - ${q.projectLocation}` : q.projectName);
+                      }
+                    } else {
+                      setFormClientCode('');
+                      if (!editingReceiptId) {
+                        setFormProjectCode(getNextCustomerPoNo(receipts.map(r => r.projectCode), '', formRawDate || new Date()));
                       }
                     }
                   }}
@@ -534,8 +584,19 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                   <input type="text" value={formClient} onChange={e => setFormClient(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-bold" />
                 </div>
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Kode Project / PO</label>
-                  <input type="text" value={formProjectCode} onChange={e => setFormProjectCode(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold" />
+                  <label className="font-bold text-slate-700 block mb-1">Nomor PO (Customer PO)</label>
+                  <input
+                    type="text"
+                    value={formProjectCode}
+                    onChange={e => {
+                      setFormProjectCode(e.target.value);
+                      setIsFormDirty(true);
+                      const m = e.target.value.match(/^CPO\.([A-Z0-9]+)\./i);
+                      if (m && m[1]) setFormClientCode(m[1]);
+                    }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                    placeholder="CPO.TDK.260905.001"
+                  />
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Penerima Sampel (Lab)</label>
@@ -886,7 +947,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                     <span className="col-span-3 font-semibold text-slate-700">Jumlah Sampel</span>
                     <span className="col-span-9 font-bold font-mono">: {selectedReceipt.items.length} Sampel</span>
 
-                    <span className="col-span-3 font-semibold text-slate-700">Kode Project</span>
+                    <span className="col-span-3 font-semibold text-slate-700">Nomor PO</span>
                     <span className="col-span-9 font-bold font-mono">: {selectedReceipt.projectCode}</span>
 
                     <span className="col-span-3 font-semibold text-slate-700">Nama Project</span>

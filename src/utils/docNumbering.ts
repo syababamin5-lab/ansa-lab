@@ -33,6 +33,7 @@ export type DocPrefix =
   | 'COC.SMP'
   | 'BA-PP'
   | 'ACT.MSP'
+  | 'CPO'
   | 'SPK-SUB'
   | 'SJL-SUB'
   | 'WS'
@@ -283,8 +284,91 @@ export function getNextSamplePrepNo(existingNos: string[], dateInput?: string | 
 }
 
 /**
+ * Format nomor Customer PO resmi: CPO.[KODE_KLIEN].[YYMMDD].[001]
+ * Contoh: CPO.TDK.260905.001 atau CPO.260905.001
+ */
+export function formatCustomerPoNo(
+  seq: number,
+  clientCode?: string,
+  dateInput?: string | Date
+): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const seqStr = String(Math.max(1, seq)).padStart(3, '0');
+  const cleanCode = (clientCode || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+
+  if (cleanCode) {
+    return `CPO.${cleanCode}.${yymmdd}.${seqStr}`;
+  }
+  return `CPO.${yymmdd}.${seqStr}`;
+}
+
+/**
+ * Ekstrak sequence number numerik dari nomor Customer PO
+ */
+export function extractCustomerPoSeq(poNo: string, targetDateYYMMDD?: string): number {
+  if (!poNo) return 0;
+  const clean = poNo.trim().toUpperCase();
+
+  // 1. Format: CPO.[KODE].[YYMMDD].[SEQ] atau CPO.[YYMMDD].[SEQ]
+  if (targetDateYYMMDD) {
+    const match = clean.match(new RegExp(`^CPO\\.(?:[A-Z0-9]+\\.)?${targetDateYYMMDD}\\.(\\d+)`, 'i'));
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  } else {
+    const match = clean.match(/^CPO\.(?:[A-Z0-9]+\.)?\d{6}\.(\d+)/i);
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  }
+
+  // 2. Legacy format: PO-TDK-002 atau PO-001
+  const legacyMatch = clean.match(/^PO-(?:[A-Z0-9]+-)?(\d+)/i);
+  if (legacyMatch && legacyMatch[1]) {
+    const n = parseInt(legacyMatch[1], 10);
+    if (!isNaN(n) && n > 0) return n;
+  }
+
+  return 0;
+}
+
+/**
+ * Menghasilkan nomor Customer PO berikutnya (CPO.[KODE].[YYMMDD].[001])
+ * Dijamin 100% unik tanpa duplikasi
+ */
+export function getNextCustomerPoNo(
+  existingNos: string[],
+  clientCode?: string,
+  dateInput?: string | Date
+): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const cleanExistingNos = (existingNos || []).filter(Boolean);
+  const existingSet = new Set(cleanExistingNos.map(n => n.trim().toUpperCase()));
+
+  let maxSeq = 0;
+  for (const no of cleanExistingNos) {
+    const seq = extractCustomerPoSeq(no, yymmdd);
+    if (seq > maxSeq) {
+      maxSeq = seq;
+    }
+  }
+
+  let candidateSeq = Math.max(1, maxSeq + 1);
+  let candidateNo = formatCustomerPoNo(candidateSeq, clientCode, dateInput);
+
+  while (existingSet.has(candidateNo.toUpperCase())) {
+    candidateSeq++;
+    candidateNo = formatCustomerPoNo(candidateSeq, clientCode, dateInput);
+  }
+
+  return candidateNo;
+}
+
+/**
  * Menghasilkan nomor dokumen berikutnya.
- * @param prefix      Prefix jenis dokumen (Q, BATT / COC.SMP, BA-PP / ACT.MSP, dst.)
+ * @param prefix      Prefix jenis dokumen (Q, BATT / COC.SMP, BA-PP / ACT.MSP, CPO, dst.)
  * @param existingNos Array string nomor dokumen yang sudah ada
  */
 export function getNextDocNo(prefix: DocPrefix, existingNos: string[]): string {
@@ -296,6 +380,9 @@ export function getNextDocNo(prefix: DocPrefix, existingNos: string[]): string {
   }
   if (prefix === 'BA-PP' || prefix === 'ACT.MSP') {
     return getNextSamplePrepNo(existingNos);
+  }
+  if (prefix === 'CPO') {
+    return getNextCustomerPoNo(existingNos);
   }
 
   const now = new Date();
@@ -350,6 +437,9 @@ export function formatDocNo(prefix: DocPrefix, seq: number, date?: Date): string
   }
   if (prefix === 'BA-PP' || prefix === 'ACT.MSP') {
     return formatSamplePrepNo(seq, date);
+  }
+  if (prefix === 'CPO') {
+    return formatCustomerPoNo(seq, undefined, date);
   }
   const d = date || new Date();
   const month = ROMAN_MONTHS[d.getMonth()];
