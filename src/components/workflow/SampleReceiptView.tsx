@@ -3,6 +3,7 @@ import { SampleReceipt, SampleReceiptItem, SampleReceiptPhoto, Quotation, Client
 import { PackageCheck, Plus, Printer, FileText, CheckCircle2, User, Truck, X, Image as ImageIcon, Trash2, Edit3, Search, FileSpreadsheet, Upload, Download, AlertTriangle } from 'lucide-react';
 import { getNextDocNo, getNextSampleReceiptNo, getNextCustomerPoNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 import { PersonnelItem } from '../../types';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
@@ -23,6 +24,7 @@ const MONTHS_INDO = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Ju
 export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, quotations = [], clients = [], personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveReceipt, onDeleteReceipt }) => {
   const [selectedReceipt, setSelectedReceipt] = useState<SampleReceipt | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [receiptToDelete, setReceiptToDelete] = useState<SampleReceipt | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingReceiptId, setEditingReceiptId] = useState<string | null>(null);
   const [selectedQuoId, setSelectedQuoId] = useState<string>('');
@@ -333,11 +335,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
   };
 
   const handleDelete = (receipt: SampleReceipt) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Tanda Terima Sampel No. "${receipt.receiptNo}"?`)) {
-      if (onDeleteReceipt) {
-        onDeleteReceipt(receipt.id);
-      }
-    }
+    setReceiptToDelete(receipt);
   };
 
   return (
@@ -1093,6 +1091,21 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
           </div>
         </div>
       )}
+      
+      {/* PREMIUM CONFIRM DELETE MODAL */}
+      <ConfirmDeleteModal
+        isOpen={!!receiptToDelete}
+        onClose={() => setReceiptToDelete(null)}
+        onConfirm={() => {
+          if (receiptToDelete && onDeleteReceipt) {
+            onDeleteReceipt(receiptToDelete.id);
+          }
+        }}
+        title="Hapus Tanda Terima Sampel"
+        itemName={receiptToDelete?.receiptNo}
+        itemSubtitle={receiptToDelete ? `${receiptToDelete.clientName} (${receiptToDelete.items?.length || 0} Sampel)` : undefined}
+        message="Apakah Anda yakin ingin menghapus dokumen Tanda Terima Sampel ini?"
+      />
     </div>
   );
 };

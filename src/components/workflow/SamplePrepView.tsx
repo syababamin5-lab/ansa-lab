@@ -5,6 +5,7 @@ import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProf
 import { Scissors, Plus, Printer, CheckCircle2, AlertTriangle, X, Image as ImageIcon, ArrowRight, ArrowUpRight, Edit3, Trash2, Link, Camera, ChevronDown, FlaskConical, PackageX, Truck, SlidersHorizontal, FileSpreadsheet, Upload, Download } from 'lucide-react';
 import { getNextDocNo, getNextSamplePrepNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 const DAYS_INDO = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const MONTHS_INDO = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
@@ -89,6 +90,7 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 }) => {
   const [selectedReport, setSelectedReport] = useState<SamplePrepReport | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [reportToDelete, setReportToDelete] = useState<SamplePrepReport | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingReportId, setEditingReportId] = useState<string | null>(null);
 
@@ -575,11 +577,7 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
   };
 
   const handleDeleteRep = (rep: SamplePrepReport) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Berita Acara Preparasi No. "${rep.prepReportNo}"?`)) {
-      if (onDeleteReport) {
-        onDeleteReport(rep.id);
-      }
-    }
+    setReportToDelete(rep);
   };
 
   // Helper sums for PDF table footer
@@ -1723,6 +1721,21 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
           </div>
         </div>
       )}
+      
+      {/* PREMIUM CONFIRM DELETE MODAL */}
+      <ConfirmDeleteModal
+        isOpen={!!reportToDelete}
+        onClose={() => setReportToDelete(null)}
+        onConfirm={() => {
+          if (reportToDelete && onDeleteReport) {
+            onDeleteReport(reportToDelete.id);
+          }
+        }}
+        title="Hapus Berita Acara Preparasi"
+        itemName={reportToDelete?.prepReportNo}
+        itemSubtitle={reportToDelete ? `${reportToDelete.clientName} — ${reportToDelete.projectName} (${reportToDelete.items?.length || 0} Sampel)` : undefined}
+        message="Apakah Anda yakin ingin menghapus Berita Acara Preparasi ini?"
+      />
     </div>
   );
 };

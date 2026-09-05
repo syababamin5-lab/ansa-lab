@@ -7,6 +7,7 @@ import { CreditCard, Plus, Printer, FileText, CheckCircle2, DollarSign, Building
 
 import { PersonnelItem } from '../../types';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 interface InvoiceViewProps {
   invoices: Invoice[];
@@ -18,6 +19,7 @@ interface InvoiceViewProps {
 export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfile = DEFAULT_COMPANY_PROFILE, onSaveInvoice, onDeleteInvoice }) => {
   const [selectedInv, setSelectedInv] = useState<Invoice | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [invToDelete, setInvToDelete] = useState<Invoice | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingInvId, setEditingInvId] = useState<string | null>(null);
 
@@ -86,11 +88,7 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
   };
 
   const handleDeleteInv = (inv: Invoice) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Invoice "${inv.invoiceNo}" (${inv.clientName})?`)) {
-      if (onDeleteInvoice) {
-        onDeleteInvoice(inv.id);
-      }
-    }
+    setInvToDelete(inv);
   };
 
   const handleSelectMasterTest = (index: number, masterId: string) => {
@@ -701,6 +699,21 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
           </div>
         </div>
       )}
+      
+      {/* PREMIUM CONFIRM DELETE MODAL */}
+      <ConfirmDeleteModal
+        isOpen={!!invToDelete}
+        onClose={() => setInvToDelete(null)}
+        onConfirm={() => {
+          if (invToDelete && onDeleteInvoice) {
+            onDeleteInvoice(invToDelete.id);
+          }
+        }}
+        title="Hapus Invoice Tagihan"
+        itemName={invToDelete?.invoiceNo}
+        itemSubtitle={invToDelete ? `${invToDelete.clientName} (Total: Rp ${invToDelete.grandTotal.toLocaleString('id-ID')})` : undefined}
+        message="Apakah Anda yakin ingin menghapus dokumen Invoice tagihan ini?"
+      />
     </div>
   );
 };

@@ -8,6 +8,7 @@ import { Plus, Printer, FileText, CheckCircle2, DollarSign, Building, Calendar, 
 import { PersonnelItem } from '../../types';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { PremiumTestTypeSelector } from '../common/PremiumTestTypeSelector';
+import { ConfirmDeleteModal } from '../common/ConfirmDeleteModal';
 
 interface QuotationViewProps {
   quotations: Quotation[];
@@ -21,6 +22,7 @@ interface QuotationViewProps {
 export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, clients, personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveQuotation, onDeleteQuotation }) => {
   const [selectedQuo, setSelectedQuo] = useState<Quotation | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+  const [quoToDelete, setQuoToDelete] = useState<Quotation | null>(null);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingQuoId, setEditingQuoId] = useState<string | null>(null);
 
@@ -289,11 +291,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
   };
 
   const handleDeleteQuo = (q: Quotation) => {
-    if (confirm(`Apakah Anda yakin ingin menghapus Surat Penawaran No. "${q.quotationNo}"?`)) {
-      if (onDeleteQuotation) {
-        onDeleteQuotation(q.id);
-      }
-    }
+    setQuoToDelete(q);
   };
 
   return (
@@ -1081,6 +1079,21 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
           </div>
         </div>
       )}
+      
+      {/* PREMIUM CONFIRM DELETE MODAL */}
+      <ConfirmDeleteModal
+        isOpen={!!quoToDelete}
+        onClose={() => setQuoToDelete(null)}
+        onConfirm={() => {
+          if (quoToDelete && onDeleteQuotation) {
+            onDeleteQuotation(quoToDelete.id);
+          }
+        }}
+        title="Hapus Surat Penawaran"
+        itemName={quoToDelete?.quotationNo}
+        itemSubtitle={quoToDelete ? `${quoToDelete.clientName} (Total: Rp ${quoToDelete.grandTotal.toLocaleString('id-ID')})` : undefined}
+        message="Apakah Anda yakin ingin menghapus Surat Penawaran Harga ini?"
+      />
     </div>
   );
 };
