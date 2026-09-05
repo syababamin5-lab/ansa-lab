@@ -536,22 +536,6 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                     className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-700 bg-slate-100 cursor-not-allowed select-all"
                     placeholder="COC.SMP.260905.001"
                   />
-                  {editingReceiptId && (
-                    <div className="flex justify-end mt-1 text-[10px]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newFmt = getNextSampleReceiptNo(receipts.filter(r => r.id !== editingReceiptId).map(r => r.receiptNo), formRawDate || new Date());
-                          setFormNo(newFmt);
-                          setIsFormDirty(true);
-                        }}
-                        className="text-teal-700 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
-                        title="Perbarui nomor dokumen ke format standar COC.SMP.YYMMDD.001"
-                      >
-                        🔄 Terapkan Format Baru
-                      </button>
-                    </div>
-                  )}
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Hari &amp; Tanggal Terima</label>

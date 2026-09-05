@@ -819,22 +819,6 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                     className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-700 bg-slate-100 cursor-not-allowed select-all"
                     placeholder="ACT.MSP.260905.001"
                   />
-                  {editingReportId && (
-                    <div className="flex justify-end mt-1 text-[10px]">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newFmt = getNextSamplePrepNo(reports.filter(r => r.id !== editingReportId).map(r => r.prepReportNo), formRawDate || new Date());
-                          setFormNo(newFmt);
-                          setIsFormDirty(true);
-                        }}
-                        className="text-amber-800 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
-                        title="Perbarui nomor dokumen ke format standar ACT.MSP.YYMMDD.001"
-                      >
-                        🔄 Terapkan Format Baru
-                      </button>
-                    </div>
-                  )}
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Number PO</label>
