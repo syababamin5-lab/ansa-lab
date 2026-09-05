@@ -145,7 +145,7 @@ export const LscpTvDisplayView: React.FC<LscpTvDisplayViewProps> = ({
                 </h1>
               </div>
               <p className="text-[11px] text-slate-300 font-medium leading-none mt-0.5">
-                PT. Transka Dharma Konsultan — Laboratorium Mekanika Tanah &amp; Batuan
+                PT. Terraforma Geoteknik Indonesia — Laboratorium Mekanika Tanah &amp; Batuan
               </p>
             </div>
           </div>
@@ -480,7 +480,7 @@ export const LscpTvDisplayView: React.FC<LscpTvDisplayViewProps> = ({
         <div className="flex items-center gap-3 text-xs font-mono text-slate-300">
           <span>ANSA LIMS TIMES® LSCP TV DISPLAY v2.0 (1-PAGE FIT)</span>
           <span>•</span>
-          <span className="text-slate-400">PT. Transka Dharma Konsultan</span>
+          <span className="text-slate-400">PT. Terraforma Geoteknik Indonesia</span>
         </div>
       </footer>
     </div>

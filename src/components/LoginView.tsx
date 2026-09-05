@@ -248,7 +248,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              PT. Transka Dharma Konsultan • Laboratorium Mekanika Tanah &amp; Batuan
+              PT. Terraforma Geoteknik Indonesia • Laboratorium Mekanika Tanah &amp; Batuan
             </p>
           </div>
         </div>
@@ -531,7 +531,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
           </form>
 
           <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-            <span>Sistem Terintegrasi ISO 17025 • PT. Transka Dharma</span>
+            <span>Sistem Terintegrasi ISO 17025 • PT. Terraforma Geoteknik Indonesia</span>
             <span className="text-emerald-600 font-bold flex items-center gap-1">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
               AES-256 TLS Encrypted
@@ -679,7 +679,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
       {/* ========================================================================= */}
       <footer className="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 font-medium py-3 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
         <span className="font-bold">
-          © 2026 TIMES® ANSA LIMS • PT. Transka Dharma Konsultan • <span className="text-slate-300 font-normal">Geotechnical &amp; Rock Mechanics Laboratory System</span>
+          © 2026 TIMES® ANSA LIMS • PT. Terraforma Geoteknik Indonesia • <span className="text-slate-300 font-normal">Geotechnical &amp; Rock Mechanics Laboratory System</span>
         </span>
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="flex items-center gap-1">

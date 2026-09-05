@@ -35,6 +35,7 @@ import {
 import { CBRSoakedWorksheet } from './CBRSoakedWorksheet';
 import { DSCuWorksheet } from './DSCuWorksheet';
 import { TrxCdWorksheet } from './TrxCdWorksheet';
+import { calculateTaylorT90 } from '../utils/consolidationHelpers';
 import {
   FileSpreadsheet,
   Save,
@@ -4801,69 +4802,29 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
 
     const eVal = (consolHs > 0 && hasStepData) ? Math.max(0, consolE0 - (cumulativeDeltaH / consolHs)) : 0;
 
-    // Calculate t90 Taylor Square Root Method & Cv (cm²/s) — ASTM D2435 / SNI 2812:2011 Standard
+    // Calculate t90 Taylor Square Root Method (1.15x) & Cv (cm²/s) — ASTM D2435 / SNI 2812:2011 Standard
+    const currentH = Math.max(0.5, consolHeightNum - cumulativeDeltaH);
     let t90 = 0;
     let cv = 0; // cm²/s
+    let d0 = initialDialMm;
+    let d90 = finalDialMm;
+    let sqrtT90 = 0;
+    let m1 = 0;
+    let m2 = 0;
+    let isTaylorFound = false;
+
     const totalDialDiff = Math.abs(finalDialMm - initialDialMm);
 
-    if (hasStepData && totalDialDiff > 0.0001) {
-      const d0 = initialDialMm;
-      const d100 = finalDialMm;
-      const d90 = d0 + 0.90 * (d100 - d0);
-      const isDecreasing = d100 < d0;
-
-      // Scan matrix interval for d90
-      for (let i = 0; i < CONSOL_TIMES.length - 1; i++) {
-        const rawA = timeReadings[i];
-        const rawB = timeReadings[i + 1];
-
-        // Fill missing reading from d0 or d100
-        const dA = rawA !== '' ? parseFloat(rawA) : d0;
-        const dB = rawB !== '' ? parseFloat(rawB) : (i + 1 === 13 ? d100 : dA);
-
-        const matchesInterval = isDecreasing
-          ? (dA >= d90 && dB <= d90 && dA !== dB)
-          : (dA <= d90 && dB >= d90 && dA !== dB);
-
-        if (matchesInterval) {
-          const sqrtTA = CONSOL_SQRT_TIMES[i];
-          const sqrtTB = CONSOL_SQRT_TIMES[i + 1];
-          const frac = Math.abs(d90 - dA) / Math.abs(dB - dA);
-          const sqrtT90 = sqrtTA + frac * (sqrtTB - sqrtTA);
-          t90 = Math.pow(sqrtT90, 2);
-          break;
-        }
-      }
-
-      // Fallback 1: cumulative displacement percentage scan
-      if (t90 <= 0 || isNaN(t90)) {
-        const targetDisp = 0.90 * totalDialDiff;
-        for (let i = 0; i < CONSOL_TIMES.length - 1; i++) {
-          const rawA = timeReadings[i];
-          const rawB = timeReadings[i + 1];
-          if (rawA !== '' || rawB !== '') {
-            const dA = rawA !== '' ? parseFloat(rawA) : d0;
-            const dB = rawB !== '' ? parseFloat(rawB) : d100;
-            const dispA = Math.abs(dA - d0);
-            const dispB = Math.abs(dB - d0);
-            if (dispA <= targetDisp && dispB >= targetDisp && dispB > dispA) {
-              const sqrtTA = CONSOL_SQRT_TIMES[i];
-              const sqrtTB = CONSOL_SQRT_TIMES[i + 1];
-              const frac = (targetDisp - dispA) / (dispB - dispA);
-              const sqrtT90 = sqrtTA + frac * (sqrtTB - sqrtTA);
-              t90 = Math.pow(sqrtT90, 2);
-              break;
-            }
-          }
-        }
-      }
-
-      // Fallback 2: Reasonable default t90 for cohesive clay (approx 90 min)
-      if (t90 <= 0 || isNaN(t90)) t90 = 90.0;
-
-      const currentH = Math.max(0.5, consolHeightNum - cumulativeDeltaH);
-      const Hdr = currentH / 2; // cm
-      cv = (0.848 * Math.pow(Hdr, 2)) / (t90 * 60); // cm²/s
+    if (hasStepData && totalDialDiff > 0.00001 && !isUnloading) {
+      const taylorRes = calculateTaylorT90(timeReadings, initialDialMm, currentH);
+      t90 = taylorRes.t90;
+      cv = taylorRes.cv;
+      d0 = taylorRes.d0;
+      d90 = taylorRes.d90;
+      sqrtT90 = taylorRes.sqrtT90;
+      m1 = taylorRes.m1;
+      m2 = taylorRes.m2;
+      isTaylorFound = taylorRes.isTaylorFound;
     }
 
     return {
@@ -4877,7 +4838,13 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
       eVal,
       hasStepData,
       t90,
-      cv
+      cv,
+      d0,
+      d90,
+      sqrtT90,
+      m1,
+      m2,
+      isTaylorFound
     };
   });
 
@@ -12012,28 +11979,36 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                           const dStep = sSpan / 5;
                           const dTicks = Array.from({ length: 6 }, (_, i) => r0 - i * dStep);
 
-                          // Tangent Construction Lines (Taylor Method)
-                          const pEarly = svgPts[1] || svgPts[0];
-                          const slopeInitial = (pEarly.y - svgPts[0].y) / (pEarly.x - 45 || 1);
+                          // Tangent Construction Lines (Taylor 1.15x Method)
+                          const d0Val = stepRes && stepRes.d0 !== undefined ? stepRes.d0 : r0;
+                          const s0 = Math.abs(d0Val - r0);
+                          const yD0 = 25 + (s0 / sSpan) * 155;
+
+                          // t90 and d90 from Taylor 1.15x
+                          const sqrtT90 = stepRes && stepRes.t90 > 0 ? (stepRes.sqrtT90 || Math.sqrt(stepRes.t90)) : 0;
+                          const xT90 = 45 + (sqrtT90 / 40) * 400;
+                          const d90Val = stepRes && stepRes.d90 !== undefined ? stepRes.d90 : (r0 - 0.90 * maxS);
+                          const s90 = Math.abs(d90Val - r0);
+                          const yD90 = 25 + (s90 / sSpan) * 155;
+
+                          // Geometric construction slopes
+                          const slope2 = (xT90 > 45 && Math.abs(yD90 - yD0) > 0.001) ? (yD90 - yD0) / (xT90 - 45) : 1;
+                          const slope1 = slope2 * 1.15; // Garis 1 is 1.15x steeper than Garis 2
+
                           const maxY = 195;
-                          let xTanEnd = slopeInitial > 0 ? (45 + (maxY - svgPts[0].y) / slopeInitial) : 445;
+                          let xTanEnd = slope1 > 0 ? (45 + (maxY - yD0) / slope1) : 445;
                           let yTanEnd = maxY;
                           if (xTanEnd > 445) {
                             xTanEnd = 445;
-                            yTanEnd = svgPts[0].y + slopeInitial * (445 - 45);
+                            yTanEnd = yD0 + slope1 * (445 - 45);
                           }
 
                           let x115End = 45 + 1.15 * (xTanEnd - 45);
                           let y115End = yTanEnd;
                           if (x115End > 445) {
                             x115End = 445;
+                            y115End = yD0 + slope2 * (445 - 45);
                           }
-
-                          // t90 Intersection
-                          const sqrtT90 = stepRes && stepRes.t90 > 0 ? Math.sqrt(stepRes.t90) : 0;
-                          const xT90 = 45 + (sqrtT90 / 40) * 400;
-                          const d90 = stepRes && stepRes.d90 > 0 ? stepRes.d90 : (r0 - 0.90 * maxS);
-                          const yD90 = 25 + (Math.max(0, r0 - d90) / sSpan) * 155;
 
                           return (
                             <g>
@@ -12050,10 +12025,10 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
 
                               {/* CLIPPED CHART CONTENT (Tangents & Curve) */}
                               <g clipPath="url(#t90-grid-clip)">
-                                {/* Initial Tangent Line (Orange) */}
-                                <line x1="45" y1={svgPts[0].y} x2={xTanEnd} y2={yTanEnd} stroke="#D97706" strokeWidth="1" opacity="0.85" />
-                                {/* 1.15x Line (Gray Dashed) */}
-                                <line x1="45" y1={svgPts[0].y} x2={x115End} y2={y115End} stroke="#64748B" strokeWidth="1" strokeDasharray="3 3" opacity="0.85" />
+                                {/* Initial Tangent Line (Orange - Garis 1) */}
+                                <line x1="45" y1={yD0} x2={xTanEnd} y2={yTanEnd} stroke="#D97706" strokeWidth="1.2" opacity="0.9" />
+                                {/* 1.15x Line (Green Dashed - Garis 2) */}
+                                <line x1="45" y1={yD0} x2={x115End} y2={y115End} stroke="#16A34A" strokeWidth="1.2" strokeDasharray="4 2" opacity="0.9" />
 
                                 {/* Settlement Curve (Blue) - Refined elegant stroke */}
                                 <path d={pathStr} fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -12066,6 +12041,20 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                                 ))}
                               </g>
 
+                              {/* d0 marker on Y axis */}
+                              <circle cx="45" cy={yD0} r="2.2" fill="#D97706" stroke="#FFFFFF" strokeWidth="0.6" />
+
+                              {/* Legend for Taylor lines */}
+                              <g transform="translate(260, 22)">
+                                <rect width="180" height="14" rx="3" fill="#FFFFFF" fillOpacity="0.85" stroke="#E2E8F0" strokeWidth="0.5" />
+                                <line x1="6" y1="7" x2="20" y2="7" stroke="#D97706" strokeWidth="1.2" />
+                                <text x="23" y="9.5" fontSize="5.5" fontWeight="bold" fill="#B45309">Garis 1 (Awal)</text>
+                                <line x1="72" y1="7" x2="86" y2="7" stroke="#16A34A" strokeWidth="1.2" strokeDasharray="3 1.5" />
+                                <text x="89" y="9.5" fontSize="5.5" fontWeight="bold" fill="#15803D">Garis 2 (1.15×)</text>
+                                <circle cx="140" cy="7" r="2.0" fill="#2563EB" />
+                                <text x="145" y="9.5" fontSize="5.5" fontWeight="bold" fill="#1D4ED8">√t₉₀</text>
+                              </g>
+
                               {/* t90 Construction Lines (Blue Dashed) */}
                               {stepRes && stepRes.t90 > 0 && (
                                 <g>
@@ -12076,7 +12065,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                                   <circle cx={xT90} cy={yD90} r="2.5" fill="#2563EB" stroke="#FFFFFF" strokeWidth="0.8" />
 
                                   {/* t90 Badge Overlay */}
-                                  <g transform={`translate(${Math.min(310, Math.max(50, xT90 + 8))}, ${Math.max(25, yD90 - 35)})`}>
+                                  <g transform={`translate(${Math.min(310, Math.max(50, xT90 + 8))}, ${Math.max(40, yD90 - 35)})`}>
                                     <rect width="130" height="34" rx="6" fill="#F0FDFA" stroke="#99F6E4" strokeWidth="1" />
                                     <text x="65" y="13" textAnchor="middle" fontSize="7.5" fontWeight="bold" fill="#0F766E">
                                       √t₉₀ = {sqrtT90.toFixed(2)} → t₉₀ = {stepRes.t90.toFixed(2)} min

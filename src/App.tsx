@@ -174,16 +174,14 @@ export function App() {
     sessionStorage.setItem('ansa_mobile_mode', String(isMobileMode));
   }, [isMobileMode]);
 
-  // Users State with LocalStorage Persistence & Smart Default Recovery
+  // Users State with Cloud & Local Cache Persistence
   const [users, setUsers] = useState<UserProfile[]>(() => {
     try {
       const saved = localStorage.getItem('ansa_lab_users');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map((u: any) => u.id));
-          const missingDefaults = INITIAL_USERS.filter(u => !existingIds.has(u.id));
-          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+          return parsed;
         }
       }
       return INITIAL_USERS;
@@ -573,21 +571,14 @@ export function App() {
     }
   };
 
-  // Dynamic Containers (persisted to localStorage)
+  // Dynamic Containers (persisted to Cloud & Local Cache)
   const [containerCatalogue, setContainerCatalogue] = useState<ContainerItem[]>(() => {
     const saved = localStorage.getItem('ansa_lab_containers');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const defaultMap = new Map(DEFAULT_CONTAINER_CATALOGUE.map(c => [String(c.id).toUpperCase(), c.weight]));
-          const updatedParsed = parsed.map((c: any) => {
-            const officialWt = defaultMap.get(String(c.id).toUpperCase());
-            return officialWt !== undefined ? { ...c, weight: officialWt } : c;
-          });
-          const existingIds = new Set(updatedParsed.map((c: any) => String(c.id).toUpperCase()));
-          const missingDefaults = DEFAULT_CONTAINER_CATALOGUE.filter(c => !existingIds.has(String(c.id).toUpperCase()));
-          return missingDefaults.length > 0 ? [...updatedParsed, ...missingDefaults] : updatedParsed;
+          return parsed;
         }
       } catch (e) { console.error(e); }
     }
@@ -605,9 +596,7 @@ export function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingKodes = new Set(parsed.map((m: any) => m.kode));
-          const missingDefaults = DEFAULT_MOLD_CATALOGUE.filter(m => !existingKodes.has(m.kode));
-          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+          return parsed;
         }
       } catch (e) { console.error(e); }
     }
@@ -630,9 +619,7 @@ export function App() {
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingKodes = new Set(parsed.map((r: any) => r.kode));
-          const missingDefaults = DEFAULT_REAMER_CATALOGUE.filter(r => !existingKodes.has(r.kode));
-          return missingDefaults.length > 0 ? [...parsed, ...missingDefaults] : parsed;
+          return parsed;
         }
       } catch (e) { console.error(e); }
     }
@@ -905,6 +892,7 @@ export function App() {
     if (localTs > 0 && cloudTs <= localTs) return;
     if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
     if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+    if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
     if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
     if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
     if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
@@ -929,6 +917,7 @@ export function App() {
       if (cloudState) {
         if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
         if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+        if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
         if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
         if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
         if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
@@ -987,6 +976,7 @@ export function App() {
             }
           }
           if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
+          if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
           if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
           if (Array.isArray(cloudState.quotations)) setQuotations(cloudState.quotations);
           if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
@@ -1038,6 +1028,7 @@ export function App() {
     const cloudState: CloudDatabaseState = {
       users,
       clients,
+      labRekanans,
       pos,
       quotations,
       sampleReceipts,
@@ -1061,6 +1052,7 @@ export function App() {
     isCloudLoaded,
     users,
     clients,
+    labRekanans,
     pos,
     quotations,
     sampleReceipts,

@@ -1,6 +1,7 @@
 import { Sample, SampleTest, PurchaseOrder, PersonnelItem } from '../types';
 import { LHUSheetCode, LHUHeaderInfo, LHUValueDisplay, LHUBoundData } from '../types/lhuTypes';
 import { normalizeTestCode, formatDate } from './helpers';
+import { calculateTaylorT90 } from './consolidationHelpers';
 
 export function formatDisplayVal(
   val: any, 
@@ -826,35 +827,28 @@ export function bindLHUData(
         const deltaE = (consolHs > 0) ? (stepDeltaH / consolHs) : 0;
         const eVal = (consolHs > 0 && hasStepData) ? Math.max(0, e0Num - (cumulativeDeltaH / consolHs)) : 0;
 
-        // t90 calculation
+        // t90 calculation using Taylor 1.15x method
         let t90 = 0;
         let cv = 0;
+        let d0 = initialDialMm;
+        let d90 = finalDialMm;
+        let sqrtT90 = 0;
+        let m1 = 0;
+        let m2 = 0;
+        let isTaylorFound = false;
+
         const totalDialDiff = Math.abs(finalDialMm - initialDialMm);
 
-        if (hasStepData && totalDialDiff > 0.0001) {
-          const d0 = initialDialMm;
-          const d100 = finalDialMm;
-          const d90 = d0 + 0.90 * (d100 - d0);
-          const isDecreasing = d100 < d0;
-
-          for (let i = 0; i < CONSOL_TIMES.length - 1; i++) {
-            const rawA = timeReadings[i];
-            const rawB = timeReadings[i + 1];
-            const dA = rawA !== '' ? parseFloat(rawA) : d0;
-            const dB = rawB !== '' ? parseFloat(rawB) : (i + 1 === 13 ? d100 : dA);
-            const matches = isDecreasing ? (dA >= d90 && dB <= d90 && dA !== dB) : (dA <= d90 && dB >= d90 && dA !== dB);
-            if (matches) {
-              const sqrtTA = CONSOL_SQRT_TIMES[i];
-              const sqrtTB = CONSOL_SQRT_TIMES[i + 1];
-              const frac = Math.abs(d90 - dA) / Math.abs(dB - dA);
-              const sqrtT90 = sqrtTA + frac * (sqrtTB - sqrtTA);
-              t90 = Math.pow(sqrtT90, 2);
-              break;
-            }
-          }
-          if (t90 <= 0 || isNaN(t90)) t90 = 90.0;
-          const Hdr = currentH / 2; // cm
-          cv = (0.848 * Math.pow(Hdr, 2)) / (t90 * 60); // cm²/s
+        if (hasStepData && totalDialDiff > 0.00001 && !isUnloading) {
+          const taylorRes = calculateTaylorT90(timeReadings, initialDialMm, currentH);
+          t90 = taylorRes.t90;
+          cv = taylorRes.cv;
+          d0 = taylorRes.d0;
+          d90 = taylorRes.d90;
+          sqrtT90 = taylorRes.sqrtT90;
+          m1 = taylorRes.m1;
+          m2 = taylorRes.m2;
+          isTaylorFound = taylorRes.isTaylorFound;
         }
 
         let mv = 0;
@@ -881,6 +875,11 @@ export function bindLHUData(
           deltaE,
           eVal,
           t90,
+          d0,
+          d90,
+          sqrtT90,
+          m1,
+          m2,
           hDr: currentH / 2,
           cv,
           mv,

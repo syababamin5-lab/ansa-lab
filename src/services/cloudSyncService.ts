@@ -2,7 +2,7 @@
 // TIMES® ANSA LIMS — Official Vercel KV Realtime Database Engine
 // =====================================================================
 import { UserProfile, INITIAL_USERS } from '../types/userTypes';
-import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice } from '../types/workflowTypes';
+import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice, LabRekanan } from '../types/workflowTypes';
 import { PurchaseOrder, ContainerItem, RingItem, ConsolRingItem, PycnometerItem, MoldItem, ReamerItem, PersonnelItem, DocumentItem } from '../types';
 import {
   DEFAULT_CONTAINER_CATALOGUE,
@@ -23,6 +23,7 @@ const LOCAL_CACHE_KEY = 'ansa_lab_vercel_kv_cache_v2';
 export interface CloudDatabaseState {
   users: UserProfile[];
   clients: Client[];
+  labRekanans?: LabRekanan[];
   pos: PurchaseOrder[];
   quotations: Quotation[];
   sampleReceipts: SampleReceipt[];
@@ -45,6 +46,7 @@ export function getInitialMasterState(): CloudDatabaseState {
   return {
     users: INITIAL_USERS,
     clients: [],
+    labRekanans: [],
     pos: [],
     quotations: [],
     sampleReceipts: [],
@@ -119,6 +121,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           containers: mergeContainers(cloudData.containers),
           pos: cloudData.pos || [],
           clients: cloudData.clients || [],
+          labRekanans: cloudData.labRekanans || [],
           quotations: cloudData.quotations || [],
           sampleReceipts: cloudData.sampleReceipts || [],
           prepReports: cloudData.prepReports || [],
@@ -145,6 +148,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           containers: mergeContainers(parsed.containers),
           pos: parsed.pos || [],
           clients: parsed.clients || [],
+          labRekanans: parsed.labRekanans || [],
           quotations: parsed.quotations || [],
           sampleReceipts: parsed.sampleReceipts || [],
           prepReports: parsed.prepReports || [],
@@ -161,14 +165,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
 
 function mergeContainers(existing: ContainerItem[] | undefined): ContainerItem[] {
   if (!existing || existing.length === 0) return DEFAULT_CONTAINER_CATALOGUE;
-  const defaultMap = new Map(DEFAULT_CONTAINER_CATALOGUE.map(c => [String(c.id).toUpperCase(), c.weight]));
-  const updated = existing.map(c => {
-    const officialWt = defaultMap.get(String(c.id).toUpperCase());
-    return officialWt !== undefined ? { ...c, weight: officialWt } : c;
-  });
-  const existingIds = new Set(updated.map(c => String(c.id).toUpperCase()));
-  const missing = DEFAULT_CONTAINER_CATALOGUE.filter(c => !existingIds.has(String(c.id).toUpperCase()));
-  return missing.length > 0 ? [...updated, ...missing] : updated;
+  return existing; // Respect user edits, never overwrite calibrated weights!
 }
 
 function mergeUsers(existing: UserProfile[] | undefined): UserProfile[] {

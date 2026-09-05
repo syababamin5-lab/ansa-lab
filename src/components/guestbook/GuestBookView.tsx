@@ -251,7 +251,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
       </head>
       <body>
         <table>
-          <tr><td colspan="11" class="title">PT. TRANSKA DHARMA KONSULTAN — LABORATORIUM MEKANIKA TANAH & BATUAN</td></tr>
+          <tr><td colspan="11" class="title">PT. TERRAFORMA GEOTEKNIK INDONESIA — LABORATORIUM MEKANIKA TANAH & BATUAN</td></tr>
           <tr><td colspan="11" class="subtitle">LAPORAN REKAPITULASI BUKU TAMU DIGITAL (ANSA LAB)</td></tr>
           <tr><td colspan="11" class="meta">Tanggal Ekspor: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })} • Total Registrasi: ${filteredEntries.length} (${totalHeadcount} Orang) • Aktif di Lab: ${checkedInHeadcount} Orang</td></tr>
           <tr></tr>
@@ -340,7 +340,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
       </head>
       <body>
         <div class="header">
-          <h1>PT. TRANSKA DHARMA KONSULTAN</h1>
+          <h1>PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
           <h2>LABORATORIUM MEKANIKA TANAH & BATUAN (ANSA LAB)</h2>
           <p>LAPORAN REKAPITULASI BUKU TAMU DIGITAL • Tanggal Cetak: ${new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
         </div>
@@ -445,7 +445,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
                 </h1>
               </div>
               <p className="text-xs text-slate-500 font-medium">
-                PT. Transka Dharma Konsultan — Laboratorium Mekanika Tanah &amp; Batuan
+                PT. Terraforma Geoteknik Indonesia — Laboratorium Mekanika Tanah &amp; Batuan
               </p>
             </div>
           </div>
@@ -1176,7 +1176,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
                       BUKU TAMU DIGITAL
                     </h2>
                     <p className="text-xs text-slate-600 font-extrabold tracking-wide uppercase mt-1">
-                      PT. Transka Dharma Konsultan — ANSA Lab
+                      PT. Terraforma Geoteknik Indonesia — ANSA Lab
                     </p>
                   </div>
                 </div>

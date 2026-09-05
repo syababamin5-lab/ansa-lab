@@ -55,10 +55,16 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
           de: st.deltaE || 0,
           e: st.eVal || 0,
           t90: st.t90 || 0,
+          d0: st.d0,
+          d90: st.d90,
+          sqrtT90: st.sqrtT90,
+          m1: st.m1,
+          m2: st.m2,
           hDr: st.hDr || (h0 / 2),
           mv: st.mv || 0,
           cv: st.cv || 0,
-          k: st.k > 0 ? st.k.toExponential(2).toUpperCase() : '-'
+          k: st.k > 0 ? st.k.toExponential(2).toUpperCase() : '-',
+          timeReadings: st.timeReadings
         }))
       : [
           { p: 25, dh: 0.00229, h: 2.0177, de: 0.002229, e: 0.9643, t90: 3.24, hDr: 1.01115, mv: 0.00004629, cv: 0.004459914, k: '2.02E-08' },
@@ -102,13 +108,13 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
       }
 
       const r0 = pts[0].dial;
-      const settlements = pts.map(p => Math.max(0, r0 - p.dial));
+      const settlements = pts.map(p => Math.abs(p.dial - r0));
       const maxS = Math.max(0.005, ...settlements);
       const sSpan = maxS * 1.15;
 
       const svgPts = pts.map((p) => {
         const px = paddingLeft + (p.sqrtT / 40) * plotWidth;
-        const s = Math.max(0, r0 - p.dial);
+        const s = Math.abs(p.dial - r0);
         const py = paddingTop + (s / sSpan) * plotHeight;
         return { x: px, y: py, dial: p.dial, sqrtT: p.sqrtT, s };
       });
@@ -118,26 +124,36 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
       const dStep = sSpan / 5;
       const dTicks = Array.from({ length: 6 }, (_, i) => r0 - i * dStep);
 
-      const pEarly = svgPts[1] || svgPts[0];
-      const slopeInitial = (pEarly.y - svgPts[0].y) / (pEarly.x - paddingLeft || 1);
+      // Taylor 1.15x Construction Lines
+      const d0Val = step?.d0 !== undefined ? step.d0 : r0;
+      const s0 = Math.abs(d0Val - r0);
+      const yD0 = paddingTop + (s0 / sSpan) * plotHeight;
+
+      const t90Val = step?.t90 || 0;
+      const cvVal = step?.cv || 0;
+      const sqrtT90 = step?.sqrtT90 || (t90Val > 0 ? Math.sqrt(t90Val) : 0);
+      const xT90 = paddingLeft + (sqrtT90 / 40) * plotWidth;
+      const d90Val = step?.d90 !== undefined ? step.d90 : (r0 - 0.90 * maxS);
+      const s90 = Math.abs(d90Val - r0);
+      const yD90 = paddingTop + (s90 / sSpan) * plotHeight;
+
+      const slope2 = (xT90 > paddingLeft && Math.abs(yD90 - yD0) > 0.001) ? (yD90 - yD0) / (xT90 - paddingLeft) : 1;
+      const slope1 = slope2 * 1.15;
+
       const maxY = paddingBottom;
-      let xTanEnd = slopeInitial > 0 ? (paddingLeft + (maxY - svgPts[0].y) / slopeInitial) : paddingRight;
+      let xTanEnd = slope1 > 0 ? (paddingLeft + (maxY - yD0) / slope1) : paddingRight;
       let yTanEnd = maxY;
       if (xTanEnd > paddingRight) {
         xTanEnd = paddingRight;
-        yTanEnd = svgPts[0].y + slopeInitial * (paddingRight - paddingLeft);
+        yTanEnd = yD0 + slope1 * (paddingRight - paddingLeft);
       }
 
       let x115End = paddingLeft + 1.15 * (xTanEnd - paddingLeft);
       let y115End = yTanEnd;
-      if (x115End > paddingRight) x115End = paddingRight;
-
-      const t90Val = step?.t90 || 0;
-      const cvVal = step?.cv || 0;
-      const sqrtT90 = t90Val > 0 ? Math.sqrt(t90Val) : 0;
-      const xT90 = paddingLeft + (sqrtT90 / 40) * plotWidth;
-      const d90 = r0 - 0.90 * maxS;
-      const yD90 = paddingTop + (Math.max(0, r0 - d90) / sSpan) * plotHeight;
+      if (x115End > paddingRight) {
+        x115End = paddingRight;
+        y115End = yD0 + slope2 * (paddingRight - paddingLeft);
+      }
 
       return (
         <div className="border border-slate-900 bg-white p-1 overflow-hidden">
@@ -172,9 +188,10 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             <line x1={paddingLeft} y1={paddingTop} x2={paddingLeft} y2={paddingBottom} stroke="#334155" strokeWidth="1.2" />
             <line x1={paddingLeft} y1={paddingTop} x2={paddingRight} y2={paddingTop} stroke="#334155" strokeWidth="1.2" />
 
-            {/* Tangent Construction Lines */}
-            <line x1={paddingLeft} y1={svgPts[0].y} x2={xTanEnd} y2={yTanEnd} stroke="#EA580C" strokeWidth="1.1" />
-            <line x1={paddingLeft} y1={svgPts[0].y} x2={x115End} y2={y115End} stroke="#64748B" strokeWidth="1" strokeDasharray="2 2" />
+            {/* Tangent Construction Lines (Taylor 1.15x) */}
+            <line x1={paddingLeft} y1={yD0} x2={xTanEnd} y2={yTanEnd} stroke="#EA580C" strokeWidth="1.1" />
+            <line x1={paddingLeft} y1={yD0} x2={x115End} y2={y115End} stroke="#16A34A" strokeWidth="1" strokeDasharray="3 2" />
+            <circle cx={paddingLeft} cy={yD0} r="1.8" fill="#EA580C" stroke="#fff" strokeWidth="0.5" />
 
             {/* Curve */}
             {pathStr && <path d={pathStr} fill="none" stroke="#2563EB" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />}
@@ -193,9 +210,9 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
           </svg>
 
           <div className="flex items-center justify-center gap-2 text-[6px] text-slate-500 font-mono mt-0.5">
-            <span className="text-orange-600">Initial tangent</span>
+            <span className="text-orange-600 font-semibold">Garis 1 (Awal)</span>
             <span>·</span>
-            <span className="text-slate-600">Taylor line</span>
+            <span className="text-emerald-700 font-semibold">Garis 2 (1.15×)</span>
             <span>·</span>
             <span className="text-sky-600">t90 = {t90Val.toFixed(2)} min</span>
             <span>·</span>
