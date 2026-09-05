@@ -960,7 +960,7 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                               const allChecked = formItems.length > 0 && formItems.every(item => !!(item.testEligible && item.testEligible[key]));
                               const someChecked = formItems.some(item => !!(item.testEligible && item.testEligible[key]));
                               return (
-                                <th key={label} className="p-1 text-center font-extrabold text-amber-900 bg-amber-100/60 border-x border-slate-300 min-w-[56px]">
+                                <th key={label} className="p-1 text-center font-extrabold text-amber-900 bg-amber-100/60 border-x border-slate-300 min-w-[65px]">
                                   <div className="flex flex-col items-center gap-0.5">
                                     <span>{label}</span>
                                     <button
@@ -1073,65 +1073,64 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                                   const cellDetail = item.testStatusDetails?.[key];
                                   const cellStatus: TestCellStatus = isChecked ? (cellDetail?.status || 'PASS') : 'CANCEL';
 
-                                  let cellBg = 'bg-slate-50/40';
-                                  let badgeStyle = 'bg-emerald-600 text-white font-extrabold';
-                                  let statusText = 'PASS';
+                                   let cellBg = 'bg-slate-50/40';
+                                   let badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200';
+                                   let statusText = 'PASS';
 
-                                  if (isChecked) {
-                                    if (cellStatus === 'PASS') {
-                                      cellBg = 'bg-emerald-50/80';
-                                      badgeStyle = 'bg-emerald-700 text-white font-extrabold';
-                                      statusText = 'PASS';
-                                    } else if (cellStatus === 'NP') {
-                                      cellBg = 'bg-red-100/90';
-                                      badgeStyle = 'bg-red-700 text-white font-extrabold';
-                                      statusText = 'N.P.';
-                                    } else if (cellStatus === 'INSUFFICIENT') {
-                                      cellBg = 'bg-orange-100/90';
-                                      badgeStyle = 'bg-orange-700 text-white font-extrabold';
-                                      statusText = 'KURANG';
-                                    } else if (cellStatus === 'SUBCONTRACT') {
-                                      } else if (cellStatus === 'SUBCONTRACT') {
-                                        cellBg = 'bg-amber-200/90';
-                                        badgeStyle = 'bg-amber-800 text-white font-extrabold';
-                                        statusText = 'SUB';
-                                      } else if (cellStatus === 'CANCEL') {
-                                        cellBg = 'bg-slate-200/90';
-                                        badgeStyle = 'bg-slate-600 text-white font-extrabold';
-                                        statusText = 'NON-UJI';
-                                      }
-                                    }
+                                   if (isChecked) {
+                                     if (cellStatus === 'PASS') {
+                                       cellBg = 'bg-emerald-50/40';
+                                       badgeStyle = 'bg-emerald-100 text-emerald-800 border-emerald-300 hover:bg-emerald-200';
+                                       statusText = 'PASS';
+                                     } else if (cellStatus === 'NP') {
+                                       cellBg = 'bg-red-50/70';
+                                       badgeStyle = 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200';
+                                       statusText = 'N.P.';
+                                     } else if (cellStatus === 'INSUFFICIENT') {
+                                       cellBg = 'bg-orange-50/70';
+                                       badgeStyle = 'bg-orange-100 text-orange-800 border-orange-300 hover:bg-orange-200';
+                                       statusText = 'KURANG';
+                                     } else if (cellStatus === 'SUBCONTRACT') {
+                                       cellBg = 'bg-amber-50/70';
+                                       badgeStyle = 'bg-amber-100 text-amber-800 border-amber-300 hover:bg-amber-200';
+                                       statusText = 'SUB';
+                                     } else if (cellStatus === 'CANCEL') {
+                                       cellBg = 'bg-slate-100/60';
+                                       badgeStyle = 'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200';
+                                       statusText = 'NON-UJI';
+                                     }
+                                   }
 
-                                    return (
-                                      <td key={key} className={`p-1 text-center border-x border-slate-200 transition-colors ${cellBg}`}>
-                                        <div className="flex flex-col items-center justify-center gap-0.5">
-                                          <input
-                                            type="checkbox"
-                                            checked={isChecked}
-                                            onChange={() => handleToggleEligible(idx, key)}
-                                            className="w-3.5 h-3.5 cursor-pointer accent-amber-600"
-                                            title={isChecked ? `Status: ${statusText}` : 'Centang untuk mengaktifkan uji ini'}
-                                          />
-                                          {isChecked && (
-                                            <select
-                                              value={cellStatus}
-                                              onChange={(e) => handleSetTestCellStatus(idx, key, e.target.value as TestCellStatus)}
-                                              className={`text-[9px] font-extrabold rounded px-1 py-0.5 border border-slate-300 cursor-pointer shadow-2xs outline-none ${badgeStyle}`}
-                                              title="Ubah status spesifik parameter uji ini"
-                                            >
-                                              <option value="PASS" className="bg-white text-slate-800 font-semibold">🟢 PASS (Diuji)</option>
-                                              <option value="NP" className="bg-white text-slate-800 font-semibold">🔴 N.P. (Pasir)</option>
-                                              <option value="INSUFFICIENT" className="bg-white text-slate-800 font-semibold">🟧 Sampel Kurang</option>
-                                              <option value="SUBCONTRACT" className="bg-white text-slate-800 font-semibold">🟨 Subkontrak Lab</option>
-                                              <option value="CANCEL" className="bg-white text-slate-800 font-semibold">⚪ Tidak Diuji</option>
-                                            </select>
-                                          )}
-                                        </div>
-                                      </td>
-                                  );
-                                })}
-
-
+                                   return (
+                                     <td key={key} className={`p-1 text-center border-x border-slate-200 transition-colors ${cellBg}`}>
+                                       <div className="flex flex-col items-center justify-center gap-1 py-0.5">
+                                         <input
+                                           type="checkbox"
+                                           checked={isChecked}
+                                           onChange={() => handleToggleEligible(idx, key)}
+                                           className={`w-3.5 h-3.5 cursor-pointer rounded transition ${
+                                             isChecked ? 'accent-emerald-600' : 'accent-slate-400'
+                                           }`}
+                                           title={isChecked ? `Status: ${statusText}` : 'Centang untuk mengaktifkan uji ini'}
+                                         />
+                                         {isChecked && (
+                                           <select
+                                             value={cellStatus}
+                                             onChange={(e) => handleSetTestCellStatus(idx, key, e.target.value as TestCellStatus)}
+                                             className={`text-[9.5px] font-extrabold rounded-md px-1.5 py-0.5 border cursor-pointer shadow-2xs outline-none transition text-center ${badgeStyle}`}
+                                             title="Ubah status spesifik parameter uji ini"
+                                           >
+                                             <option value="PASS" className="bg-white text-emerald-800 font-bold">PASS (Diuji)</option>
+                                             <option value="NP" className="bg-white text-red-700 font-bold">N.P. (Pasir)</option>
+                                             <option value="INSUFFICIENT" className="bg-white text-orange-700 font-bold">Sampel Kurang</option>
+                                             <option value="SUBCONTRACT" className="bg-white text-amber-800 font-bold">Subkontrak Lab</option>
+                                             <option value="CANCEL" className="bg-white text-slate-600 font-semibold">Tidak Diuji</option>
+                                           </select>
+                                         )}
+                                       </div>
+                                     </td>
+                                   );
+                                 })}
 
                                 <td className="p-1">
                                   <input type="text" value={item.description || ''} onChange={e => handleUpdateItem(idx, 'description', e.target.value)} className="w-full p-1 border border-slate-300 rounded text-[11px]" placeholder="Keterangan..." />
