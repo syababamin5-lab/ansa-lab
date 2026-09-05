@@ -1824,12 +1824,11 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: activeNormSubTab === 'PP' ? (summaryData.testedBy || s.testedBy) : (s.testedBy || summaryData.testedBy),
-                  checkedBy: summaryData.checkedBy || s.checkedBy,
-                  approvedBy: summaryData.approvedBy || s.approvedBy,
-                  dateTested: summaryData.dateTested || s.dateTested,
-                  dateTestedEnd: summaryData.dateTestedEnd || s.dateTestedEnd,
-                  assignedTechnician: activeNormSubTab === 'PP' ? (summaryData.testedBy || s.assignedTechnician) : (s.assignedTechnician || summaryData.testedBy),
+                  ...(activeNormSubTab === 'SUMMARY' ? {
+                    approvedBy: summaryData.approvedBy || s.approvedBy,
+                    dateTested: summaryData.dateTested || s.dateTested,
+                    dateTestedEnd: summaryData.dateTestedEnd || s.dateTestedEnd,
+                  } : {}),
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };
@@ -1896,8 +1895,6 @@ export function App() {
 
                 return {
                   ...s,
-                  testedBy: normTestCode === 'PP' ? technicianName : (s.testedBy || technicianName),
-                  assignedTechnician: normTestCode === 'PP' ? technicianName : (s.assignedTechnician || technicianName),
                   tests: updatedTests,
                   updatedAt: new Date().toISOString()
                 };

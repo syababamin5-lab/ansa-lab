@@ -3130,79 +3130,31 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         prevLoadedSampleIdRef.current = activeSample.id;
       }
 
-      // Initialize default personnel from sample object
-      if (activeSample.testedBy) setTestedBy(activeSample.testedBy);
-      else if (activeSample.assignedTechnician) setTestedBy(activeSample.assignedTechnician);
-
-      // Consolidated inputs dictionary across all tests for the active sample
-      const mergedInputs: Record<string, any> = {};
-      const currentNorm = normalizeTestCode(activeTestSubTab);
-      // Order tests so current active test is applied LAST (highest priority!)
-      const sortedTests = [...(activeSample.tests || [])].sort((a, b) => {
-        const aNorm = normalizeTestCode(a.testTypeCode || a.testTypeId || '');
-        const bNorm = normalizeTestCode(b.testTypeCode || b.testTypeId || '');
-        if (aNorm === currentNorm) return 1;
-        if (bNorm === currentNorm) return -1;
-        return 0;
-      });
-
-      sortedTests.forEach(test => {
-        const origInputs = test.originalTechnicianInput?.inputValues || {};
-        const calcInputs = test.calculationData?.inputValues || test.calculationData || {};
-        const combinedInputs = { ...origInputs, ...calcInputs };
-        
-        const hasActualValue = (val: any): boolean => {
-          if (val === undefined || val === null || val === '') return false;
-          if (Array.isArray(val)) {
-            return val.some(item => hasActualValue(item));
-          }
-          if (typeof val === 'object') {
-            return Object.values(val).some(item => hasActualValue(item));
-          }
-          return true;
-        };
-
-        Object.entries(combinedInputs).forEach(([k, v]) => {
-          if (hasActualValue(v)) {
-            mergedInputs[k] = v;
-          }
+      // Laboratory Personnel & Dates isolated per test type
+      if (activeTestSubTab === 'SUMMARY') {
+        setTestedBy('');
+        setCheckedBy('');
+        setApprovedBy(activeSample.approvedBy || '');
+        setDateTested(activeSample.dateTested || '');
+        setDateTestedEnd(activeSample.dateTestedEnd || activeSample.dateTested || '');
+      } else {
+        const activeTest = (activeSample.tests || []).find(t => {
+          const tNorm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
+          if (currentNorm === 'PP') return ['SG', 'MC', 'UW', 'PP'].includes(tNorm);
+          if (isSieveHydroCode(currentNorm) && isSieveHydroCode(tNorm)) return true;
+          return tNorm === currentNorm;
         });
+        const activeOrig = activeTest?.originalTechnicianInput?.inputValues || {};
+        const activeCalc = activeTest?.calculationData?.inputValues || activeTest?.calculationData || {};
+        const activeInputs = { ...activeOrig, ...activeCalc };
 
-        if (test.calculationData?.summaryResults) {
-          Object.entries(test.calculationData.summaryResults).forEach(([k, v]) => {
-            if (hasActualValue(v) && !(k in mergedInputs)) {
-              mergedInputs[k] = v;
-            }
-          });
-        }
-      });
-
-      const cleanNum = (v: any) => {
-        if (v === undefined || v === null || v === '') return '';
-        return String(v).replace(',', '.').trim();
-      };
-      const inputs = mergedInputs;
-
-      // Laboratory Personnel & Dates
-      const testLevelTester = sortedTests.find(t => (t.technicianName || t.assignedTechnician))?.technicianName || sortedTests.find(t => t.assignedTechnician)?.assignedTechnician;
-      const initialTestedBy = (
-        (typeof mergedInputs.testedBy === 'string' && mergedInputs.testedBy.trim()) ||
-        (typeof testLevelTester === 'string' && testLevelTester.trim()) ||
-        (typeof activeSample.testedBy === 'string' && activeSample.testedBy.trim()) ||
-        (typeof activeSample.assignedTechnician === 'string' && activeSample.assignedTechnician.trim()) ||
-        ''
-      );
-      if (initialTestedBy) setTestedBy(initialTestedBy);
-      if (mergedInputs.analystBy) setAnalystBy(mergedInputs.analystBy);
-      if (mergedInputs.computedBy) setComputedBy(mergedInputs.computedBy);
-      if (mergedInputs.checkedBy || activeSample.checkedBy) setCheckedBy(mergedInputs.checkedBy || activeSample.checkedBy || '');
-      if (mergedInputs.approvedBy || activeSample.approvedBy) setApprovedBy(mergedInputs.approvedBy || activeSample.approvedBy || '');
-      if (mergedInputs.dateStarted) setDateTested(mergedInputs.dateStarted);
-      else if (mergedInputs.dateTested) setDateTested(mergedInputs.dateTested);
-      else if (activeSample.dateTested) setDateTested(activeSample.dateTested);
-      if (mergedInputs.dateCompleted) setDateTestedEnd(mergedInputs.dateCompleted);
-      else if (mergedInputs.dateTestedEnd) setDateTestedEnd(mergedInputs.dateTestedEnd);
-      else if (activeSample.dateTestedEnd) setDateTestedEnd(activeSample.dateTestedEnd);
+        setTestedBy((typeof activeInputs.testedBy === 'string' && activeInputs.testedBy.trim()) || (typeof activeTest?.technicianName === 'string' && activeTest.technicianName.trim()) || (typeof activeTest?.assignedTechnician === 'string' && activeTest.assignedTechnician.trim()) || '');
+        setCheckedBy((typeof activeInputs.checkedBy === 'string' && activeInputs.checkedBy.trim()) || (typeof activeTest?.checkerName === 'string' && activeTest.checkerName.trim()) || '');
+        setApprovedBy((typeof activeInputs.approvedBy === 'string' && activeInputs.approvedBy.trim()) || (typeof activeTest?.approverName === 'string' && activeTest.approverName.trim()) || '');
+        const stDate = (typeof activeInputs.dateStarted === 'string' && activeInputs.dateStarted.trim()) || (typeof activeInputs.dateTested === 'string' && activeInputs.dateTested.trim()) || (typeof activeTest?.dateTested === 'string' && activeTest.dateTested.trim()) || '';
+        setDateTested(stDate);
+        setDateTestedEnd((typeof activeInputs.dateCompleted === 'string' && activeInputs.dateCompleted.trim()) || (typeof activeInputs.dateTestedEnd === 'string' && activeInputs.dateTestedEnd.trim()) || (typeof activeTest?.dateTestedEnd === 'string' && activeTest.dateTestedEnd.trim()) || stDate);
+      }
 
       // 1. Specific Gravity (SG)
       if (mergedInputs.pycNo1) setPycNo1(String(mergedInputs.pycNo1));
@@ -3608,49 +3560,51 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
       const calcInputs = currentSubTabTest?.calculationData?.inputValues || currentSubTabTest?.calculationData || {};
       const currentSubTabInputs = { ...origInputs, ...calcInputs };
 
-      const resolvedTestedBy = (
-        (typeof currentSubTabInputs.testedBy === 'string' && currentSubTabInputs.testedBy.trim()) ||
-        (typeof currentSubTabTest?.technicianName === 'string' && currentSubTabTest.technicianName.trim()) ||
-        (typeof currentSubTabTest?.assignedTechnician === 'string' && currentSubTabTest.assignedTechnician.trim()) ||
-        (typeof activeSample.testedBy === 'string' && activeSample.testedBy.trim()) ||
-        (typeof activeSample.assignedTechnician === 'string' && activeSample.assignedTechnician.trim()) ||
-        ''
-      );
-      setTestedBy(resolvedTestedBy);
+      if (activeTestSubTab === 'SUMMARY') {
+        setTestedBy('');
+        setCheckedBy('');
+        setApprovedBy(activeSample.approvedBy || '');
+        setDateTested(activeSample.dateTested || '');
+        setDateTestedEnd(activeSample.dateTestedEnd || activeSample.dateTested || '');
+      } else {
+        const resolvedTestedBy = (
+          (typeof currentSubTabInputs.testedBy === 'string' && currentSubTabInputs.testedBy.trim()) ||
+          (typeof currentSubTabTest?.technicianName === 'string' && currentSubTabTest.technicianName.trim()) ||
+          (typeof currentSubTabTest?.assignedTechnician === 'string' && currentSubTabTest.assignedTechnician.trim()) ||
+          ''
+        );
+        setTestedBy(resolvedTestedBy);
 
-      const resolvedCheckedBy = (
-        (typeof currentSubTabInputs.checkedBy === 'string' && currentSubTabInputs.checkedBy.trim()) ||
-        (typeof currentSubTabTest?.checkerName === 'string' && currentSubTabTest.checkerName.trim()) ||
-        (typeof activeSample.checkedBy === 'string' && activeSample.checkedBy.trim()) ||
-        ''
-      );
-      setCheckedBy(resolvedCheckedBy);
+        const resolvedCheckedBy = (
+          (typeof currentSubTabInputs.checkedBy === 'string' && currentSubTabInputs.checkedBy.trim()) ||
+          (typeof currentSubTabTest?.checkerName === 'string' && currentSubTabTest.checkerName.trim()) ||
+          ''
+        );
+        setCheckedBy(resolvedCheckedBy);
 
-      const resolvedApprovedBy = (
-        (typeof currentSubTabInputs.approvedBy === 'string' && currentSubTabInputs.approvedBy.trim()) ||
-        (typeof currentSubTabTest?.approverName === 'string' && currentSubTabTest.approverName.trim()) ||
-        (typeof activeSample.approvedBy === 'string' && activeSample.approvedBy.trim()) ||
-        ''
-      );
-      setApprovedBy(resolvedApprovedBy);
+        const resolvedApprovedBy = (
+          (typeof currentSubTabInputs.approvedBy === 'string' && currentSubTabInputs.approvedBy.trim()) ||
+          (typeof currentSubTabTest?.approverName === 'string' && currentSubTabTest.approverName.trim()) ||
+          ''
+        );
+        setApprovedBy(resolvedApprovedBy);
 
-      const resolvedDateTested = (
-        (typeof currentSubTabInputs.dateStarted === 'string' && currentSubTabInputs.dateStarted.trim()) ||
-        (typeof currentSubTabInputs.dateTested === 'string' && currentSubTabInputs.dateTested.trim()) ||
-        (typeof currentSubTabTest?.dateTested === 'string' && currentSubTabTest.dateTested.trim()) ||
-        (typeof activeSample.dateTested === 'string' && activeSample.dateTested.trim()) ||
-        ''
-      );
-      setDateTested(resolvedDateTested);
+        const resolvedDateTested = (
+          (typeof currentSubTabInputs.dateStarted === 'string' && currentSubTabInputs.dateStarted.trim()) ||
+          (typeof currentSubTabInputs.dateTested === 'string' && currentSubTabInputs.dateTested.trim()) ||
+          (typeof currentSubTabTest?.dateTested === 'string' && currentSubTabTest.dateTested.trim()) ||
+          ''
+        );
+        setDateTested(resolvedDateTested);
 
-      const resolvedDateTestedEnd = (
-        (typeof currentSubTabInputs.dateCompleted === 'string' && currentSubTabInputs.dateCompleted.trim()) ||
-        (typeof currentSubTabInputs.dateTestedEnd === 'string' && currentSubTabInputs.dateTestedEnd.trim()) ||
-        (typeof currentSubTabTest?.dateTestedEnd === 'string' && currentSubTabTest.dateTestedEnd.trim()) ||
-        (typeof activeSample.dateTestedEnd === 'string' && activeSample.dateTestedEnd.trim()) ||
-        resolvedDateTested
-      );
-      setDateTestedEnd(resolvedDateTestedEnd);
+        const resolvedDateTestedEnd = (
+          (typeof currentSubTabInputs.dateCompleted === 'string' && currentSubTabInputs.dateCompleted.trim()) ||
+          (typeof currentSubTabInputs.dateTestedEnd === 'string' && currentSubTabInputs.dateTestedEnd.trim()) ||
+          (typeof currentSubTabTest?.dateTestedEnd === 'string' && currentSubTabTest.dateTestedEnd.trim()) ||
+          resolvedDateTested
+        );
+        setDateTestedEnd(resolvedDateTestedEnd);
+      }
 
       setSoilColourCode(currentSubTabInputs.soilColourCode ?? currentSubTabTest?.soilColourCode ?? (activeSample.colourCode || 0));
       setSoilColourName(currentSubTabInputs.soilColourName ?? currentSubTabTest?.soilColourName ?? (activeSample.colourName || ''));
