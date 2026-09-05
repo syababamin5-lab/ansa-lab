@@ -73,7 +73,7 @@ export const LscpDashboardView: React.FC<LscpDashboardViewProps> = ({
   onUpdateSampleAssignedTests,
   onOpenLHUModal
 }) => {
-  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'layout' | 'timeline' | 'po_matrix'>('overview');
+  const [activeSubTab, setActiveSubTab] = useState<'overview' | 'layout' | 'timeline' | 'po_matrix'>('po_matrix');
   const [selectedEquipmentForVmt, setSelectedEquipmentForVmt] = useState<EquipmentItem | null>(null);
   const [layoutViewMode, setLayoutViewMode] = useState<'2D' | '3D'>('2D');
 
