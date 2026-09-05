@@ -17,6 +17,7 @@ interface PremiumTestTypeSelectorProps {
   placeholder?: string;
   label?: string;
   disabled?: boolean;
+  disabledCodes?: string[];
 }
 
 const DEFAULT_CATEGORIZED_TESTS: PremiumTestTypeOption[] = [
@@ -86,7 +87,8 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
   onChange,
   placeholder = '-- Pilih Jenis Pengujian --',
   label,
-  disabled = false
+  disabled = false,
+  disabledCodes = []
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -261,19 +263,23 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                       <div className="space-y-1 pl-1">
                         {items.map(option => {
                           const isSelected = option.code.toUpperCase() === (value || '').toUpperCase();
+                          const isAlreadyUsed = disabledCodes.some(dc => dc.toUpperCase() === option.code.toUpperCase()) && !isSelected;
                           const badgeProps = getTestTypeBadgeProps(option.code);
 
                           return (
                             <div
                               key={option.code}
                               onClick={() => {
+                                if (isAlreadyUsed) return;
                                 onChange(option.code);
                                 setIsOpen(false);
                               }}
-                              className={`p-2.5 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 ${
-                                isSelected
-                                  ? 'bg-blue-50/90 border border-blue-300 text-blue-950 font-bold shadow-2xs'
-                                  : 'hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-800 font-medium'
+                              className={`p-2.5 rounded-xl transition flex items-center justify-between gap-3 ${
+                                isAlreadyUsed
+                                  ? 'opacity-40 cursor-not-allowed bg-slate-100/60 border border-slate-200/80 select-none'
+                                  : isSelected
+                                  ? 'bg-blue-50/90 border border-blue-300 text-blue-950 font-bold shadow-2xs cursor-pointer'
+                                  : 'hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-800 font-medium cursor-pointer'
                               }`}
                             >
                               <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -292,7 +298,13 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                                 </div>
                               </div>
 
-                              {isSelected && (
+                              {isAlreadyUsed && (
+                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 font-mono shrink-0">
+                                  Sudah Dipilih
+                                </span>
+                              )}
+
+                              {isSelected && !isAlreadyUsed && (
                                 <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
                                   <Check className="w-3.5 h-3.5" />
                                 </div>

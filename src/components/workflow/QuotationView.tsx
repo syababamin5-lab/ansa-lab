@@ -150,7 +150,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
 
   const handleAddItem = () => {
     setIsFormDirty(true);
-    // Tambah baris kosong — parameter, qty, freq harus diisi manual oleh user
+    // Tambah baris kosong — parameter, qty diisi user, freq default 1
     const newItem: QuotationItem = {
       id: Date.now().toString(),
       testCode: '',
@@ -158,7 +158,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
       standardStr: '',
       unit: 'Sampel',
       quantity: 0,
-      freq: 0,
+      freq: 1, // Default Freq adalah 1
       unitPrice: 0,
       subtotal: 0
     };
@@ -170,7 +170,10 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
     const updated = [...formItems];
     const item = { ...updated[index], [field]: val };
     if (field === 'quantity' || field === 'unitPrice' || field === 'freq') {
-      item.subtotal = (Number(item.quantity) || 0) * (Number(item.freq) || 1) * (Number(item.unitPrice) || 0);
+      const q = Number(item.quantity) || 0;
+      const f = Number(item.freq) > 0 ? Number(item.freq) : 1;
+      const p = Number(item.unitPrice) || 0;
+      item.subtotal = q * f * p;
     }
     updated[index] = item;
     setFormItems(updated);
@@ -190,6 +193,14 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
   };
 
   const handleSaveForm = () => {
+    // Validasi tidak boleh ada jenis pengujian yang sama dalam 1 penawaran
+    const filledCodes = formItems.map(item => item.testCode.toUpperCase().trim()).filter(Boolean);
+    const duplicates = filledCodes.filter((code, index) => filledCodes.indexOf(code) !== index);
+    if (duplicates.length > 0) {
+      alert(`Terdapat jenis pengujian ganda dalam penawaran ini (${Array.from(new Set(duplicates)).join(', ')}).\n\nSilakan hapus baris duplikat atau gabungkan jumlah sampelnya.`);
+      return;
+    }
+
     const subtotal = formItems.reduce((sum, item) => sum + item.subtotal, 0);
     const discountAmount = Math.round(subtotal * (formDiscountPct / 100));
     const afterDiscount = subtotal - discountAmount;
@@ -471,15 +482,24 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                           <td className="p-1.5 min-w-[220px]">
                             <PremiumTestTypeSelector
                               value={item.testCode}
+                              disabledCodes={formItems.filter((_, i) => i !== idx && !!_.testCode).map(i => i.testCode)}
                               onChange={(selectedCode) => {
                                 setIsFormDirty(true);
+                                // Validasi jika jenis pengujian sudah dipilih pada baris lain
+                                const isDuplicate = formItems.some((other, oIdx) => oIdx !== idx && other.testCode.toUpperCase() === selectedCode.toUpperCase());
+                                if (isDuplicate) {
+                                  alert(`Jenis pengujian "${selectedCode}" sudah dipilih pada baris lain di penawaran ini!\n\nUntuk menambah jumlah pengujian, silakan sesuaikan pada kolom "Jumlah Sampel" atau "Freq" di baris yang sudah ada.`);
+                                  return;
+                                }
+
                                 const masterList = getStoredMasterPrices();
                                 const master = masterList.find(m => m.code.toUpperCase() === selectedCode.toUpperCase() || m.id === selectedCode);
                                 if (!master) return;
                                 const unitPrice = master[priceTier] || 0;
                                 const updated = [...formItems];
                                 const qty  = updated[idx]?.quantity ?? 0;
-                                const freq = updated[idx]?.freq ?? 0;
+                                const currentFreq = updated[idx]?.freq;
+                                const freq = currentFreq !== undefined && currentFreq > 0 ? currentFreq : 1;
                                 updated[idx] = {
                                   ...updated[idx],
                                   testCode: master.code,
@@ -487,6 +507,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                                   standardStr: master.standard,
                                   unit: master.unit === 'Sample' ? 'Sampel' : master.unit,
                                   unitPrice,
+                                  freq,
                                   subtotal: qty * freq * unitPrice
                                 };
                                 setFormItems(updated);
@@ -527,15 +548,18 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                             />
                           </td>
 
-                          {/* Freq — editable, Tab→qty baris bawah, Enter→freq baris bawah */}
+                          {/* Freq — editable, default 1, Tab→qty baris bawah, Enter→freq baris bawah */}
                           <td className="p-1.5">
                             <input
                               id={`freq-${idx}`}
                               type="number"
-                              min={0}
-                              value={item.freq === 0 ? '' : item.freq}
-                              placeholder="0"
-                              onChange={e => handleUpdateItem(idx, 'freq', parseFloat(e.target.value) || 0)}
+                              min={1}
+                              value={item.freq === undefined || item.freq === 0 ? 1 : item.freq}
+                              placeholder="1"
+                              onChange={e => {
+                                const val = parseFloat(e.target.value);
+                                handleUpdateItem(idx, 'freq', isNaN(val) ? 1 : Math.max(1, val));
+                              }}
                               onKeyDown={e => {
                                 if (e.key === 'Tab') {
                                   e.preventDefault();
@@ -545,7 +569,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                                   document.getElementById(`freq-${idx + 1}`)?.focus();
                                 }
                               }}
-                              className="w-full p-1 border border-blue-300 rounded text-center font-mono focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                              className="w-full p-1 border border-blue-300 rounded text-center font-mono font-bold focus:ring-2 focus:ring-blue-400 focus:outline-none"
                             />
                           </td>
 
