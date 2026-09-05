@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { SampleReceipt, SampleReceiptItem, SampleReceiptPhoto, Quotation } from '../../types/workflowTypes';
 import { PackageCheck, Plus, Printer, FileText, CheckCircle2, User, Truck, X, Image as ImageIcon, Trash2, Edit3, Search, FileSpreadsheet, Upload, Download, AlertTriangle } from 'lucide-react';
-import { getNextDocNo } from '../../utils/docNumbering';
+import { getNextDocNo, getNextSampleReceiptNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
 
 import { PersonnelItem } from '../../types';
@@ -27,15 +27,15 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
   const [selectedQuoId, setSelectedQuoId] = useState<string>('');
 
   // Form State
-  const [formDocCode, setFormDocCode] = useState('SKS-23-002');
-  const [formNo, setFormNo] = useState('23 / 020 / VII / 2026');
-  const [formRawDate, setFormRawDate] = useState('2026-07-21');
-  const [formDay, setFormDay] = useState('Selasa');
-  const [formDate, setFormDate] = useState('21 Juli 2026');
+  const [formDocCode, setFormDocCode] = useState('COC.SMP');
+  const [formNo, setFormNo] = useState('');
+  const [formRawDate, setFormRawDate] = useState('2026-09-05');
+  const [formDay, setFormDay] = useState('Sabtu');
+  const [formDate, setFormDate] = useState('5 September 2026');
   const [formTime, setFormTime] = useState('14:00 WIB');
-  const [formClient, setFormClient] = useState('PT. Transka Dharma Konsultan');
-  const [formProjectCode, setFormProjectCode] = useState('PO-TDK-020');
-  const [formProjectName, setFormProjectName] = useState('Air Baku Terabek - Kab. Bangka Barat Prov Bangka Belitung');
+  const [formClient, setFormClient] = useState('');
+  const [formProjectCode, setFormProjectCode] = useState('');
+  const [formProjectName, setFormProjectName] = useState('');
   const [formReceiver, setFormReceiver] = useState('Syabaab Amin A');
 
   // Form dirty state & unsaved modal
@@ -56,6 +56,11 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
 
     setFormDay(dayName);
     setFormDate(`${dayNum} ${monthName} ${yearNum}`);
+
+    // Jika form baru, perbarui nomor COC.SMP sesuai tanggal yang dipilih
+    if (!editingReceiptId) {
+      setFormNo(getNextSampleReceiptNo(receipts.map(r => r.receiptNo), isoDate));
+    }
   };
   
   // Excel Upload state & ref
@@ -147,10 +152,10 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
     setSelectedQuoId('');
-    setFormDocCode('BATT');
-    const nextNo = getNextDocNo('BATT', receipts.map(r => r.receiptNo));
-    setFormNo(nextNo);
+    setFormDocCode('COC.SMP');
     const todayIso = new Date().toISOString().split('T')[0];
+    const nextNo = getNextSampleReceiptNo(receipts.map(r => r.receiptNo), todayIso);
+    setFormNo(nextNo);
     handleDateInputChange(todayIso);
     setFormTime('14:00 WIB');
     setFormClient('');
@@ -263,10 +268,27 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
   };
 
   const handleSaveForm = () => {
+    // Pastikan nomor tanda terima terisi dan dijamin 100% unik tanpa duplikasi
+    let finalReceiptNo = formNo.trim();
+    if (!finalReceiptNo) {
+      finalReceiptNo = getNextSampleReceiptNo(receipts.map(r => r.receiptNo), formRawDate || new Date());
+    } else if (!editingReceiptId) {
+      const isDup = receipts.some(r => r.receiptNo.trim().toUpperCase() === finalReceiptNo.toUpperCase());
+      if (isDup) {
+        finalReceiptNo = getNextSampleReceiptNo(receipts.map(r => r.receiptNo), formRawDate || new Date());
+      }
+    } else {
+      const isDup = receipts.some(r => r.id !== editingReceiptId && r.receiptNo.trim().toUpperCase() === finalReceiptNo.toUpperCase());
+      if (isDup) {
+        alert(`Nomor Tanda Terima "${finalReceiptNo}" sudah digunakan pada dokumen lain. Nomor disesuaikan otomatis.`);
+        finalReceiptNo = getNextSampleReceiptNo(receipts.map(r => r.receiptNo), formRawDate || new Date());
+      }
+    }
+
     const receiptToSave: SampleReceipt = {
       id: editingReceiptId || `batt-${Date.now()}`,
       docCode: formDocCode,
-      receiptNo: formNo,
+      receiptNo: finalReceiptNo,
       dayName: formDay,
       date: formDate,
       timeStr: formTime,
@@ -301,7 +323,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
             <span>TAHAP 2 OPERASIONAL LAB (ISO 17025)</span>
           </div>
           <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-             Berita Acara / Surat Tanda Terima Sampel (BATT)
+             Berita Acara / Surat Tanda Terima Sampel (COC.SMP)
           </h2>
           <p className="text-xs text-slate-500 mt-1 font-medium">
             Pencatatan fisik sampel tanah yang baru diterima di lab &amp; penerbitan dokumen Tanda Terima Sampel resmi + Halaman Lampiran Foto (tanpa batasan jumlah foto).
@@ -458,8 +480,36 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor Tanda Terima</label>
-                  <input type="text" value={formNo} onChange={e => setFormNo(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold" />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-700">Nomor Tanda Terima</label>
+                    <span className="text-[10px] font-mono text-teal-800 font-bold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
+                      Otomatis
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formNo}
+                    onChange={e => { setFormNo(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-teal-300 rounded-lg font-mono font-bold text-teal-950 bg-teal-50/30 focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                    placeholder="COC.SMP.260905.001"
+                  />
+                  <div className="flex items-center justify-between mt-1 text-[10px]">
+                    <span className="text-slate-400 font-mono">Format: COC.SMP.YYMMDD.001</span>
+                    {editingReceiptId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFmt = getNextSampleReceiptNo(receipts.filter(r => r.id !== editingReceiptId).map(r => r.receiptNo), formRawDate || new Date());
+                          setFormNo(newFmt);
+                          setIsFormDirty(true);
+                        }}
+                        className="text-teal-700 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
+                        title="Perbarui nomor dokumen ke format standar COC.SMP.YYMMDD.001"
+                      >
+                        🔄 Terapkan Format Baru
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Hari &amp; Tanggal Terima (Otomatis Hari)</label>

@@ -3,7 +3,7 @@ import { SamplePrepReport, SamplePrepItem, SamplePrepPairPhoto, SampleReceipt, S
 import { PurchaseOrder, PersonnelItem } from '../../types';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { Scissors, Plus, Printer, CheckCircle2, AlertTriangle, X, Image as ImageIcon, ArrowRight, ArrowUpRight, Edit3, Trash2, Link, Camera, ChevronDown, FlaskConical, PackageX, Truck, SlidersHorizontal, FileSpreadsheet, Upload, Download } from 'lucide-react';
-import { getNextDocNo } from '../../utils/docNumbering';
+import { getNextDocNo, getNextSamplePrepNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
 
 const DAYS_INDO = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
@@ -205,6 +205,11 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 
     setFormDay(dayName);
     setFormDateStr(`${dayNum} ${monthName} ${yearNum}`);
+
+    // Update formNo otomatis untuk form baru jika tanggal diubah
+    if (!editingReportId) {
+      setFormNo(getNextSamplePrepNo(reports.map(r => r.prepReportNo), isoDate));
+    }
   };
 
   const openNewForm = () => {
@@ -212,10 +217,10 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
     setManualActiveTestKeys({});
-    const nextNo = getNextDocNo('BA-PP', reports.map(r => r.prepReportNo));
+    const todayIso = new Date().toISOString().split('T')[0];
+    const nextNo = getNextSamplePrepNo(reports.map(r => r.prepReportNo), todayIso);
     setFormNo(nextNo);
     setFormPoNo('');
-    const todayIso = new Date().toISOString().split('T')[0];
     handleDateInputChange(todayIso);
     setFormClient('');
     setFormProject('');
@@ -530,10 +535,27 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
   };
 
   const handleSaveForm = () => {
+    // Pastikan nomor BA Preparasi terisi dan dijamin 100% unik tanpa duplikasi
+    let finalReportNo = formNo.trim();
+    if (!finalReportNo) {
+      finalReportNo = getNextSamplePrepNo(reports.map(r => r.prepReportNo), formRawDate || new Date());
+    } else if (!editingReportId) {
+      const isDup = reports.some(r => r.prepReportNo.trim().toUpperCase() === finalReportNo.toUpperCase());
+      if (isDup) {
+        finalReportNo = getNextSamplePrepNo(reports.map(r => r.prepReportNo), formRawDate || new Date());
+      }
+    } else {
+      const isDup = reports.some(r => r.id !== editingReportId && r.prepReportNo.trim().toUpperCase() === finalReportNo.toUpperCase());
+      if (isDup) {
+        alert(`Nomor BA Preparasi "${finalReportNo}" sudah digunakan pada dokumen lain. Nomor disesuaikan otomatis.`);
+        finalReportNo = getNextSamplePrepNo(reports.map(r => r.prepReportNo), formRawDate || new Date());
+      }
+    }
+
     const prepCount = formItems.filter(i => !i.isRockHighlight && i.status !== 'REJECTED' && i.status !== 'FAIL_SUBCONTRACT').length;
     const newRep: SamplePrepReport = {
       id: editingReportId || `bap-${Date.now()}`,
-      prepReportNo: formNo,
+      prepReportNo: finalReportNo,
       date: formDateStr,
       dayName: formDay,
       poNumber: formPoNo,
@@ -574,7 +596,7 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
             <span>TAHAP 3 OPERASIONAL LAB (ISO 17025)</span>
           </div>
           <h2 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-             Berita Acara Preparasi Sampel &amp; Lampiran Foto Inspeksi
+             Berita Acara Preparasi Sampel (ACT.MSP) &amp; Lampiran Foto Inspeksi
           </h2>
           <p className="text-xs text-slate-500 mt-1 font-medium">
             Pembukaan tabung, evaluasi kelayakan parameter uji, status kondisi sampel (Normal / Batuan / Tidak Cukup / Subkontrak), dan foto Before &amp; After per sampel.
@@ -787,8 +809,36 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 
               <div className="grid grid-cols-4 gap-3">
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Nomor BA Preparasi</label>
-                  <input type="text" value={formNo} onChange={e => setFormNo(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold" />
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-700">Nomor BA Preparasi</label>
+                    <span className="text-[10px] font-mono text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                      Otomatis
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formNo}
+                    onChange={e => { setFormNo(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-amber-300 rounded-lg font-mono font-bold text-amber-950 bg-amber-50/30 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    placeholder="ACT.MSP.260905.001"
+                  />
+                  <div className="flex items-center justify-between mt-1 text-[10px]">
+                    <span className="text-slate-400 font-mono">Format: ACT.MSP.YYMMDD.001</span>
+                    {editingReportId && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const newFmt = getNextSamplePrepNo(reports.filter(r => r.id !== editingReportId).map(r => r.prepReportNo), formRawDate || new Date());
+                          setFormNo(newFmt);
+                          setIsFormDirty(true);
+                        }}
+                        className="text-amber-800 font-bold hover:underline cursor-pointer flex items-center gap-0.5"
+                        title="Perbarui nomor dokumen ke format standar ACT.MSP.YYMMDD.001"
+                      >
+                        🔄 Terapkan Format Baru
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Number PO</label>

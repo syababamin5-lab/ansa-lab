@@ -30,12 +30,44 @@ export const ROMAN_MONTHS = [
 export type DocPrefix =
   | 'Q'
   | 'BATT'
+  | 'COC.SMP'
   | 'BA-PP'
+  | 'ACT.MSP'
   | 'SPK-SUB'
   | 'SJL-SUB'
   | 'WS'
   | 'LHU'
   | 'INV';
+
+/**
+ * Format tanggal menjadi 6 digit YYMMDD (contoh: 2026-09-05 -> '260905')
+ */
+export function formatDateYYMMDD(dateInput?: string | Date): string {
+  if (!dateInput) {
+    const now = new Date();
+    const yy = String(now.getFullYear()).slice(-2);
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    return `${yy}${mm}${dd}`;
+  }
+
+  if (typeof dateInput === 'string') {
+    const isoMatch = dateInput.trim().match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+      const yy = isoMatch[1].slice(-2);
+      const mm = isoMatch[2];
+      const dd = isoMatch[3];
+      return `${yy}${mm}${dd}`;
+    }
+  }
+
+  const d = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  const validDate = isNaN(d.getTime()) ? new Date() : d;
+  const yy = String(validDate.getFullYear()).slice(-2);
+  const mm = String(validDate.getMonth() + 1).padStart(2, '0');
+  const dd = String(validDate.getDate()).padStart(2, '0');
+  return `${yy}${mm}${dd}`;
+}
 
 /**
  * Format nomor penawaran baku: Q-[KODE_KLIEN]-[SEQ]-[MM]-[YY]
@@ -69,7 +101,6 @@ export function extractQuotationSeq(quotationNo: string): number {
   const clean = quotationNo.trim().toUpperCase();
 
   // 1. Pola standar: -[SEQ]-[BULAN_ROMAWI]-[TAHUN 2/4 DIGIT]
-  // Contoh: Q-TSK-001-IX-26 atau Q-002-IX-2026 atau Q-001-IX-26
   const stdMatch = clean.match(/-(\d+)-(?:I|II|III|IV|V|VI|VII|VIII|IX|X|XI|XII)-(?:\d{2}|\d{4})$/i);
   if (stdMatch && stdMatch[1]) {
     const n = parseInt(stdMatch[1], 10);
@@ -97,9 +128,6 @@ export function extractQuotationSeq(quotationNo: string): number {
 
 /**
  * Menghasilkan nomor penawaran baru otomatis berurutan dan dijamin 100% unik tanpa duplikasi.
- * @param existingNos  Daftar seluruh nomor penawaran yang ada di sistem
- * @param clientCode   Kode/singkatan perusahaan klien (opsional, misal: 'TSK', 'TDK')
- * @param dateInput    Tanggal pembuatan penawaran (opsional, default: hari ini)
  */
 export function getNextQuotationNo(
   existingNos: string[],
@@ -109,7 +137,6 @@ export function getNextQuotationNo(
   const cleanExistingNos = (existingNos || []).filter(Boolean);
   const existingSet = new Set(cleanExistingNos.map(n => n.trim().toUpperCase()));
 
-  // 1. Temukan nomor urut (seq) tertinggi dari seluruh data yang ada
   let maxSeq = 0;
   for (const no of cleanExistingNos) {
     const seq = extractQuotationSeq(no);
@@ -121,8 +148,6 @@ export function getNextQuotationNo(
   let candidateSeq = Math.max(1, maxSeq + 1);
   let candidateNo = formatQuotationNo(candidateSeq, clientCode, dateInput);
 
-  // 2. Garansi Mutlak Unik (Anti-Tabrakan / Anti-Duplikat):
-  // Jika nomor kandidat ternyata sudah ada di database, naikkan urutan sampai menemukan slot nomor yang belum pernah dipakai
   while (existingSet.has(candidateNo.toUpperCase())) {
     candidateSeq++;
     candidateNo = formatQuotationNo(candidateSeq, clientCode, dateInput);
@@ -132,28 +157,157 @@ export function getNextQuotationNo(
 }
 
 /**
+ * Format nomor Tanda Terima Sampel resmi: COC.SMP.[YYMMDD].[001]
+ * Contoh: COC.SMP.260905.001
+ */
+export function formatSampleReceiptNo(seq: number, dateInput?: string | Date): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const seqStr = String(Math.max(1, seq)).padStart(3, '0');
+  return `COC.SMP.${yymmdd}.${seqStr}`;
+}
+
+/**
+ * Ekstrak nomor urut Tanda Terima Sampel (format COC.SMP.260905.001 atau legacy BATT)
+ */
+export function extractSampleReceiptSeq(receiptNo: string, targetDateYYMMDD?: string): number {
+  if (!receiptNo) return 0;
+  const clean = receiptNo.trim().toUpperCase();
+
+  // 1. Format baru: COC.SMP.YYMMDD.001
+  if (targetDateYYMMDD) {
+    const match = clean.match(new RegExp(`^COC\\.SMP\\.${targetDateYYMMDD}\\.(\\d+)`, 'i'));
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  } else {
+    const match = clean.match(/^COC\.SMP\.\d{6}\.(\d+)/i);
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  }
+
+  return 0;
+}
+
+/**
+ * Menghasilkan nomor Tanda Terima Sampel berikutnya (COC.SMP.YYMMDD.001)
+ * Dijamin 100% unik tanpa duplikasi
+ */
+export function getNextSampleReceiptNo(existingNos: string[], dateInput?: string | Date): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const cleanExistingNos = (existingNos || []).filter(Boolean);
+  const existingSet = new Set(cleanExistingNos.map(n => n.trim().toUpperCase()));
+
+  let maxSeq = 0;
+  for (const no of cleanExistingNos) {
+    const seq = extractSampleReceiptSeq(no, yymmdd);
+    if (seq > maxSeq) {
+      maxSeq = seq;
+    }
+  }
+
+  let candidateSeq = Math.max(1, maxSeq + 1);
+  let candidateNo = formatSampleReceiptNo(candidateSeq, dateInput);
+
+  while (existingSet.has(candidateNo.toUpperCase())) {
+    candidateSeq++;
+    candidateNo = formatSampleReceiptNo(candidateSeq, dateInput);
+  }
+
+  return candidateNo;
+}
+
+/**
+ * Format nomor Berita Acara Preparasi resmi: ACT.MSP.[YYMMDD].[001]
+ * Contoh: ACT.MSP.260905.001
+ */
+export function formatSamplePrepNo(seq: number, dateInput?: string | Date): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const seqStr = String(Math.max(1, seq)).padStart(3, '0');
+  return `ACT.MSP.${yymmdd}.${seqStr}`;
+}
+
+/**
+ * Ekstrak nomor urut Berita Acara Preparasi (format ACT.MSP.260905.001 atau legacy BA-PP)
+ */
+export function extractSamplePrepSeq(reportNo: string, targetDateYYMMDD?: string): number {
+  if (!reportNo) return 0;
+  const clean = reportNo.trim().toUpperCase();
+
+  // 1. Format baru: ACT.MSP.YYMMDD.001
+  if (targetDateYYMMDD) {
+    const match = clean.match(new RegExp(`^ACT\\.MSP\\.${targetDateYYMMDD}\\.(\\d+)`, 'i'));
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  } else {
+    const match = clean.match(/^ACT\.MSP\.\d{6}\.(\d+)/i);
+    if (match && match[1]) {
+      const n = parseInt(match[1], 10);
+      if (!isNaN(n) && n > 0) return n;
+    }
+  }
+
+  return 0;
+}
+
+/**
+ * Menghasilkan nomor Berita Acara Preparasi berikutnya (ACT.MSP.YYMMDD.001)
+ * Dijamin 100% unik tanpa duplikasi
+ */
+export function getNextSamplePrepNo(existingNos: string[], dateInput?: string | Date): string {
+  const yymmdd = formatDateYYMMDD(dateInput);
+  const cleanExistingNos = (existingNos || []).filter(Boolean);
+  const existingSet = new Set(cleanExistingNos.map(n => n.trim().toUpperCase()));
+
+  let maxSeq = 0;
+  for (const no of cleanExistingNos) {
+    const seq = extractSamplePrepSeq(no, yymmdd);
+    if (seq > maxSeq) {
+      maxSeq = seq;
+    }
+  }
+
+  let candidateSeq = Math.max(1, maxSeq + 1);
+  let candidateNo = formatSamplePrepNo(candidateSeq, dateInput);
+
+  while (existingSet.has(candidateNo.toUpperCase())) {
+    candidateSeq++;
+    candidateNo = formatSamplePrepNo(candidateSeq, dateInput);
+  }
+
+  return candidateNo;
+}
+
+/**
  * Menghasilkan nomor dokumen berikutnya.
- * @param prefix      Prefix jenis dokumen (Q, BATT, BA-PP, dst.)
+ * @param prefix      Prefix jenis dokumen (Q, BATT / COC.SMP, BA-PP / ACT.MSP, dst.)
  * @param existingNos Array string nomor dokumen yang sudah ada
- * @returns           String nomor dokumen baru, mis: "Q-TSK-001-IX-26" atau "BATT-003-VIII-2026"
  */
 export function getNextDocNo(prefix: DocPrefix, existingNos: string[]): string {
   if (prefix === 'Q') {
     return getNextQuotationNo(existingNos);
+  }
+  if (prefix === 'BATT' || prefix === 'COC.SMP') {
+    return getNextSampleReceiptNo(existingNos);
+  }
+  if (prefix === 'BA-PP' || prefix === 'ACT.MSP') {
+    return getNextSamplePrepNo(existingNos);
   }
 
   const now = new Date();
   const year = now.getFullYear();
   const month = ROMAN_MONTHS[now.getMonth()];
 
-  // Temukan SEQ tertinggi dari daftar yang ada
   let maxSeq = 0;
   let detectedSubPrefix = '';
 
   for (const no of existingNos) {
     if (!no) continue;
     
-    // Ekstrak angka urut persis sebelum Bulan Romawi & Tahun (misal: -003-VIII-2026)
     const seqMatch = no.match(/-(\d+)-[IVXLCDM]+-\d{4}$/i);
     if (seqMatch) {
       const seq = parseInt(seqMatch[1], 10);
@@ -166,7 +320,6 @@ export function getNextDocNo(prefix: DocPrefix, existingNos: string[]): string {
   const nextSeq = maxSeq + 1;
   const seqStr = String(nextSeq).padStart(3, '0');
 
-  // Jika nomor yang ada menggunakan subprefix seperti BATT-23-001..., pertahankan pola tersebut jika ada
   let has2DigitSubPrefix = false;
   for (const no of existingNos) {
     const escaped = prefix.replace(/-/g, '\\-');
@@ -191,6 +344,12 @@ export function getNextDocNo(prefix: DocPrefix, existingNos: string[]): string {
 export function formatDocNo(prefix: DocPrefix, seq: number, date?: Date): string {
   if (prefix === 'Q') {
     return formatQuotationNo(seq, undefined, date);
+  }
+  if (prefix === 'BATT' || prefix === 'COC.SMP') {
+    return formatSampleReceiptNo(seq, date);
+  }
+  if (prefix === 'BA-PP' || prefix === 'ACT.MSP') {
+    return formatSamplePrepNo(seq, date);
   }
   const d = date || new Date();
   const month = ROMAN_MONTHS[d.getMonth()];
