@@ -181,110 +181,151 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
         <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
       </button>
 
-      {/* DROPDOWN POPUP PANEL (Lebar & Nyaman, Tidak Terbatas Ukuran Kolom) */}
+      {/* CENTERED POPUP MODAL DIALOG (Tampil di Tengah Layar, Tidak Nabrak Batas Modal) */}
       {isOpen && (
-        <div className="absolute left-0 top-full mt-2 w-[480px] max-w-[92vw] bg-white border border-slate-200/90 rounded-2xl shadow-2xl ring-1 ring-slate-900/10 z-[9999] overflow-hidden max-h-[480px] flex flex-col animate-in fade-in zoom-in-95 duration-150">
-          
-          {/* SEARCH INPUT HEADER */}
-          <div className="p-3 bg-slate-50 border-b border-slate-100 shrink-0">
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                placeholder="Cari kode atau nama jenis pengujian..."
-                className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-medium transition"
-                autoFocus
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer p-0.5"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+        <div
+          className="fixed inset-0 z-[99999] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[82vh] animate-in zoom-in-95 duration-150">
+            
+            {/* MODAL HEADER */}
+            <div className="p-4 sm:p-4.5 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+                  <FlaskConical className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-black text-slate-900 tracking-tight">Pilih Jenis Pengujian Laboratorium</h3>
+                  <p className="text-[11px] text-slate-500 font-medium">Katalog Resmi TIMES® ANSA LIMS ({allOptions.length} Parameter Uji)</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* SEARCH INPUT HEADER */}
+            <div className="p-3 bg-slate-50 border-b border-slate-200/80 shrink-0">
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
+                  placeholder="Cari kode (mis. SG, MC, TRX) atau nama pengujian..."
+                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-medium transition shadow-2xs"
+                  autoFocus
+                />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer p-0.5"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* OPTIONS LIST BY CATEGORY GROUPS */}
+            <div className="overflow-y-auto p-3 space-y-4 flex-1 text-xs">
+              {filteredOptions.length === 0 ? (
+                <div className="p-8 text-center text-slate-400 text-xs font-medium">
+                  Tidak ada jenis pengujian yang cocok dengan "{searchQuery}"
+                </div>
+              ) : (
+                groupedCategories.map(category => {
+                  const items = filteredOptions.filter(o => o.category === category);
+                  if (items.length === 0) return null;
+
+                  return (
+                    <div key={category} className="space-y-1.5">
+                      {/* Category Group Title */}
+                      <div className="px-3 py-1.5 rounded-xl bg-slate-100/90 text-[11px] font-black uppercase tracking-wider text-slate-700 font-mono flex items-center justify-between border border-slate-200/80">
+                        <div className="flex items-center gap-2">
+                          <Box className="w-3.5 h-3.5 text-blue-600 shrink-0" />
+                          <span>{category}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-400 font-bold">{items.length} uji</span>
+                      </div>
+
+                      {/* Group Items */}
+                      <div className="space-y-1 pl-1">
+                        {items.map(option => {
+                          const isSelected = option.code.toUpperCase() === (value || '').toUpperCase();
+                          const badgeProps = getTestTypeBadgeProps(option.code);
+
+                          return (
+                            <div
+                              key={option.code}
+                              onClick={() => {
+                                onChange(option.code);
+                                setIsOpen(false);
+                              }}
+                              className={`p-2.5 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 ${
+                                isSelected
+                                  ? 'bg-blue-50/90 border border-blue-300 text-blue-950 font-bold shadow-2xs'
+                                  : 'hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-800 font-medium'
+                              }`}
+                            >
+                              <div className="flex items-center gap-3 min-w-0 flex-1">
+                                <span className={`px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-black shrink-0 tracking-wider shadow-2xs ${badgeProps.bg} ${badgeProps.text}`}>
+                                  {option.code}
+                                </span>
+                                <div className="min-w-0 flex-1">
+                                  <div className="font-extrabold text-slate-900 text-xs leading-snug">
+                                    {option.name}
+                                  </div>
+                                  {option.standard && (
+                                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                      {option.standard}
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {isSelected && (
+                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                  <Check className="w-3.5 h-3.5" />
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })
               )}
             </div>
-          </div>
 
-          {/* OPTIONS LIST BY CATEGORY GROUPS */}
-          <div className="overflow-y-auto p-2.5 space-y-3.5 flex-1 text-xs">
-            {filteredOptions.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs font-medium">
-                Tidak ada jenis pengujian yang cocok dengan "{searchQuery}"
+            {/* FOOTER TOTAL COUNT & CLOSE */}
+            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-[11px] font-medium text-slate-500 flex items-center justify-between shrink-0">
+              <span className="flex items-center gap-1.5 text-slate-600 font-mono text-[10.5px]">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                TIMES® ANSA LIMS Test Catalogue
+              </span>
+              <div className="flex items-center gap-3">
+                <span className="text-blue-700 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-mono text-[10.5px]">
+                  {filteredOptions.length} Jenis Uji Tersedia
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setIsOpen(false)}
+                  className="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
+                >
+                  Tutup
+                </button>
               </div>
-            ) : (
-              groupedCategories.map(category => {
-                const items = filteredOptions.filter(o => o.category === category);
-                if (items.length === 0) return null;
-
-                return (
-                  <div key={category} className="space-y-1.5">
-                    {/* Category Group Title */}
-                    <div className="px-3 py-1.5 rounded-lg bg-slate-100 text-[11px] font-black uppercase tracking-wider text-slate-700 font-mono flex items-center gap-2 border border-slate-200/80">
-                      <Box className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                      <span>{category}</span>
-                    </div>
-
-                    {/* Group Items */}
-                    <div className="space-y-1 pl-1">
-                      {items.map(option => {
-                        const isSelected = option.code.toUpperCase() === (value || '').toUpperCase();
-                        const badgeProps = getTestTypeBadgeProps(option.code);
-
-                        return (
-                          <div
-                            key={option.code}
-                            onClick={() => {
-                              onChange(option.code);
-                              setIsOpen(false);
-                            }}
-                            className={`p-2.5 rounded-xl transition cursor-pointer flex items-center justify-between gap-3 ${
-                              isSelected
-                                ? 'bg-blue-50/90 border border-blue-300 text-blue-950 font-bold shadow-2xs'
-                                : 'hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-800 font-medium'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3 min-w-0 flex-1">
-                              <span className={`px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-black shrink-0 tracking-wider shadow-2xs ${badgeProps.bg} ${badgeProps.text}`}>
-                                {option.code}
-                              </span>
-                              <div className="min-w-0 flex-1">
-                                <div className="font-extrabold text-slate-900 text-xs leading-snug">
-                                  {option.name}
-                                </div>
-                                {option.standard && (
-                                  <div className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                    {option.standard}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-
-                            {isSelected && (
-                              <Check className="w-4 h-4 text-blue-600 shrink-0" />
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* FOOTER TOTAL COUNT */}
-          <div className="px-3.5 py-2.5 bg-slate-50 border-t border-slate-100 text-[10.5px] font-mono font-bold text-slate-500 flex items-center justify-between shrink-0">
-            <span className="flex items-center gap-1.5 text-slate-600">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              TIMES® ANSA LIMS Test Catalogue
-            </span>
-            <span className="text-blue-700 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-              {filteredOptions.length} Jenis Uji Tersedia
-            </span>
+            </div>
           </div>
         </div>
       )}
