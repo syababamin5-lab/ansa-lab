@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Search, Bell, RefreshCw, Sparkles, Smartphone, LogOut } from 'lucide-react';
 import { UserProfile, USER_ROLE_LABELS, USER_ROLE_BADGE } from '../types/userTypes';
+import { ConfirmLogoutModal } from './common/ConfirmLogoutModal';
 
 interface NavbarProps {
   searchTerm: string;
@@ -23,6 +24,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onLogout,
   onToggleMobileMode,
 }) => {
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const badge = USER_ROLE_BADGE[currentUser.role];
 
   return (
@@ -109,11 +111,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <button
-            onClick={() => {
-              if (confirm(`Apakah Anda yakin ingin keluar dari akun ${currentUser.name}?`)) {
-                onLogout();
-              }
-            }}
+            onClick={() => setShowLogoutModal(true)}
             className="p-1.5 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold transition cursor-pointer flex items-center gap-1 ml-1"
             title="Keluar dari Akun / Logout"
           >
@@ -122,6 +120,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Premium Confirm Logout Modal */}
+      <ConfirmLogoutModal
+        isOpen={showLogoutModal}
+        onClose={() => setShowLogoutModal(false)}
+        onConfirm={onLogout}
+        user={currentUser}
+      />
     </header>
   );
 };

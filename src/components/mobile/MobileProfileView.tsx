@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { normalizeTestCode, getTestStatus3State } from '../../utils/helpers';
 import { isSampleAssignedToUser, isSingleTestAssignedToUser } from '../../utils/userPermissions';
+import { ConfirmLogoutModal } from '../common/ConfirmLogoutModal';
 
 interface MobileProfileViewProps {
   pos?: PurchaseOrder[];
@@ -79,6 +80,7 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
   const [hasDrawn, setHasDrawn] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [inkColor, setInkColor] = useState('#0F172A'); // Default dark ink
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const pointsRef = useRef<Array<{ x: number; y: number }>>([]);
 
   // High-precision coordinate extractor that maps touch/mouse coordinates to canvas buffer
@@ -330,11 +332,7 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
           {/* LOGOUT BUTTON ON THE RIGHT INSIDE PROFILE CARD */}
           {onLogout && (
             <button
-              onClick={() => {
-                if (confirm(`Apakah Anda yakin ingin keluar dari akun ${currentUser.name}?`)) {
-                  onLogout();
-                }
-              }}
+              onClick={() => setShowLogoutModal(true)}
               className="px-2.5 py-1.5 rounded-xl bg-red-500/20 hover:bg-red-500/30 text-red-200 hover:text-white border border-red-400/40 text-[10.5px] font-bold flex items-center gap-1.5 transition cursor-pointer active:scale-95 shrink-0 shadow-2xs backdrop-blur-xs"
             >
               <LogOut className="w-3.5 h-3.5 text-red-300" />
@@ -610,6 +608,16 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
           PT. Terraforma Geoteknik Indonesia • ISO/IEC 17025 Certified
         </p>
       </div>
+
+      {/* Premium Confirm Logout Modal */}
+      {onLogout && (
+        <ConfirmLogoutModal
+          isOpen={showLogoutModal}
+          onClose={() => setShowLogoutModal(false)}
+          onConfirm={onLogout}
+          user={currentUser}
+        />
+      )}
     </div>
   );
 };
