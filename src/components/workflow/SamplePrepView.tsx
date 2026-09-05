@@ -809,22 +809,16 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 
               <div className="grid grid-cols-4 gap-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">Nomor BA Preparasi</label>
-                    <span className="text-[10px] font-mono text-amber-800 font-bold bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
-                      Otomatis
-                    </span>
-                  </div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor BA Preparasi</label>
                   <input
                     type="text"
                     value={formNo}
                     onChange={e => { setFormNo(e.target.value); setIsFormDirty(true); }}
-                    className="w-full p-2 border border-amber-300 rounded-lg font-mono font-bold text-amber-950 bg-amber-50/30 focus:ring-2 focus:ring-amber-400 focus:outline-none"
+                    className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
                     placeholder="ACT.MSP.260905.001"
                   />
-                  <div className="flex items-center justify-between mt-1 text-[10px]">
-                    <span className="text-slate-400 font-mono">Format: ACT.MSP.YYMMDD.001</span>
-                    {editingReportId && (
+                  {editingReportId && (
+                    <div className="flex justify-end mt-1 text-[10px]">
                       <button
                         type="button"
                         onClick={() => {
@@ -837,8 +831,8 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                       >
                         🔄 Terapkan Format Baru
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Number PO</label>

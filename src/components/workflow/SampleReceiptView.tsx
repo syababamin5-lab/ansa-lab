@@ -480,22 +480,16 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">Nomor Tanda Terima</label>
-                    <span className="text-[10px] font-mono text-teal-800 font-bold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200">
-                      Otomatis
-                    </span>
-                  </div>
+                  <label className="font-bold text-slate-700 block mb-1">Nomor Tanda Terima</label>
                   <input
                     type="text"
                     value={formNo}
                     onChange={e => { setFormNo(e.target.value); setIsFormDirty(true); }}
-                    className="w-full p-2 border border-teal-300 rounded-lg font-mono font-bold text-teal-950 bg-teal-50/30 focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                    className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-teal-400 focus:outline-none"
                     placeholder="COC.SMP.260905.001"
                   />
-                  <div className="flex items-center justify-between mt-1 text-[10px]">
-                    <span className="text-slate-400 font-mono">Format: COC.SMP.YYMMDD.001</span>
-                    {editingReceiptId && (
+                  {editingReceiptId && (
+                    <div className="flex justify-end mt-1 text-[10px]">
                       <button
                         type="button"
                         onClick={() => {
@@ -508,18 +502,17 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                       >
                         🔄 Terapkan Format Baru
                       </button>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
                 <div>
-                  <label className="font-bold text-slate-700 block mb-1">Hari &amp; Tanggal Terima (Otomatis Hari)</label>
+                  <label className="font-bold text-slate-700 block mb-1">Hari &amp; Tanggal Terima</label>
                   <div className="flex gap-1.5 items-center">
                     <input 
                       type="text" 
                       value={formDay} 
                       readOnly 
                       className="w-24 p-2 border border-slate-300 rounded-lg font-extrabold bg-slate-100/90 text-teal-800 text-center cursor-not-allowed select-none" 
-                      title="Hari terisi otomatis berdasarkan tanggal yang Anda pilih" 
                     />
                     <input 
                       type="date" 
@@ -545,25 +538,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                   <input type="text" value={formProjectCode} onChange={e => setFormProjectCode(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold" />
                 </div>
                 <div>
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700 block">Penerima Sampel (Lab)</label>
-                    {(() => {
-                      const selectedPerson = (personnelCatalogue || []).find(p => 
-                        p.name.toLowerCase().trim() === formReceiver.toLowerCase().trim() ||
-                        p.name.toLowerCase().includes(formReceiver.toLowerCase()) ||
-                        formReceiver.toLowerCase().includes(p.name.toLowerCase())
-                      );
-                      const hasSig = !!(selectedPerson?.signatureUrl || selectedPerson?.digitalSignatureUrl);
-                      if (hasSig) {
-                        return (
-                          <span className="text-[10px] text-teal-700 font-bold bg-teal-50 px-1.5 py-0.5 rounded border border-teal-200 flex items-center gap-1">
-                            ✓ TTD Terhubung
-                          </span>
-                        );
-                      }
-                      return null;
-                    })()}
-                  </div>
+                  <label className="font-bold text-slate-700 block mb-1">Penerima Sampel (Lab)</label>
                   <select
                     value={formReceiver}
                     onChange={e => {

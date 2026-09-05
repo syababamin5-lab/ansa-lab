@@ -471,23 +471,15 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
               </div>
 
               {/* ── MANUAL FIELDS (auto-filled when client selected) ─────────────── */}
-              {/* ── MANUAL FIELDS (auto-filled when client selected) ─────────────── */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div className="md:col-span-1">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="font-bold text-slate-700">No. Penawaran</label>
-                    <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
-                      Otomatis
-                    </span>
-                  </div>
+                  <label className="font-bold text-slate-700 block mb-1">No. Penawaran</label>
                   <input
                     type="text"
                     value={formNo}
                     readOnly
                     className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold bg-slate-100 text-slate-800 select-all cursor-not-allowed"
-                    title="Nomor penawaran dibuat otomatis: Q-[KODE]-[000]-[MM]-[YY]"
                   />
-                  <div className="text-[10px] text-slate-400 mt-1 font-mono">Format: Q-[KODE]-[000]-[MM]-[YY]</div>
                 </div>
 
                 <div className="md:col-span-1">
