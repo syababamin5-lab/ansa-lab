@@ -590,13 +590,9 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
 
               {/* Password Input */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[11px] font-black uppercase text-slate-700 tracking-wider">
-                  <label>PASSWORD:</label>
-                  <span className="text-[10px] font-mono text-amber-900 font-extrabold bg-amber-50 px-2 py-0.5 rounded border border-amber-200 flex items-center gap-1">
-                    <Key className="w-3 h-3 text-amber-700" />
-                    <span>Default: 1234</span>
-                  </span>
-                </div>
+                <label className="text-[11px] font-black uppercase text-slate-700 tracking-wider block">
+                  PASSWORD:
+                </label>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                   <input
