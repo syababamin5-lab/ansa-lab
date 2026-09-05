@@ -290,29 +290,26 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
                           setSelectedInv(inv);
                           setIsPreviewModalOpen(true);
                         }}
-                        className="px-2.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg transition cursor-pointer shadow-xs"
                         title="Cetak Invoice PDF"
                       >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Cetak PDF</span>
+                        <Printer className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => openEditForm(inv)}
-                        className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg transition cursor-pointer shadow-xs"
                         title="Edit Invoice ini"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
+                        <Edit3 className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => handleDeleteInv(inv)}
-                        className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg transition cursor-pointer shadow-xs"
                         title="Hapus Invoice ini"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Hapus</span>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>

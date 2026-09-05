@@ -671,16 +671,17 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                     <td className="py-3 px-4 text-center space-x-1.5">
                       <button
                         onClick={() => { setSelectedReport(rep); setIsPreviewModalOpen(true); }}
-                        className="px-2.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg transition cursor-pointer shadow-xs inline-flex items-center"
+                        title="Cetak BA Preparasi PDF"
                       >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Cetak PDF</span>
+                        <Printer className="w-4 h-4" />
                       </button>
 
                       {subcontractCount > 0 && (
                         <button
                           onClick={() => onOpenSubcontractTrigger(rep)}
-                          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                          className="px-2.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer shadow-xs"
+                          title="Subkontrak Sampel"
                         >
                           <span>Subkontrak</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -689,10 +690,10 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 
                       <button
                         onClick={() => openEditForm(rep)}
-                        className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg transition cursor-pointer shadow-xs inline-flex items-center"
+                        title="Edit BA Preparasi ini"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
+                        <Edit3 className="w-4 h-4" />
                       </button>
 
                       {onSyncToPO && (
@@ -712,10 +713,10 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
 
                       <button
                         onClick={() => handleDeleteRep(rep)}
-                        className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg transition cursor-pointer shadow-xs inline-flex items-center"
+                        title="Hapus BA Preparasi ini"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Hapus</span>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

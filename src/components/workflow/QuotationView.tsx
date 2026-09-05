@@ -368,29 +368,26 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                           setSelectedQuo(q);
                           setIsPreviewModalOpen(true);
                         }}
-                        className="px-2.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-blue-900 hover:bg-blue-800 text-white rounded-lg transition cursor-pointer shadow-xs"
                         title="Cetak Surat Penawaran PDF"
                       >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>Cetak PDF</span>
+                        <Printer className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => openEditForm(q)}
-                        className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg transition cursor-pointer shadow-xs"
                         title="Edit Penawaran Ini"
                       >
-                        <Edit3 className="w-3.5 h-3.5" />
-                        <span>Edit</span>
+                        <Edit3 className="w-4 h-4" />
                       </button>
 
                       <button
                         onClick={() => handleDeleteQuo(q)}
-                        className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        className="p-2 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg transition cursor-pointer shadow-xs"
                         title="Hapus Penawaran Ini"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Hapus</span>
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
