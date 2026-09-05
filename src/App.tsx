@@ -42,6 +42,8 @@ import { MobileTechnicianApp } from './components/mobile/MobileTechnicianApp';
 import { saveStateToCloud, loadStateFromCloud, purgeLegacyLocalStorage, CloudDatabaseState } from './services/cloudSyncService';
 import { LoginView } from './components/LoginView';
 import { GuestBookView } from './components/guestbook/GuestBookView';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from './types/companyProfileTypes';
+import { GuestEntry } from './types/guestBookTypes';
 
 import { CheckCircle2 } from 'lucide-react';
 
@@ -336,6 +338,12 @@ export function App() {
   const [clients, setClients] = useState<Client[]>(() => INITIAL_CLIENTS);
   const [labRekanans, setLabRekanans] = useState<LabRekanan[]>(() => []);
 
+  // Profil Perusahaan & Kop Surat (100% Cloud-First)
+  const [companyProfile, setCompanyProfile] = useState<CompanyProfile>(() => DEFAULT_COMPANY_PROFILE);
+
+  // Buku Tamu Digital (100% Cloud-First, Realtime Sync HP & PC)
+  const [guestEntries, setGuestEntries] = useState<GuestEntry[]>(() => []);
+
   // Selected PO & Sample for drill-down view
   const [selectedPOId, setSelectedPOId] = useState<string | undefined>(undefined);
   const [selectedSampleId, setSelectedSampleId] = useState<string | undefined>(undefined);
@@ -596,6 +604,8 @@ export function App() {
         if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
         if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
         if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+        if (cloudState.companyProfile) setCompanyProfile(cloudState.companyProfile);
+        if (Array.isArray(cloudState.guestEntries)) setGuestEntries(cloudState.guestEntries);
         showGlobalToast('⚡ Data Berhasil Disinkronkan dengan Server Cloud!');
       }
     } catch (e) {
@@ -630,6 +640,8 @@ export function App() {
           if (Array.isArray(cloudState.molds) && cloudState.molds.length > 0) setMoldCatalogue(cloudState.molds);
           if (Array.isArray(cloudState.reamers) && cloudState.reamers.length > 0) setReamerCatalogue(cloudState.reamers);
           if (Array.isArray(cloudState.personnels) && cloudState.personnels.length > 0) setPersonnelCatalogue(cloudState.personnels);
+          if (cloudState.companyProfile) setCompanyProfile(cloudState.companyProfile);
+          if (Array.isArray(cloudState.guestEntries)) setGuestEntries(cloudState.guestEntries);
           if (cloudState.updatedAt) lastSavedAtRef.current = new Date(cloudState.updatedAt).getTime();
         }
       } catch (e) {
@@ -683,6 +695,8 @@ export function App() {
       molds: moldCatalogue,
       reamers: reamerCatalogue,
       personnels: personnelCatalogue,
+      companyProfile,
+      guestEntries,
       updatedAt: new Date(now).toISOString(),
     };
     saveStateToCloud(cloudState).finally(() => {
@@ -707,7 +721,9 @@ export function App() {
     pycCatalogue,
     moldCatalogue,
     reamerCatalogue,
-    personnelCatalogue
+    personnelCatalogue,
+    companyProfile,
+    guestEntries
   ]);
 
   const handleUpdatePersonnelCatalogue = (updated: PersonnelItem[]) => {
@@ -767,6 +783,11 @@ export function App() {
     if (confirm('Reset daftar master personil lab ke bawaan default?')) {
       setPersonnelCatalogue(DEFAULT_PERSONNEL_CATALOGUE);
     }
+  };
+
+  const handleUpdateCompanyProfile = (updated: CompanyProfile) => {
+    setCompanyProfile(updated);
+    showGlobalToast('✅ Profil Perusahaan & Kop Surat berhasil disimpan ke Cloud!');
   };
 
   // Urgent PO Count
@@ -1903,6 +1924,8 @@ export function App() {
         <GuestBookView
           initialMode="checkin"
           isPublicMode={true}
+          entries={guestEntries}
+          onSaveEntries={setGuestEntries}
           onSwitchToLims={() => setGuestBookMode(false)}
         />
       </ErrorBoundary>
@@ -2018,6 +2041,7 @@ export function App() {
                 quotations={quotations}
                 clients={clients}
                 personnelCatalogue={personnelCatalogue}
+                companyProfile={companyProfile}
                 onSaveQuotation={(q) => {
                   setQuotations(prev => {
                     const idx = prev.findIndex(item => item.id === q.id);
@@ -2042,6 +2066,7 @@ export function App() {
                 receipts={sampleReceipts}
                 quotations={quotations}
                 personnelCatalogue={personnelCatalogue}
+                companyProfile={companyProfile}
                 onSaveReceipt={(r) => {
                   setSampleReceipts(prev => {
                     const idx = prev.findIndex(item => item.id === r.id);
@@ -2068,6 +2093,7 @@ export function App() {
                 quotations={quotations}
                 pos={pos}
                 personnelCatalogue={personnelCatalogue}
+                companyProfile={companyProfile}
                 onSaveReport={(rep) => {
                   setSamplePrepReports(prev => {
                     const idx = prev.findIndex(item => item.id === rep.id);
@@ -2119,6 +2145,8 @@ export function App() {
                 notices={subcontractNotices}
                 shippingLetters={subcontractShippingLetters}
                 prepReports={samplePrepReports}
+                personnelCatalogue={personnelCatalogue}
+                companyProfile={companyProfile}
                 onSaveNotice={(sn) => {
                   setSubcontractNotices(prev => {
                     const idx = prev.findIndex(item => item.id === sn.id || item.prepReportNo === sn.prepReportNo);
@@ -2147,7 +2175,7 @@ export function App() {
 
           {activeTab === 'blank_worksheet' && (
             <ErrorBoundary>
-              <BlankWorksheetView prepReports={samplePrepReports} />
+              <BlankWorksheetView prepReports={samplePrepReports} companyProfile={companyProfile} />
             </ErrorBoundary>
           )}
 
@@ -2155,6 +2183,8 @@ export function App() {
             <ErrorBoundary>
               <GuestBookView
                 initialMode="admin"
+                entries={guestEntries}
+                onSaveEntries={setGuestEntries}
               />
             </ErrorBoundary>
           )}
@@ -2172,6 +2202,7 @@ export function App() {
             <ErrorBoundary>
               <InvoiceView
                 invoices={invoices}
+                companyProfile={companyProfile}
                 onSaveInvoice={(inv) => {
                   setInvoices(prev => {
                     const idx = prev.findIndex(item => item.id === inv.id);
@@ -2378,6 +2409,8 @@ export function App() {
                 personnelCatalogue={personnelCatalogue}
                 onUpdatePersonnelCatalogue={handleUpdatePersonnelCatalogue}
                 onResetPersonnelCatalogue={handleResetPersonnelCatalogue}
+                companyProfile={companyProfile}
+                onUpdateCompanyProfile={handleUpdateCompanyProfile}
               />
             </ErrorBoundary>
           )}
@@ -2455,6 +2488,7 @@ export function App() {
             po={activeLHUModal.po}
             personnelList={personnelCatalogue}
             initialSelectedCodes={activeLHUModal.initialSelectedCodes}
+            companyProfile={companyProfile}
             onClose={() => setActiveLHUModal(null)}
           />
         </ErrorBoundary>

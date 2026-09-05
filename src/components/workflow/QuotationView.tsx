@@ -6,17 +6,19 @@ import { getNextDocNo } from '../../utils/docNumbering';
 import { Plus, Printer, FileText, CheckCircle2, DollarSign, Building, Calendar, Edit3, Trash2, X, Download, Tag, Users, ChevronDown, AlertTriangle } from 'lucide-react';
 
 import { PersonnelItem } from '../../types';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { PremiumTestTypeSelector } from '../common/PremiumTestTypeSelector';
 
 interface QuotationViewProps {
   quotations: Quotation[];
   clients: Client[];              // Master data client untuk dropdown
   personnelCatalogue?: PersonnelItem[];
+  companyProfile?: CompanyProfile;
   onSaveQuotation: (quo: Quotation) => void;
   onDeleteQuotation?: (id: string) => void;
 }
 
-export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, clients, personnelCatalogue = [], onSaveQuotation, onDeleteQuotation }) => {
+export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, clients, personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveQuotation, onDeleteQuotation }) => {
   const [selectedQuo, setSelectedQuo] = useState<Quotation | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -697,19 +699,24 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
 
                 {/* ══ KOP SURAT ══════════════════════════════════════════════════ */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px', paddingBottom: '8px', borderBottom: '3px solid #1d4ed8', marginBottom: '10px' }}>
-                  <div style={{ width: '56px', height: '56px', border: '2px solid #1d4ed8', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: '#eff6ff', flexDirection: 'column' }}>
-                    <span style={{ fontSize: '12pt', fontWeight: 900, color: '#1d4ed8', lineHeight: 1 }}>PT</span>
-                    <span style={{ fontSize: '7.5pt', fontWeight: 800, color: '#1d4ed8', letterSpacing: '0.5px' }}>TGI</span>
-                  </div>
+                  <img 
+                    src={companyProfile.logoUrl || '/logo.png'} 
+                    alt="Logo Perusahaan" 
+                    style={{ width: '56px', height: '56px', objectFit: 'contain', flexShrink: 0 }} 
+                  />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: '14pt', fontWeight: 900, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.3px', lineHeight: 1.1 }}>PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
-                    <div style={{ fontSize: '9pt', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '2px' }}>Soil Mechanics Laboratory</div>
+                    <div style={{ fontSize: '14pt', fontWeight: 900, color: '#1d4ed8', textTransform: 'uppercase', letterSpacing: '0.3px', lineHeight: 1.1 }}>
+                      {companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}
+                    </div>
+                    <div style={{ fontSize: '9pt', fontWeight: 700, color: '#334155', textTransform: 'uppercase', letterSpacing: '1.5px', marginTop: '2px' }}>
+                      {companyProfile.labNameEn || companyProfile.labName || 'Soil Mechanics Laboratory'}
+                    </div>
                     <div style={{ fontSize: '7.5pt', color: '#64748b', marginTop: '3px' }}>
-                      Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Kab. Bandung, Jawa Barat 40911
+                      {companyProfile.officeAddress || companyProfile.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Kab. Bandung, Jawa Barat 40911'}
                     </div>
                     <div style={{ fontSize: '7.5pt', color: '#64748b' }}>
-                      Telp/Fax: 022-4572-5093 &nbsp;·&nbsp; Mobile: 0812-1491-4641 &nbsp;·&nbsp;
-                      <span style={{ color: '#1d4ed8' }}>soil_test@terraforma.co.id</span> &nbsp;·&nbsp; www.terraforma.co.id
+                      Telp: {companyProfile.phone || '022-4572-5093'} &nbsp;·&nbsp; Mobile: {companyProfile.mobile || '0812-1491-4641'} &nbsp;·&nbsp;
+                      <span style={{ color: '#1d4ed8' }}>{companyProfile.email || 'soil_test@terraforma.co.id'}</span> &nbsp;·&nbsp; {companyProfile.website || 'www.terraforma.co.id'}
                     </div>
                   </div>
                 </div>
@@ -936,16 +943,18 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                     <div style={{ display: 'flex', justifyContent: 'flex-end', fontSize: '9pt', marginTop: '16px' }}>
                       <div style={{ textAlign: 'center', width: '240px' }}>
                         <div>Hormat Kami,</div>
-                        <div style={{ fontWeight: 700, color: '#1d4ed8' }}>Soil Mechanics Laboratory</div>
-                        <div style={{ fontWeight: 900, color: '#1d4ed8', fontSize: '8.5pt', textTransform: 'uppercase' }}>PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
+                        <div style={{ fontWeight: 700, color: '#1d4ed8' }}>{companyProfile.labNameEn || companyProfile.labName || 'Soil Mechanics Laboratory'}</div>
+                        <div style={{ fontWeight: 900, color: '#1d4ed8', fontSize: '8.5pt', textTransform: 'uppercase' }}>{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
                         
                         <div style={{ height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px 0', position: 'relative' }}>
-                          {/* CAP LOGO TERRAFORMA DI KIRI TTD (MENEMPEL DI TTD & TRANSPARAN REALISTIS) */}
-                          <img 
-                            src="/logo.png" 
-                            alt="Cap Stempel Logo PT. Terraforma Geoteknik Indonesia" 
-                            style={{ position: 'absolute', bottom: '-4px', left: '10px', width: '64px', height: '64px', objectFit: 'contain', mixBlendMode: 'multiply', opacity: 0.8, transform: 'rotate(-6deg)', pointerEvents: 'none', zIndex: 20 }} 
-                          />
+                          {/* CAP STEMPEL RESMI (TERPISAH DARI LOGO - MENGGUNAKAN STAMP URL) */}
+                          {(companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png') && (
+                            <img 
+                              src={companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png'} 
+                              alt="Cap Stempel Resmi" 
+                              style={{ position: 'absolute', bottom: '-4px', left: '10px', width: '64px', height: '64px', objectFit: 'contain', mixBlendMode: 'multiply', opacity: 0.82, transform: 'rotate(-6deg)', pointerEvents: 'none', zIndex: 20 }} 
+                            />
+                          )}
 
                           {signerSignature ? (
                             <img 
@@ -972,7 +981,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                 {/* ══ FOOTER ════════════════════════════════════════════════════ */}
                 <div style={{ marginTop: 'auto', borderTop: '1px solid #e2e8f0', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '7.5pt', color: '#94a3b8' }}>
                   <span>No. Dok: {selectedQuo.quotationNo}</span>
-                  <span>PT. Terraforma Geoteknik Indonesia — Soil Mechanics Laboratory</span>
+                  <span>{companyProfile.companyName || 'PT. Terraforma Geoteknik Indonesia'} — {companyProfile.labNameEn || 'Soil Mechanics Laboratory'}</span>
                   <span>Hal. 1 / {Math.ceil(selectedQuo.items.length / 15) || 1}</span>
                 </div>
 

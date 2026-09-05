@@ -1,6 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Sample, PurchaseOrder, PersonnelItem } from '../types';
 import { LHUSheetCode } from '../types/lhuTypes';
+import { CompanyProfile } from '../types/companyProfileTypes';
 import { bindLHUData } from '../utils/lhuDataBinder';
 import { LHUViewRenderer } from './lhu/LHUViewRenderer';
 import { Printer, X, FileText, CheckCircle2, Download, Loader2, ZoomIn, ZoomOut } from 'lucide-react';
@@ -10,6 +11,7 @@ interface LHUReportModalProps {
   sample: Sample;
   po: PurchaseOrder;
   personnelList: PersonnelItem[];
+  companyProfile?: CompanyProfile;
   initialSelectedCodes?: LHUSheetCode[];
   onClose: () => void;
 }
@@ -73,6 +75,7 @@ export const LHUReportModal: React.FC<LHUReportModalProps> = ({
   sample,
   po,
   personnelList,
+  companyProfile,
   initialSelectedCodes,
   onClose
 }) => {
@@ -259,7 +262,7 @@ export const LHUReportModal: React.FC<LHUReportModalProps> = ({
                   className="lhu-sheet-wrapper origin-top mb-16 print:scale-100 print:m-0 print:page-break-after-always transition-transform duration-150"
                   style={{ zoom: zoomLevel }}
                 >
-                  <LHUViewRenderer sheetCode={item.code} boundData={boundData} />
+                  <LHUViewRenderer sheetCode={item.code} boundData={boundData} companyProfile={companyProfile} />
                 </div>
               );
             })

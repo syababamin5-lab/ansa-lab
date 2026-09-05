@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   GuestEntry,
   GUEST_PURPOSE_OPTIONS,
@@ -6,6 +6,11 @@ import {
   getDynamicLabHosts,
   INITIAL_GUEST_ENTRIES
 } from '../../types/guestBookTypes';
+import {
+  saveGuestEntryDirectToCloud,
+  updateGuestEntryInCloud,
+  loadGuestEntriesFromCloud
+} from '../../services/cloudSyncService';
 import { SignatureCanvas } from '../common/SignatureCanvas';
 import {
   UserCheck,
@@ -35,24 +40,60 @@ import {
   ChevronDown,
   PackageCheck,
   MessageSquare,
-  Check
+  Check,
+  RefreshCw
 } from 'lucide-react';
 
 interface GuestBookViewProps {
   initialMode?: 'checkin' | 'admin';
   isPublicMode?: boolean;
   onSwitchToLims?: () => void;
+  entries?: GuestEntry[];
+  onSaveEntries?: (entries: GuestEntry[]) => void;
 }
 
 export const GuestBookView: React.FC<GuestBookViewProps> = ({
   initialMode = 'checkin',
   isPublicMode = false,
-  onSwitchToLims
+  onSwitchToLims,
+  entries: propEntries,
+  onSaveEntries
 }) => {
   const [mode, setMode] = useState<'checkin' | 'admin' | 'poster'>(initialMode);
   
-  // Guest Entries State
-  const [entries, setEntries] = useState<GuestEntry[]>(INITIAL_GUEST_ENTRIES);
+  // Guest Entries State (100% Cloud-First)
+  const [entries, setEntries] = useState<GuestEntry[]>(() => propEntries || []);
+  const [isCloudLoading, setIsCloudLoading] = useState(false);
+
+  // Sync with propEntries if provided
+  useEffect(() => {
+    if (propEntries) {
+      setEntries(propEntries);
+    }
+  }, [propEntries]);
+
+  // Load latest entries directly from Cloud Redis on mount & on interval
+  const fetchCloudEntries = useCallback(async (showLoading = false) => {
+    if (showLoading) setIsCloudLoading(true);
+    try {
+      const cloudData = await loadGuestEntriesFromCloud();
+      setEntries(cloudData);
+      onSaveEntries?.(cloudData);
+    } catch (e) {
+      console.warn('Failed to load guest entries from cloud:', e);
+    } finally {
+      if (showLoading) setIsCloudLoading(false);
+    }
+  }, [onSaveEntries]);
+
+  useEffect(() => {
+    fetchCloudEntries(true);
+    // Polling setiap 8 detik agar tamu yang check in di HP langsung muncul di PC secara real-time
+    const interval = setInterval(() => {
+      fetchCloudEntries(false);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [fetchCloudEntries]);
 
   // Form Fields State
   const [fullName, setFullName] = useState('');
@@ -160,8 +201,14 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
       notes: notes.trim() || undefined
     };
 
-    setTimeout(() => {
-      setEntries(prev => [newEntry, ...prev]);
+    (async () => {
+      try {
+        const updatedList = await saveGuestEntryDirectToCloud(newEntry);
+        setEntries(updatedList);
+        onSaveEntries?.(updatedList);
+      } catch (err) {
+        setEntries(prev => [newEntry, ...prev]);
+      }
       setLastCheckIn(newEntry);
       setIsSubmitting(false);
       // Reset form
@@ -176,17 +223,31 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
       setCustomHost('');
       setNotes('');
       setSignatureUrl('');
-    }, 600);
+    })();
   };
 
   // Handle Guest Check Out
-  const handleCheckOutGuest = (entryId: string) => {
+  const handleCheckOutGuest = async (entryId: string) => {
     const now = new Date();
     const formattedOutDate = now.toLocaleDateString('id-ID', {
       day: '2-digit',
       month: 'short',
       year: 'numeric'
     }) + `, ${now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB`;
+
+    try {
+      const updatedList = await updateGuestEntryInCloud(entryId, {
+        status: 'Checked Out',
+        checkOutTime: formattedOutDate
+      });
+      if (updatedList && updatedList.length > 0) {
+        setEntries(updatedList);
+        onSaveEntries?.(updatedList);
+        return;
+      }
+    } catch (e) {
+      console.warn('Failed to update checkout in cloud:', e);
+    }
 
     setEntries(prev => prev.map(entry => {
       if (entry.id === entryId) {
@@ -199,6 +260,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
       return entry;
     }));
   };
+
 
   // Handle Export to Native Formatted Excel (.xls)
   const handleExportExcel = () => {
@@ -1012,6 +1074,16 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
                   </div>
 
                   <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => fetchCloudEntries(true)}
+                      disabled={isCloudLoading}
+                      className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer disabled:opacity-50"
+                      title="Sinkronisasi & Ambil Data Tamu Terbaru dari Cloud Redis"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isCloudLoading ? 'animate-spin' : ''}`} />
+                      <span>{isCloudLoading ? 'Sinkron...' : 'Refresh Cloud'}</span>
+                    </button>
+
                     <button
                       onClick={handleExportExcel}
                       className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-xs transition active:scale-95 cursor-pointer"

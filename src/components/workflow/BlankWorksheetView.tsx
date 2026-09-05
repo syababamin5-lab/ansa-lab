@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { BlankWorksheetConfig, SamplePrepReport } from '../../types/workflowTypes';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { FileSpreadsheet, Printer, CheckCircle2, X } from 'lucide-react';
 
 interface BlankWorksheetViewProps {
   prepReports: SamplePrepReport[];
+  companyProfile?: CompanyProfile;
 }
 
-export const BlankWorksheetView: React.FC<BlankWorksheetViewProps> = ({ prepReports }) => {
+export const BlankWorksheetView: React.FC<BlankWorksheetViewProps> = ({ prepReports, companyProfile = DEFAULT_COMPANY_PROFILE }) => {
   const [selectedConfig, setSelectedConfig] = useState<BlankWorksheetConfig>({
     sampleCode: 'BH-1 (2.00-2.50m)',
     boreholeNo: 'BH-1',
@@ -120,11 +122,11 @@ export const BlankWorksheetView: React.FC<BlankWorksheetViewProps> = ({ prepRepo
                 {/* KOP SURAT */}
                 <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+                    <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-14 h-14 object-contain" />
                     <div>
-                      <h1 className="text-base font-black text-blue-900 tracking-wider">PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
-                      <p className="text-[10px] text-slate-600 font-bold uppercase">Geotechnical Engineering &amp; Soil Mechanics Laboratory</p>
-                      <p className="text-[9px] text-slate-500">Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung · Telp: 081214914641</p>
+                      <h1 className="text-base font-black text-blue-900 tracking-wider">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</h1>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase">{companyProfile.labNameEn || 'Geotechnical Engineering & Soil Mechanics Laboratory'}</p>
+                      <p className="text-[9px] text-slate-500">{companyProfile.officeAddress || companyProfile.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung'} · Telp: {companyProfile.mobile || companyProfile.phone || '081214914641'}</p>
                     </div>
                   </div>
                   <div className="text-right">

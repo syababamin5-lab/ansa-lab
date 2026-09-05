@@ -56,36 +56,5 @@ export function getDynamicLabHosts(): string[] {
   return result;
 }
 
-export const INITIAL_GUEST_ENTRIES: GuestEntry[] = [
-  {
-    id: 'gst-20260902-001',
-    fullName: 'Budi Santoso, S.T.',
-    institution: 'PT. Wijaya Karya (Persero) Tbk',
-    phone: '0812-3456-7890',
-    email: 'budi.santoso@wika.co.id',
-    guestCount: 2,
-    purpose: 'Pengiriman / Serah Terima Sampel Uji',
-    hostName: 'Rafi, A.Md. (Analis Utama / Penguji Lab)',
-    signatureUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80"><path d="M 10 40 Q 50 10 90 40 T 170 40" stroke="black" stroke-width="2" fill="none"/></svg>',
-    timestamp: '2026-09-02T08:15:00.000Z',
-    checkInTime: '02 Sep 2026, 08:15 WIB',
-    status: 'Checked In',
-    notes: 'Mengirim 4 sampel UDS tanah proyek Tol Cisumdawu'
-  },
-  {
-    id: 'gst-20260901-002',
-    fullName: 'Ir. Hendra Gunawan',
-    institution: 'PT. Transka Dharma Konsultan',
-    phone: '0813-9876-5432',
-    email: 'hendra@transka.co.id',
-    guestCount: 1,
-    purpose: 'Konsultasi & Diskusi Hasil Test Geoteknik',
-    hostName: 'Yustiaji, S.T., M.T. (Kepala / Manager Laboratorium)',
-    signatureUrl: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="80"><path d="M 20 50 Q 70 20 120 50 T 180 30" stroke="black" stroke-width="2" fill="none"/></svg>',
-    timestamp: '2026-09-01T14:30:00.000Z',
-    checkInTime: '01 Sep 2026, 14:30 WIB',
-    status: 'Checked Out',
-    checkOutTime: '01 Sep 2026, 16:00 WIB',
-    notes: 'Diskusi hasil uji Triaxial CU Bor1-UDS-1'
-  }
-];
+export const INITIAL_GUEST_ENTRIES: GuestEntry[] = [];
+

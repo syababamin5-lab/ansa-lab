@@ -58,8 +58,12 @@ import {
   DollarSign
 } from 'lucide-react';
 import { getStoredMasterPrices, saveStoredMasterPrices, INITIAL_MASTER_PRICE_CATALOG, MasterPriceItem } from '../data/masterPriceCatalog';
+import { CompanyProfileSettingsView } from './settings/CompanyProfileSettingsView';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../types/companyProfileTypes';
 
 interface SettingsViewProps {
+  companyProfile?: CompanyProfile;
+  onUpdateCompanyProfile?: (profile: CompanyProfile) => void;
   testCatalogue: MatrixTestInfo[];
   onUpdateCatalogue: (updated: MatrixTestInfo[]) => void;
   onResetCatalogue: () => void;
@@ -148,11 +152,13 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
   reamerCatalogue = DEFAULT_REAMER_CATALOGUE,
   onUpdateReamerCatalogue = () => {},
   onResetReamerCatalogue = () => {},
+  companyProfile = DEFAULT_COMPANY_PROFILE,
+  onUpdateCompanyProfile = () => {},
 }) => {
   // Helper: parse decimal input that may use comma or dot
   const localeParseFloat = (val: string): number => parseFloat(String(val).replace(/,/g, '.')) || 0;
 
-  const [activeSubTab, setActiveSubTab] = useState<'prices' | 'tests' | 'containers' | 'ds_containers' | 'rings' | 'consol_rings' | 'ds_rings' | 'trx_rings' | 'uct_rings' | 'pycnometers' | 'molds' | 'cbr_molds' | 'reamers' | 'cbr_reamers' | 'sample_types' | 'personnel'>('prices');
+  const [activeSubTab, setActiveSubTab] = useState<'prices' | 'tests' | 'containers' | 'ds_containers' | 'rings' | 'consol_rings' | 'ds_rings' | 'trx_rings' | 'uct_rings' | 'pycnometers' | 'molds' | 'cbr_molds' | 'reamers' | 'cbr_reamers' | 'sample_types' | 'personnel' | 'company_profile'>('company_profile');
   const [savedFeedback, setSavedFeedback] = useState<string | null>(null);
 
   // Master Prices State
@@ -813,8 +819,31 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
         </div>
       </div>
 
-      {/* ─── 3 CATEGORY MAIN CARDS NAVIGATION ─── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 w-full">
+      {/* ─── 4 CATEGORY MAIN CARDS NAVIGATION ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 w-full">
+        {/* CATEGORY 0: KOP SURAT & PROFIL LAB */}
+        <button
+          onClick={() => setActiveSubTab('company_profile')}
+          className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer flex items-center justify-between shadow-xs ${
+            activeSubTab === 'company_profile'
+              ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-500 ring-2 ring-blue-500/20'
+              : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`p-2.5 rounded-xl ${activeSubTab === 'company_profile' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : 'bg-slate-100 text-slate-600'}`}>
+              <Building2 className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-extrabold text-slate-900">Kop Surat &amp; Profil Lab</h4>
+              <p className="text-[10px] text-slate-500 font-medium">Logo, Cap Stempel, Rekening, TTD</p>
+            </div>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-blue-800">
+            Form
+          </span>
+        </button>
+
         {/* CATEGORY 1: TARIF & KATALOG */}
         <button
           onClick={() => {
@@ -894,7 +923,8 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
       </div>
 
       {/* ─── SUB-SEGMENTED PILL CONTROLS FOR ACTIVE CATEGORY ─── */}
-      <div className="bg-slate-100/90 p-2 rounded-2xl border border-slate-200/90 w-full shadow-xs">
+      {activeSubTab !== 'company_profile' && (
+        <div className="bg-slate-100/90 p-2 rounded-2xl border border-slate-200/90 w-full shadow-xs">
         {/* SUB-TABS DARI KATEGORI 1 (TARIF & KATALOG) */}
         {['prices', 'tests', 'sample_types'].includes(activeSubTab) && (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 w-full">
@@ -1117,6 +1147,15 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
           </div>
         )}
       </div>
+      )}
+
+      {/* TAB: KOP SURAT & PROFIL PERUSAHAAN */}
+      {activeSubTab === 'company_profile' && (
+        <CompanyProfileSettingsView
+          companyProfile={companyProfile}
+          onSaveCompanyProfile={onUpdateCompanyProfile}
+        />
+      )}
 
       {/* TAB 0: MASTER TARIF & HARGA UJI (PRICES) */}
       {activeSubTab === 'prices' && (

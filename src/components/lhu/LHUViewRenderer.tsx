@@ -3,12 +3,15 @@ import { LHUSheetCode, LHUBoundData, LHUValueDisplay } from '../../types/lhuType
 import { LHUHeader, LHUFooter } from './LHUHeaderFooter';
 import { LHUPageContainer } from './LHUPageContainer';
 
+import { CompanyProfile } from '../../types/companyProfileTypes';
+
 interface LHUViewRendererProps {
   sheetCode: LHUSheetCode;
   boundData: LHUBoundData;
+  companyProfile?: CompanyProfile;
 }
 
-export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, boundData }) => {
+export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, boundData, companyProfile }) => {
   const { header, testTypeName, standard, parameters } = boundData;
 
   const renderValBadge = (item?: LHUValueDisplay) => {
@@ -234,6 +237,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             titleIndo="UJI KONSOLIDASI"
             titleEn="(CONSOLIDATION TEST)"
             standardStr="SNI 2812:2011 / ASTM D2435"
+            companyProfile={companyProfile}
           />
 
           <div className="flex-1 my-2 space-y-2 text-[8.5px] font-sans overflow-hidden">
@@ -496,7 +500,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             </div>
           </div>
 
-          <LHUFooter header={headerP1} sheetCode="LHU_Konsolidasi" />
+          <LHUFooter header={headerP1} sheetCode="LHU_Konsolidasi" companyProfile={companyProfile} />
         </LHUPageContainer>
 
         {/* PAGE 2 (LAMPIRAN / APPENDIX) */}
@@ -506,6 +510,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             titleIndo="LAMPIRAN / APPENDIX"
             titleEn="(CONSOLIDATION TEST TAYLOR PLOTS & PHOTOGRAPHS)"
             standardStr="SNI 2812:2011 / ASTM D2435"
+            companyProfile={companyProfile}
           />
 
           <div className="flex-1 my-2 space-y-2 text-[8.5px] font-sans overflow-hidden">
@@ -540,7 +545,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             </div>
           </div>
 
-          <LHUFooter header={headerP2} sheetCode="LHU_Konsolidasi" />
+          <LHUFooter header={headerP2} sheetCode="LHU_Konsolidasi" companyProfile={companyProfile} />
         </LHUPageContainer>
       </div>
     );
@@ -984,7 +989,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             </div>
           </div>
 
-          <LHUFooter header={header} sheetCode="LHU_UCT" />
+          <LHUFooter header={header} sheetCode="LHU_UCT" companyProfile={companyProfile} />
         </LHUPageContainer>
 
         {/* PAGE 2: LAMPIRAN / APPENDIX (FOTO PENGUJIAN & DOKUMENTASI UCT MATCHING LHU-UCT.pdf) */}
@@ -995,6 +1000,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             titleEn="UJI KUAT TEKAN BEBAS (UNCONFINED COMPRESSION TEST)"
             standardStr="SNI 3638:2012 / ASTM D2166"
             pageStr="2 dari 2"
+            companyProfile={companyProfile}
           />
 
           <div className="flex-1 space-y-4 py-2 font-sans text-[8.5px]">
@@ -1042,7 +1048,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
             </div>
           </div>
 
-          <LHUFooter header={header} sheetCode="LHU_UCT" />
+          <LHUFooter header={header} sheetCode="LHU_UCT" companyProfile={companyProfile} />
         </LHUPageContainer>
       </div>
     );
@@ -1056,6 +1062,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
         titleIndo={sheetCode === 'LHU_PP' ? 'LAPORAN HASIL PENGUJIAN SIFAT FISIK TANAH' : testTypeName}
         titleEn={sheetCode === 'LHU_PP' ? '(PHYSICAL PROPERTIES LABORATORY TEST REPORT)' : `(${boundData.testCode} LABORATORY REPORT)`}
         standardStr={sheetCode === 'LHU_PP' ? 'SNI 1964:2008 / SNI 1965:2008 / SNI 2813:2008' : standard}
+        companyProfile={companyProfile}
       />
 
       {/* 2. AREA UTAMA TABEL HASIL & GRAFIK (MATCHING QMS-RPS-001.xlsx 100%) */}
@@ -3708,7 +3715,7 @@ export const LHUViewRenderer: React.FC<LHUViewRendererProps> = ({ sheetCode, bou
       </div>
 
       {/* 3. TANDA TANGAN & DISCLAIMER FOOTER */}
-      <LHUFooter header={header} sheetCode={sheetCode} />
+      <LHUFooter header={header} sheetCode={sheetCode} companyProfile={companyProfile} />
     </LHUPageContainer>
   );
 };

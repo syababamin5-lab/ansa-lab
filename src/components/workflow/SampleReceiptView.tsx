@@ -5,11 +5,13 @@ import { getNextDocNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
 
 import { PersonnelItem } from '../../types';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 
 interface SampleReceiptViewProps {
   receipts: SampleReceipt[];
   quotations?: Quotation[];
   personnelCatalogue?: PersonnelItem[];
+  companyProfile?: CompanyProfile;
   onSaveReceipt: (receipt: SampleReceipt) => void;
   onDeleteReceipt?: (id: string) => void;
 }
@@ -17,7 +19,7 @@ interface SampleReceiptViewProps {
 const DAYS_INDO = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 const MONTHS_INDO = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
-export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, quotations = [], personnelCatalogue = [], onSaveReceipt, onDeleteReceipt }) => {
+export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, quotations = [], personnelCatalogue = [], companyProfile = DEFAULT_COMPANY_PROFILE, onSaveReceipt, onDeleteReceipt }) => {
   const [selectedReceipt, setSelectedReceipt] = useState<SampleReceipt | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -826,10 +828,10 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
               <div className="w-[210mm] bg-white text-slate-900 p-8 shadow-2xl font-sans text-xs space-y-4 border border-slate-300 min-h-[297mm] relative">
 
                 <div className="border-b-2 border-blue-900 pb-2 flex items-center gap-3">
-                  <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+                  <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-14 h-14 object-contain" />
                   <div>
-                    <h1 className="text-base font-black text-blue-900 tracking-wider uppercase">PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
-                    <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">SOIL TEST LABORATORY</h2>
+                    <h1 className="text-base font-black text-blue-900 tracking-wider uppercase">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</h1>
+                    <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{companyProfile.labNameEn || companyProfile.labName || 'SOIL TEST LABORATORY'}</h2>
                   </div>
                 </div>
 
@@ -899,7 +901,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                 {/* FOOTER HALAMAN 1 */}
                 <div className="absolute bottom-5 left-8 right-8 border-t border-slate-300 pt-2 flex justify-between items-center text-[9px] text-slate-500 font-mono">
                   <span>No. Dok: <strong className="text-slate-700">{selectedReceipt.receiptNo}</strong></span>
-                  <span className="text-center font-semibold text-slate-600">PT. Terraforma Geoteknik Indonesia — Soil Mechanics Laboratory</span>
+                  <span className="text-center font-semibold text-slate-600">{companyProfile.companyName || 'PT. Terraforma Geoteknik Indonesia'} — {companyProfile.labNameEn || 'Soil Mechanics Laboratory'}</span>
                   <span>Hal. <strong className="text-slate-700">1</strong> / 2</span>
                 </div>
               </div>
@@ -908,10 +910,10 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
               <div className="w-[210mm] bg-white text-slate-900 p-8 shadow-2xl font-sans text-xs space-y-6 border border-slate-300 min-h-[297mm] relative page-break-before-always">
 
                 <div className="border-b-2 border-blue-900 pb-2 flex items-center gap-3">
-                  <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+                  <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-14 h-14 object-contain" />
                   <div>
-                    <h1 className="text-base font-black text-blue-900 tracking-wider uppercase">PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
-                    <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">SOIL TEST LABORATORY</h2>
+                    <h1 className="text-base font-black text-blue-900 tracking-wider uppercase">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</h1>
+                    <h2 className="text-[10px] font-black text-slate-800 uppercase tracking-widest">{companyProfile.labNameEn || companyProfile.labName || 'SOIL TEST LABORATORY'}</h2>
                   </div>
                 </div>
 
@@ -948,7 +950,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                 {/* CLOSING TEXT & PARAF PENERIMA (MASTER PERSONIL INTEGRATION) */}
                 <div className="pt-4 space-y-4">
                   <div className="font-bold text-slate-900 text-xs">
-                    Sampel tersebut telah diterima oleh PT. Terraforma Geoteknik Indonesia
+                    Sampel tersebut telah diterima oleh {companyProfile.companyName || 'PT. Terraforma Geoteknik Indonesia'}
                   </div>
 
                   {(() => {
@@ -967,12 +969,14 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                           <div className="font-bold text-slate-900 text-xs">Paraf penerima sampel,</div>
                           
                           <div className="h-16 flex flex-col items-center justify-end pb-1 relative my-1">
-                            {/* CAP LOGO TERRAFORMA DI KIRI TTD (MENEMPEL DI TTD & TRANSPARAN REALISTIS) */}
-                            <img 
-                              src="/logo.png" 
-                              alt="Cap Stempel Logo PT. Terraforma Geoteknik Indonesia" 
-                              className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
-                            />
+                            {/* CAP STEMPEL RESMI (TERPISAH DARI LOGO - MENGGUNAKAN STAMP URL) */}
+                            {(companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png') && (
+                              <img 
+                                src={companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png'} 
+                                alt="Cap Stempel Resmi" 
+                                className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
+                              />
+                            )}
 
                             {receiverSignature ? (
                               <img 
@@ -1000,7 +1004,7 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                 {/* FOOTER HALAMAN 2 */}
                 <div className="absolute bottom-5 left-8 right-8 border-t border-slate-300 pt-2 flex justify-between items-center text-[9px] text-slate-500 font-mono">
                   <span>No. Dok: <strong className="text-slate-700">{selectedReceipt.receiptNo}</strong></span>
-                  <span className="text-center font-semibold text-slate-600">PT. Terraforma Geoteknik Indonesia — Soil Mechanics Laboratory</span>
+                  <span className="text-center font-semibold text-slate-600">{companyProfile.companyName || 'PT. Terraforma Geoteknik Indonesia'} — {companyProfile.labNameEn || 'Soil Mechanics Laboratory'}</span>
                   <span>Hal. <strong className="text-slate-700">2</strong> / 2</span>
                 </div>
 

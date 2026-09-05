@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SubcontractNotice, SubcontractShippingLetter, SamplePrepReport, SubcontractItem, PersonnelItem } from '../../types/workflowTypes';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { Building2, Plus, Printer, FileText, CheckCircle2, AlertTriangle, Send, X, ShieldCheck, FileCheck } from 'lucide-react';
 import { getNextDocNo } from '../../utils/docNumbering';
 
@@ -8,6 +9,7 @@ interface SubcontractNoticeViewProps {
   shippingLetters: SubcontractShippingLetter[];
   prepReports?: SamplePrepReport[];
   personnelCatalogue?: PersonnelItem[];
+  companyProfile?: CompanyProfile;
   onSaveNotice: (notice: SubcontractNotice) => void;
   onSaveShippingLetter: (letter: SubcontractShippingLetter) => void;
 }
@@ -17,6 +19,7 @@ export const SubcontractNoticeView: React.FC<SubcontractNoticeViewProps> = ({
   shippingLetters,
   prepReports = [],
   personnelCatalogue = [],
+  companyProfile = DEFAULT_COMPANY_PROFILE,
   onSaveNotice,
   onSaveShippingLetter
 }) => {
@@ -338,11 +341,11 @@ export const SubcontractNoticeView: React.FC<SubcontractNoticeViewProps> = ({
               <div className="w-[210mm] bg-white text-slate-900 p-8 shadow-2xl font-sans text-xs space-y-4 border border-slate-300 min-h-[297mm]">
                 <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+                    <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-14 h-14 object-contain" />
                     <div>
-                      <h1 className="text-base font-black text-blue-900 tracking-wider">PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
-                      <p className="text-[10px] text-slate-600 font-bold uppercase">Geotechnical Engineering &amp; Soil Mechanics Laboratory</p>
-                      <p className="text-[9px] text-slate-500">Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung · Telp: 081214914641</p>
+                      <h1 className="text-base font-black text-blue-900 tracking-wider">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</h1>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase">{companyProfile.labNameEn || 'Geotechnical Engineering & Soil Mechanics Laboratory'}</p>
+                      <p className="text-[9px] text-slate-500">{companyProfile.officeAddress || companyProfile.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung'} · Telp: {companyProfile.mobile || companyProfile.phone || '081214914641'}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -456,15 +459,17 @@ export const SubcontractNoticeView: React.FC<SubcontractNoticeViewProps> = ({
 
                       <div className="flex justify-center">
                         <div className="w-60 font-sans space-y-1">
-                          <div className="font-bold uppercase text-[10px] text-slate-600">PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
+                          <div className="font-bold uppercase text-[10px] text-slate-600">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
                           
                           <div className="h-16 flex flex-col items-center justify-end pb-1 relative my-1">
-                            {/* CAP LOGO TERRAFORMA DI KIRI TTD (MENEMPEL DI TTD & TRANSPARAN REALISTIS) */}
-                            <img 
-                              src="/logo.png" 
-                              alt="Cap Stempel Logo PT. Terraforma Geoteknik Indonesia" 
-                              className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
-                            />
+                            {/* CAP STEMPEL RESMI (TERPISAH DARI LOGO - MENGGUNAKAN STAMP URL) */}
+                            {(companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png') && (
+                              <img 
+                                src={companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png'} 
+                                alt="Cap Stempel Resmi" 
+                                className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
+                              />
+                            )}
 
                             {headOfLab.signatureUrl ? (
                               <img 
@@ -517,11 +522,11 @@ export const SubcontractNoticeView: React.FC<SubcontractNoticeViewProps> = ({
               <div className="w-[210mm] bg-white text-slate-900 p-8 shadow-2xl font-sans text-xs space-y-4 border border-slate-300 min-h-[297mm]">
                 <div className="border-b-2 border-slate-900 pb-3 flex justify-between items-center">
                   <div className="flex items-center gap-3">
-                    <img src="/logo.png" alt="Logo" className="w-14 h-14 object-contain" />
+                    <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-14 h-14 object-contain" />
                     <div>
-                      <h1 className="text-base font-black text-blue-900 tracking-wider">PT. TERRAFORMA GEOTEKNIK INDONESIA</h1>
-                      <p className="text-[10px] text-slate-600 font-bold uppercase">Geotechnical Engineering &amp; Soil Mechanics Laboratory</p>
-                      <p className="text-[9px] text-slate-500">Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung · Telp: 081214914641</p>
+                      <h1 className="text-base font-black text-blue-900 tracking-wider">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</h1>
+                      <p className="text-[10px] text-slate-600 font-bold uppercase">{companyProfile.labNameEn || 'Geotechnical Engineering & Soil Mechanics Laboratory'}</p>
+                      <p className="text-[9px] text-slate-500">{companyProfile.officeAddress || companyProfile.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Bandung'} · Telp: {companyProfile.mobile || companyProfile.phone || '081214914641'}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -636,7 +641,7 @@ export const SubcontractNoticeView: React.FC<SubcontractNoticeViewProps> = ({
                     <div className="font-bold text-slate-900 underline">(Tanda Tangan &amp; Stempel)</div>
                   </div>
                   <div className="space-y-12">
-                    <div className="font-bold uppercase text-[10px] text-slate-600">PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
+                    <div className="font-bold uppercase text-[10px] text-slate-600">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
                     <div className="font-bold text-slate-900 underline">Manajer Mutu Lab</div>
                   </div>
                 </div>

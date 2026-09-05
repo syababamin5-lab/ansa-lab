@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { SamplePrepReport, SamplePrepItem, SamplePrepPairPhoto, SampleReceipt, SampleConditionStatus, Quotation } from '../../types/workflowTypes';
 import { PurchaseOrder, PersonnelItem } from '../../types';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
 import { Scissors, Plus, Printer, CheckCircle2, AlertTriangle, X, Image as ImageIcon, ArrowRight, ArrowUpRight, Edit3, Trash2, Link, Camera, ChevronDown, FlaskConical, PackageX, Truck, SlidersHorizontal, FileSpreadsheet, Upload, Download } from 'lucide-react';
 import { getNextDocNo } from '../../utils/docNumbering';
 import { parseSoilLabExcel, downloadSampleImportTemplate } from '../../utils/excelParser';
@@ -14,6 +15,7 @@ export interface SamplePrepViewProps {
   quotations?: Quotation[];
   pos?: PurchaseOrder[];
   personnelCatalogue?: PersonnelItem[];
+  companyProfile?: CompanyProfile;
   onSaveReport: (report: SamplePrepReport) => void;
   onDeleteReport: (id: string) => void;
   onOpenSubcontractTrigger?: (report: SamplePrepReport) => void;
@@ -79,6 +81,7 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
   quotations = [],
   pos = [],
   personnelCatalogue = [],
+  companyProfile = DEFAULT_COMPANY_PROFILE,
   onSaveReport,
   onDeleteReport,
   onOpenSubcontractTrigger,
@@ -1244,14 +1247,14 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
               {/* ─── HALAMAN 1: TABEL EVALUASI ──────────────────────────────── */}
               <div className="w-[210mm] max-w-full bg-white text-slate-900 p-7 shadow-2xl font-sans text-[10px] space-y-2.5 border border-slate-300 min-h-[297mm] relative overflow-hidden">
                 
-                {/* OFFICIAL KOP SURAT TERRAFORMA */}
+                {/* OFFICIAL KOP SURAT */}
                 <div className="border-b-2 border-slate-900 pb-2 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <img src="/logo.png" alt="Terraforma Logo" className="w-12 h-12 object-contain" />
+                    <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-12 h-12 object-contain" />
                     <div>
-                      <div className="font-black text-sm tracking-wider text-slate-950 uppercase leading-tight">PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
-                      <div className="text-[8.5px] font-bold text-slate-700 uppercase tracking-tight">Soil Mechanics &amp; Geotechnical Laboratory Testing</div>
-                      <div className="text-[7px] text-slate-500 font-sans">Jl. Terusan Jakarta No. 175, Antapani, Bandung — Jawa Barat | Email: lab@terraforma.co.id</div>
+                      <div className="font-black text-sm tracking-wider text-slate-950 uppercase leading-tight">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
+                      <div className="text-[8.5px] font-bold text-slate-700 uppercase tracking-tight">{companyProfile.taglineEn || companyProfile.labNameEn || 'Soil Mechanics & Geotechnical Laboratory Testing'}</div>
+                      <div className="text-[7px] text-slate-500 font-sans">{companyProfile.labAddress || companyProfile.officeAddress || 'Jl. Terusan Jakarta No. 175, Antapani, Bandung — Jawa Barat'} | Email: {companyProfile.email || 'lab@terraforma.co.id'}</div>
                     </div>
                   </div>
                   <div className="text-right font-mono text-[8px] text-slate-600">
@@ -1503,19 +1506,21 @@ export const SamplePrepView: React.FC<SamplePrepViewProps> = ({
                                       Bandung, {selectedReport.date}
                                     </p>
                                     <p className="text-[10.5px] font-black text-slate-900">
-                                      PT. Terraforma Geoteknik Indonesia
+                                      {companyProfile.companyName || 'PT. Terraforma Geoteknik Indonesia'}
                                     </p>
                                     <p className="text-[9px] font-medium text-slate-600">
-                                      Kepala Laboratorium Mekanika Tanah
+                                      {companyProfile.headOfLabTitle || 'Kepala Laboratorium Mekanika Tanah'}
                                     </p>
 
                                     <div className="h-16 flex flex-col items-center justify-end pb-1 relative my-1">
-                                      {/* CAP LOGO TERRAFORMA DI KIRI TTD (MENEMPEL DI TTD & TRANSPARAN REALISTIS) */}
-                                      <img 
-                                        src="/logo.png" 
-                                        alt="Cap Stempel Logo PT. Terraforma Geoteknik Indonesia" 
-                                        className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
-                                      />
+                                      {/* CAP STEMPEL RESMI (TERPISAH DARI LOGO - MENGGUNAKAN STAMP URL) */}
+                                      {(companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png') && (
+                                        <img 
+                                          src={companyProfile.stampUrl || companyProfile.logoUrl || '/logo.png'} 
+                                          alt="Cap Stempel Resmi" 
+                                          className="absolute bottom-0 left-2 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none z-20 select-none" 
+                                        />
+                                      )}
 
                                       {approverSignature ? (
                                         <img 

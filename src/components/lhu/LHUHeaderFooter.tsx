@@ -1,38 +1,46 @@
 import React from 'react';
 import { LHUHeaderInfo } from '../../types/lhuTypes';
+import { CompanyProfile } from '../../types/companyProfileTypes';
 
 interface LHUHeaderProps {
   header: LHUHeaderInfo;
   titleIndo: string;
   titleEn: string;
   standardStr: string;
+  companyProfile?: CompanyProfile;
 }
 
 export const LHUHeader: React.FC<LHUHeaderProps> = ({
   header,
   titleIndo,
   titleEn,
-  standardStr
+  standardStr,
+  companyProfile
 }) => {
+  const logoUrl = companyProfile?.logoUrl || '/logo.png';
+  const labName = companyProfile?.labName || 'LABORATORIUM MEKANIKA TANAH';
+  const companyName = companyProfile?.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA';
+  const taglineEn = companyProfile?.taglineEn || 'LABORATORY TEST REPORT';
+
   return (
     <div className="space-y-1.5 text-[9.5px] text-slate-900 border-b border-black pb-1.5 font-sans">
       {/* KOP SURAT ATAS (LOGO LEFT + CENTERED TITLE) */}
       <div className="relative border-b border-slate-900 pb-2 pt-1">
         {/* Logo at Left */}
         <div className="absolute left-1 top-1/2 -translate-y-1/2">
-          <img src="/logo.png" alt="Logo Terraforma Geoteknik Indonesia" className="w-14 h-14 object-contain" />
+          <img src={logoUrl} alt={companyName} className="w-14 h-14 object-contain" />
         </div>
 
         {/* Centered Title */}
-        <div className="text-center space-y-0.5">
+        <div className="text-center space-y-0.5 px-14">
           <h1 className="text-[15px] font-black uppercase tracking-wider leading-none text-[#1e40af]">
-            LABORATORIUM MEKANIKA TANAH
+            {labName}
           </h1>
           <h2 className="text-[13px] font-black text-[#1e40af] uppercase leading-tight">
-            PT. TERRA<span className="text-[#dc2626]">FORMA</span> GEOTEKNIK INDONESIA
+            {companyName}
           </h2>
           <p className="text-[9.5px] font-extrabold tracking-widest text-[#64748b] uppercase">
-            LABORATORY TEST REPORT
+            {taglineEn}
           </p>
         </div>
       </div>
@@ -174,6 +182,7 @@ interface LHUFooterProps {
   onlyApprovedBy?: boolean;
   hideSignatures?: boolean;
   sheetCode?: LHUSheetCode;
+  companyProfile?: CompanyProfile;
 }
 
 import QRCode from 'qrcode';
@@ -262,8 +271,20 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
   header,
   onlyApprovedBy = false,
   hideSignatures = false,
-  sheetCode
+  sheetCode,
+  companyProfile
 }) => {
+  const compName = companyProfile?.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA';
+  const labAddr = companyProfile?.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Kec. Soreang, Kabupaten Bandung, Jawa Barat 40911';
+  const labPhone = companyProfile?.mobile ? `Telp: ${companyProfile.mobile}` : (companyProfile?.phone ? `Telp: ${companyProfile.phone}` : 'Telp: 081214914641');
+  const labEmail = companyProfile?.email ? `Email: ${companyProfile.email}` : 'Email: soil_test@terraforma.co.id';
+
+  const n1Indo = companyProfile?.notesLHU1Indo || 'Laporan Hasil Uji ini hanya berlaku untuk contoh yang diuji.';
+  const n1En = companyProfile?.notesLHU1En || 'This test report applies only to the tested sample.';
+  const n2Indo = companyProfile?.notesLHU2Indo || `Dilarang memperbanyak laporan tanpa ijin tertulis dari Laboratorium Mekanika Tanah ${compName}.`;
+  const n2En = companyProfile?.notesLHU2En || `This report shall not be reproduced except in full without written approval from ${compName} Soil Mechanics Laboratory.`;
+  const n3Indo = companyProfile?.notesLHU3Indo || 'Laboratorium tidak bertanggung jawab atas kegiatan pengambilan dan transportasi contoh yang dilakukan oleh pihak lain.';
+  const n3En = companyProfile?.notesLHU3En || 'The laboratory is not responsible for sampling, handling and sample transportation conducted by others.';
   return (
     <div className="space-y-1 text-[8.5px] border-t border-black pt-1 font-sans mt-auto break-inside-avoid print:break-inside-avoid">
       {/* TANDA TANGAN PERSONEL GRID */}
@@ -430,39 +451,39 @@ export const LHUFooter: React.FC<LHUFooterProps> = ({
           {/* Baris 1 */}
           <div className="flex items-start gap-1">
             <span className="shrink-0 font-bold text-slate-700">-</span>
-            <span className="flex-1">Laporan Hasil Uji ini hanya berlaku untuk contoh yang diuji.</span>
+            <span className="flex-1">{n1Indo}</span>
           </div>
           <div className="flex items-start gap-1 text-slate-600 italic">
             <span className="shrink-0 font-bold text-slate-500 not-italic">-</span>
-            <span className="flex-1">This test report applies only to the tested sample.</span>
+            <span className="flex-1">{n1En}</span>
           </div>
 
           {/* Baris 2 */}
           <div className="flex items-start gap-1">
             <span className="shrink-0 font-bold text-slate-700">-</span>
-            <span className="flex-1">Dilarang memperbanyak laporan tanpa ijin tertulis dari Laboratorium Mekanika Tanah PT. TERRAFORMA GEOTEKNIK INDONESIA.</span>
+            <span className="flex-1">{n2Indo}</span>
           </div>
           <div className="flex items-start gap-1 text-slate-600 italic">
             <span className="shrink-0 font-bold text-slate-500 not-italic">-</span>
-            <span className="flex-1">This report shall not be reproduced except in full without written approval from PT. TERRAFORMA GEOTEKNIK INDONESIA Soil Mechanics Laboratory.</span>
+            <span className="flex-1">{n2En}</span>
           </div>
 
           {/* Baris 3 */}
           <div className="flex items-start gap-1">
             <span className="shrink-0 font-bold text-slate-700">-</span>
-            <span className="flex-1">Laboratorium tidak bertanggung jawab atas kegiatan pengambilan dan transportasi contoh yang dilakukan oleh pihak lain.</span>
+            <span className="flex-1">{n3Indo}</span>
           </div>
           <div className="flex items-start gap-1 text-slate-600 italic">
             <span className="shrink-0 font-bold text-slate-500 not-italic">-</span>
-            <span className="flex-1">The laboratory is not responsible for sampling, handling and sample transportation conducted by others.</span>
+            <span className="flex-1">{n3En}</span>
           </div>
         </div>
       </div>
 
       <div className="flex justify-between items-center text-[7.5px] font-semibold bg-[#1e40af] text-white px-2 py-1 rounded-xs shadow-xs">
-        <span>Jl. Terusan Al Fathu Ruko Linggahara 2 No.2, Soreang, Kec. Soreang, Kabupaten Bandung, Jawa Barat 40911</span>
-        <span>Telp: 081214914641</span>
-        <span>Email: soil_test@terraforma.co.id</span>
+        <span className="truncate max-w-[340px]">{labAddr}</span>
+        <span>{labPhone}</span>
+        <span>{labEmail}</span>
       </div>
     </div>
   );

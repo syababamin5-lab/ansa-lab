@@ -5,12 +5,16 @@ import { getStoredMasterPrices, PriceCategoryKey } from '../../data/masterPriceC
 import { getNextDocNo } from '../../utils/docNumbering';
 import { CreditCard, Plus, Printer, FileText, CheckCircle2, DollarSign, Building, Calendar, Edit3, Trash2, X, Download, Tag } from 'lucide-react';
 
+import { PersonnelItem } from '../../types';
+import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from '../../types/companyProfileTypes';
+
 interface InvoiceViewProps {
   invoices: Invoice[];
+  companyProfile?: CompanyProfile;
   onSaveInvoice: (inv: Invoice) => void;
 }
 
-export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, onSaveInvoice }) => {
+export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfile = DEFAULT_COMPANY_PROFILE, onSaveInvoice }) => {
   const [selectedInv, setSelectedInv] = useState<Invoice | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -479,14 +483,14 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, onSaveInvoic
                 {/* KOP SURAT INVOICE */}
                 <div className="border-b-2 border-blue-900 pb-2 flex justify-between items-start">
                   <div className="flex items-center gap-3">
-                    <img src="/logo.png" alt="Logo" className="w-16 h-16 object-contain" />
+                    <img src={companyProfile.logoUrl || '/logo.png'} alt="Logo" className="w-16 h-16 object-contain" />
                     <div>
-                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
-                      <h1 className="text-xl font-black text-blue-900 tracking-tight leading-none">mineArth / ANSA LIMS</h1>
+                      <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
+                      <h1 className="text-xl font-black text-blue-900 tracking-tight leading-none">{companyProfile.labNameEn || companyProfile.labName || 'Soil Mechanics Laboratory'}</h1>
                       <p className="text-[9px] text-slate-600 font-semibold mt-1">
-                        Jl. Terusan Al Fathu Ruko Linggahara 2 No.2 - Soreang, Bandung - Jawa Barat 40911
+                        {companyProfile.officeAddress || companyProfile.labAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2 - Soreang, Bandung - Jawa Barat 40911'}
                       </p>
-                      <p className="text-[9px] text-slate-600 font-semibold">Phone 022-4572-5093 / 0812-1491-4641</p>
+                      <p className="text-[9px] text-slate-600 font-semibold">Phone {companyProfile.phone || '022-4572-5093'} / {companyProfile.mobile || '0812-1491-4641'}</p>
                     </div>
                   </div>
 
@@ -598,31 +602,39 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, onSaveInvoic
                     <div className="font-bold text-blue-900 text-xs border-b border-blue-200 pb-0.5">Pembayaran ditujukan Kepada :</div>
                     <div className="grid grid-cols-12 pt-0.5">
                       <span className="col-span-4 font-semibold text-slate-700">Nama Bank</span>
-                      <span className="col-span-8 font-bold text-slate-900">: {selectedInv.bankName || 'Bank Mandiri'}</span>
+                      <span className="col-span-8 font-bold text-slate-900">: {selectedInv.bankName || companyProfile.bankName || 'Bank Mandiri'}</span>
                     </div>
                     <div className="grid grid-cols-12">
                       <span className="col-span-4 font-semibold text-slate-700">Atas Nama</span>
-                      <span className="col-span-8 font-bold text-slate-900">: {selectedInv.bankAccountName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</span>
+                      <span className="col-span-8 font-bold text-slate-900">: {selectedInv.bankAccountName || companyProfile.bankAccountName || companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</span>
                     </div>
                     <div className="grid grid-cols-12">
                       <span className="col-span-4 font-semibold text-slate-700">No Rekening</span>
-                      <span className="col-span-8 font-bold font-mono text-blue-900 text-xs">: {selectedInv.bankAccountNumber || '133 - 00 - 99 - 00 - 8823'}</span>
+                      <span className="col-span-8 font-bold font-mono text-blue-900 text-xs">: {selectedInv.bankAccountNumber || companyProfile.bankAccountNumber || '133 - 00 - 99 - 00 - 8823'}</span>
                     </div>
                     <div className="grid grid-cols-12">
                       <span className="col-span-4 font-semibold text-slate-700">Konfirmasi Pembayaran</span>
-                      <span className="col-span-8 font-semibold text-slate-900">: Melalui No WA <strong className="font-mono text-blue-900">{selectedInv.waConfirmationNo || '0811-2183-223'}</strong></span>
+                      <span className="col-span-8 font-semibold text-slate-900">: Melalui No WA <strong className="font-mono text-blue-900">{selectedInv.waConfirmationNo || companyProfile.waConfirmationNo || '0811-2183-223'}</strong></span>
                     </div>
                     <div className="pt-1 text-[9.5px] italic text-slate-700 border-t border-slate-300">
-                      <strong>Catatan :</strong> {selectedInv.taxNote || 'Bukti potong pajak pph 23 (2%) untuk dapat dikirim ke PT. Terraforma Geoteknik Indonesia'}
+                      <strong>Catatan :</strong> {selectedInv.taxNote || companyProfile.taxNote || 'Bukti potong pajak pph 23 (2%) untuk dapat dikirim ke PT. Terraforma Geoteknik Indonesia'}
                     </div>
                   </div>
 
                   <div className="col-span-5 text-center flex flex-col justify-between pt-2">
-                    <div className="font-bold text-slate-900 text-xs uppercase">PT. TERRAFORMA GEOTEKNIK INDONESIA</div>
-                    <div className="pt-8 border-b border-slate-900 w-48 mx-auto">
-                      <div className="font-bold text-slate-900 text-xs underline">Ir. Hartawi Riskha, S.T</div>
+                    <div className="font-bold text-slate-900 text-xs uppercase">{companyProfile.companyName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA'}</div>
+                    <div className="relative pt-6 border-b border-slate-900 w-48 mx-auto flex flex-col items-center">
+                      {/* CAP STEMPEL RESMI (TERPISAH DARI LOGO - MENGGUNAKAN STAMP URL) */}
+                      {(companyProfile.stampUrl || companyProfile.logoUrl) && (
+                        <img 
+                          src={companyProfile.stampUrl || companyProfile.logoUrl} 
+                          alt="Cap Stempel Resmi" 
+                          className="absolute -top-3 left-1 w-16 h-16 object-contain mix-blend-multiply opacity-80 rotate-[-6deg] pointer-events-none select-none z-10" 
+                        />
+                      )}
+                      <div className="font-bold text-slate-900 text-xs underline relative z-20">{companyProfile.directorName || 'Ir. Hartawi Riskha, S.T'}</div>
                     </div>
-                    <div className="text-[10px] text-slate-700 font-semibold -mt-2">Interim Operations Director</div>
+                    <div className="text-[10px] text-slate-700 font-semibold -mt-2">{companyProfile.directorTitle || 'Interim Operations Director'}</div>
                   </div>
                 </div>
 
@@ -632,8 +644,8 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, onSaveInvoic
                     "Terima kasih atas kepercayaan dan kerja samanya, semoga kolaborasi baik ini dapat terus berlanjut secara berkelanjutan."
                   </p>
                   <div className="flex justify-between items-center text-[9px] font-semibold text-slate-600 bg-slate-100 p-1.5 rounded-xs border border-slate-200">
-                    <div><strong>SOIL MECHANICS LAB :</strong> Jl. Terusan Al Fathu Ruko Linggahara 2 No.2 - Soreang, Bandung - Jawa Barat 40911</div>
-                    <div>Phone: 022-4572-5093 · Mobile: 0812-1491-4641</div>
+                    <div><strong>{companyProfile.labNameEn || 'SOIL MECHANICS LAB'} :</strong> {companyProfile.labAddress || companyProfile.officeAddress || 'Jl. Terusan Al Fathu Ruko Linggahara 2 No.2 - Soreang, Bandung - Jawa Barat 40911'}</div>
+                    <div>Phone: {companyProfile.phone || '022-4572-5093'} · Mobile: {companyProfile.mobile || '0812-1491-4641'}</div>
                   </div>
                 </div>
 
