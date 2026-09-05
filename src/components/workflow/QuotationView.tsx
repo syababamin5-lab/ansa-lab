@@ -535,8 +535,8 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="col-span-1">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
                   <label className="font-bold text-slate-700 block mb-1">Nama Perusahaan Klien</label>
                   <input
                     type="text"
@@ -546,7 +546,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                     placeholder="PT. Nama Perusahaan"
                   />
                 </div>
-                <div className="col-span-1">
+                <div>
                   <label className="font-bold text-slate-700 block mb-1">Alamat Klien</label>
                   <input
                     type="text"
@@ -554,16 +554,6 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                     onChange={e => { setFormAddress(e.target.value); setIsFormDirty(true); }}
                     className="w-full p-2 border border-slate-300 rounded-lg"
                     placeholder="Jl. Alamat lengkap..."
-                  />
-                </div>
-                <div className="col-span-1">
-                  <label className="font-bold text-slate-700 block mb-1">No. PO Client (Opsional)</label>
-                  <input
-                    type="text"
-                    value={formPoNo}
-                    onChange={e => { setFormPoNo(e.target.value); setIsFormDirty(true); }}
-                    className="w-full p-2 border border-slate-300 rounded-lg font-mono"
-                    placeholder="PO-2026-xxx"
                   />
                 </div>
               </div>
@@ -849,7 +839,6 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                       ['U.p / PIC', selectedQuo.clientContactPerson || '-'],
                       ['Telp', selectedQuo.clientPhone || '-'],
                       ['E-mail', selectedQuo.clientEmail || '-'],
-                      ['No. PO Client', selectedQuo.poNumber || '-'],
                     ] as [string,string][]).map(([lbl, val]) => (
                       <div key={lbl} style={{ display: 'flex', marginBottom: '2px' }}>
                         <span style={{ width: '96px', color: '#475569', fontWeight: 600, flexShrink: 0 }}>{lbl}</span>
