@@ -3130,6 +3130,57 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         prevLoadedSampleIdRef.current = activeSample.id;
       }
 
+      // Aggregate data from all tests for this sample
+      // Sort priority so higher specific tests override general ones
+      const sortedTests = [...(activeSample.tests || [])].sort((a, b) => {
+        const aCode = normalizeTestCode(a.testTypeCode || a.testTypeId || '');
+        const bCode = normalizeTestCode(b.testTypeCode || b.testTypeId || '');
+        if (aCode === 'PP') return -1;
+        if (bCode === 'PP') return 1;
+        return 0;
+      });
+
+      const mergedInputs: Record<string, any> = {};
+
+      sortedTests.forEach(test => {
+        const origInputs = test.originalTechnicianInput?.inputValues || {};
+        const calcInputs = test.calculationData?.inputValues || test.calculationData || {};
+        const combinedInputs = { ...origInputs, ...calcInputs };
+        
+        const hasActualValue = (val: any): boolean => {
+          if (val === undefined || val === null || val === '') return false;
+          if (typeof val === 'number' && isNaN(val)) return false;
+          if (Array.isArray(val)) {
+            return val.some(item => item !== undefined && item !== null && item !== '' && !Number.isNaN(item));
+          }
+          if (typeof val === 'object') {
+            return Object.values(val).some(item => item !== undefined && item !== null && item !== '' && !Number.isNaN(item));
+          }
+          return true;
+        };
+
+        Object.entries(combinedInputs).forEach(([k, v]) => {
+          if (hasActualValue(v)) {
+            mergedInputs[k] = v;
+          }
+        });
+
+        if (test.calculationData?.summaryResults) {
+          Object.entries(test.calculationData.summaryResults).forEach(([k, v]) => {
+            if (hasActualValue(v) && !(k in mergedInputs)) {
+              mergedInputs[k] = v;
+            }
+          });
+        }
+      });
+
+      const cleanNum = (v: any) => {
+        if (v === undefined || v === null || v === '') return '';
+        return String(v);
+      };
+
+      const inputs = mergedInputs;
+
       // Laboratory Personnel & Dates isolated per test type
       if (activeTestSubTab === 'SUMMARY') {
         setTestedBy('');
