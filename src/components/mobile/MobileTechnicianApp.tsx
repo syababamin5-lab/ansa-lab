@@ -212,12 +212,7 @@ export const MobileTechnicianApp: React.FC<MobileTechnicianAppProps> = ({
       };
     });
 
-    // 2. Persist synchronously to localStorage so refresh never loses data
-    try {
-      localStorage.setItem('ansa_lab_pos', JSON.stringify(nextPos));
-    } catch (e) {
-      console.error('Failed to persist POS to localStorage:', e);
-    }
+
 
     // 3. Update React state locally
     setPos(nextPos);

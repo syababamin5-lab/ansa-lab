@@ -18,7 +18,6 @@ import {
 const VERCEL_KV_REST_API_URL = 'https://neat-bengal-180591.upstash.io';
 const VERCEL_KV_REST_API_TOKEN = 'gQAAAAAAAsFvAAIgcDI0Yzk0MGE3ZTZlZWI0NDAwODAyNjgzMDQ1YmNhYjIwNA';
 const STORE_KEY = 'ansa_lab_master_store_v2';
-const LOCAL_CACHE_KEY = 'ansa_lab_vercel_kv_cache_v2';
 
 export interface CloudDatabaseState {
   users: UserProfile[];
@@ -40,6 +39,21 @@ export interface CloudDatabaseState {
   reamers: ReamerItem[];
   personnels: PersonnelItem[];
   updatedAt: string;
+}
+
+/** Bersihkan seluruh jejak cache localStorage lama di browser agar kuota memori browser 100% bersih */
+export function purgeLegacyLocalStorage(): void {
+  try {
+    if (typeof window === 'undefined' || !window.localStorage) return;
+    const allKeys = Object.keys(localStorage);
+    allKeys.forEach(k => {
+      if (k.startsWith('ansa_') || k.startsWith('offline_queue')) {
+        try {
+          localStorage.removeItem(k);
+        } catch (e) {}
+      }
+    });
+  } catch (e) {}
 }
 
 /** State dasar bawaan bersih */
@@ -67,13 +81,9 @@ export function getInitialMasterState(): CloudDatabaseState {
   };
 }
 
-/** Simpan data state secara permanen ke Vercel KV Server Database */
+/** Simpan data state secara permanen HANYA ke Cloud Database (Vercel KV / Upstash Redis), TANPA menyentuh localStorage */
 export async function saveStateToCloud(state: CloudDatabaseState): Promise<boolean> {
   try {
-    // 1. Simpan snapshot cepat ke Local Cache untuk kecepatan UI
-    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(state));
-
-    // 2. Kirim langsung ke Server Vercel KV REST API
     const res = await fetch(VERCEL_KV_REST_API_URL, {
       method: 'POST',
       headers: {
@@ -93,7 +103,7 @@ export async function saveStateToCloud(state: CloudDatabaseState): Promise<boole
   }
 }
 
-/** Ambil data permanen langsung dari Vercel KV Server Database */
+/** Ambil data permanen 100% langsung dari Cloud Server Database (Vercel KV / Upstash Redis) */
 export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
   const defaultState = getInitialMasterState();
 
@@ -113,9 +123,6 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
         const rawString = responseJson.result;
         const cloudData = (typeof rawString === 'string' ? JSON.parse(rawString) : rawString) as CloudDatabaseState;
         
-        // Simpan snapshot Vercel KV terbaru ke local cache
-        localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(cloudData));
-
         return {
           ...defaultState,
           ...cloudData,
@@ -135,33 +142,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
       }
     }
   } catch (e) {
-    console.warn('[Vercel KV Load Warning]: Failed to reach Vercel KV, checking local fallback', e);
-  }
-
-  // Fallback ke local cache jika offline
-  const cached = localStorage.getItem(LOCAL_CACHE_KEY);
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-      if (parsed && typeof parsed === 'object') {
-        return {
-          ...defaultState,
-          ...parsed,
-          users: mergeUsers(parsed.users),
-          containers: mergeContainers(parsed.containers),
-          pos: parsed.pos || [],
-          clients: parsed.clients || [],
-          labRekanans: parsed.labRekanans || [],
-          quotations: parsed.quotations || [],
-          sampleReceipts: parsed.sampleReceipts || [],
-          prepReports: parsed.prepReports || [],
-          subcontractNotices: parsed.subcontractNotices || [],
-          subcontractShippingLetters: parsed.subcontractShippingLetters || [],
-          invoices: parsed.invoices || [],
-          documents: parsed.documents || []
-        };
-      }
-    } catch (err) {}
+    console.warn('[Vercel KV Load Warning]: Failed to reach Vercel KV', e);
   }
 
   return defaultState;

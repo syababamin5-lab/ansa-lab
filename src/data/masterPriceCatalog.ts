@@ -59,28 +59,16 @@ export type PriceCategoryKey = 'priceGeoland' | 'priceBRS' | 'priceUmum';
 
 const PHYSICAL_PRICE_CODES = ['PREP','SVE-HYD','SG','UW','ATB','MC','BD-DD','CMP-STD','CMP-MOD','SND-CONE','PERM','SWELLING','SHRINKAGE','PH','CHLORID','SULFAT','CARBONAT','RESISTIVITY'];
 
+let inMemoryMasterPrices: MasterPriceItem[] = INITIAL_MASTER_PRICE_CATALOG.map((item: MasterPriceItem) => ({
+  ...item,
+  category: item.category || (PHYSICAL_PRICE_CODES.includes((item.code || '').toUpperCase()) ? 'physical' : 'mechanical')
+}));
+
 export function getStoredMasterPrices(): MasterPriceItem[] {
-  try {
-    const saved = localStorage.getItem('ansa_lab_master_price_catalog');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((item: MasterPriceItem) => ({
-          ...item,
-          category: item.category || (PHYSICAL_PRICE_CODES.includes((item.code || '').toUpperCase()) ? 'physical' : 'mechanical')
-        }));
-      }
-    }
-  } catch (e) {
-    console.error(e);
-  }
-  return INITIAL_MASTER_PRICE_CATALOG;
+  return inMemoryMasterPrices;
 }
 
 export function saveStoredMasterPrices(items: MasterPriceItem[]): void {
-  try {
-    localStorage.setItem('ansa_lab_master_price_catalog', JSON.stringify(items));
-  } catch (e) {
-    console.error(e);
-  }
+  inMemoryMasterPrices = items;
 }
+

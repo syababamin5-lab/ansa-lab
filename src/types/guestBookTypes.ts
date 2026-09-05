@@ -44,47 +44,7 @@ export const DEFAULT_LAB_HOSTS = [
  * so that any changes in the web app (Master Personil / User Management) are automatically reflected in real time!
  */
 export function getDynamicLabHosts(): string[] {
-  const result: string[] = [];
-
-  try {
-    const savedPersonnels = localStorage.getItem('ansa_lab_personnels');
-    if (savedPersonnels) {
-      const parsed = JSON.parse(savedPersonnels);
-      if (Array.isArray(parsed) && parsed.length > 0) {
-        parsed.forEach((p: any) => {
-          if (p && p.name && p.isActive !== false) {
-            const roleTitle = p.title || (p.role === 'Analyst' || p.role === 'Penguji' ? 'Analis / Penguji Lab' : p.role);
-            result.push(`${p.name} (${roleTitle})`);
-          }
-        });
-      }
-    }
-
-    if (result.length === 0) {
-      const savedUsers = localStorage.getItem('ansa_lab_users');
-      if (savedUsers) {
-        const parsedUsers = JSON.parse(savedUsers);
-        if (Array.isArray(parsedUsers) && parsedUsers.length > 0) {
-          parsedUsers.forEach((u: any) => {
-            if (u && u.name && u.isActive !== false && u.id !== 'user-super-admin') {
-              const roleTitle = u.role === 'ANALYST' ? 'Analis / Penguji Lab' :
-                                u.role === 'QA_QC_COORDINATOR' ? 'QC Coordinator' :
-                                u.role === 'LAB_MANAGER' ? 'Kepala / Manager Lab' :
-                                u.role === 'EXECUTIVE_DIRECTOR' ? 'Direktur Operasional' :
-                                u.role === 'ADMIN_FINANCE' ? 'Admin Finance' : u.role;
-              result.push(`${u.name} (${roleTitle})`);
-            }
-          });
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Error loading dynamic personnel:', e);
-  }
-
-  if (result.length === 0) {
-    result.push(...DEFAULT_LAB_HOSTS.slice(0, 3));
-  }
+  const result: string[] = [...DEFAULT_LAB_HOSTS.slice(0, 3)];
 
   if (!result.some(r => r.includes('Tim Admin'))) {
     result.push('Tim Admin & Recepsionis Lab');

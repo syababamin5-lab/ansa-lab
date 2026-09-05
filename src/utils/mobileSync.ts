@@ -93,10 +93,7 @@ export const syncOfflineQueueToPos = (
       });
     });
 
-    // Save to localStorage
     try {
-      localStorage.setItem('ansa_lab_pos', JSON.stringify(nextPos));
-      
       // Post to backend sync API if available
       fetch('/api/sync-pos', {
         method: 'POST',
@@ -104,7 +101,7 @@ export const syncOfflineQueueToPos = (
         body: JSON.stringify(nextPos),
       }).catch(err => console.log('Backend sync offline fallback:', err));
     } catch (e) {
-      console.error('Failed to persist POS during offline sync:', e);
+      console.error('Failed to sync POS:', e);
     }
 
     return nextPos;

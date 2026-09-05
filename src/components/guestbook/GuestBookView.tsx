@@ -52,22 +52,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
   const [mode, setMode] = useState<'checkin' | 'admin' | 'poster'>(initialMode);
   
   // Guest Entries State
-  const [entries, setEntries] = useState<GuestEntry[]>(() => {
-    try {
-      const saved = localStorage.getItem('ansa_lab_guest_entries');
-      return saved ? JSON.parse(saved) : INITIAL_GUEST_ENTRIES;
-    } catch (e) {
-      return INITIAL_GUEST_ENTRIES;
-    }
-  });
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('ansa_lab_guest_entries', JSON.stringify(entries));
-    } catch (e) {
-      console.error('Failed to save guest entries:', e);
-    }
-  }, [entries]);
+  const [entries, setEntries] = useState<GuestEntry[]>(INITIAL_GUEST_ENTRIES);
 
   // Form Fields State
   const [fullName, setFullName] = useState('');

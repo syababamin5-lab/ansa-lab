@@ -39,11 +39,14 @@ import { ClientMasterView } from './components/workflow/ClientMasterView';
 import { WaktuPengujianView } from './components/WaktuPengujianView';
 import { FinancialAnalyticsView } from './components/FinancialAnalyticsView';
 import { MobileTechnicianApp } from './components/mobile/MobileTechnicianApp';
-import { saveStateToCloud, loadStateFromCloud, CloudDatabaseState } from './services/cloudSyncService';
+import { saveStateToCloud, loadStateFromCloud, purgeLegacyLocalStorage, CloudDatabaseState } from './services/cloudSyncService';
 import { LoginView } from './components/LoginView';
 import { GuestBookView } from './components/guestbook/GuestBookView';
 
 import { CheckCircle2 } from 'lucide-react';
+
+// Bersihkan seluruh residu localStorage lama saat aplikasi dibuka
+purgeLegacyLocalStorage();
 
 const migrateATTtoATB = (orders: PurchaseOrder[]): PurchaseOrder[] => {
   if (!Array.isArray(orders)) return orders;
@@ -174,25 +177,8 @@ export function App() {
     sessionStorage.setItem('ansa_mobile_mode', String(isMobileMode));
   }, [isMobileMode]);
 
-  // Users State with Cloud & Local Cache Persistence
-  const [users, setUsers] = useState<UserProfile[]>(() => {
-    try {
-      const saved = localStorage.getItem('ansa_lab_users');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-      return INITIAL_USERS;
-    } catch (e) {
-      return INITIAL_USERS;
-    }
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_users', JSON.stringify(users));
-  }, [users]);
+  // Users State (100% Cloud-First)
+  const [users, setUsers] = useState<UserProfile[]>(() => INITIAL_USERS);
 
   // Authentication Session State (Persisted per-tab in sessionStorage for simultaneous Super Admin & Teknisi multi-tab support)
   const [authSession, setAuthSession] = useState<{ isAuthenticated: boolean; userId: string | null }>(() => {
@@ -207,7 +193,7 @@ export function App() {
         return { isAuthenticated: true, userId: admin.id };
       }
 
-      const saved = sessionStorage.getItem('ansa_lab_auth_session') || localStorage.getItem('ansa_lab_auth_session');
+      const saved = sessionStorage.getItem('ansa_lab_auth_session');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && parsed.isAuthenticated && parsed.userId) {
@@ -254,30 +240,18 @@ export function App() {
   };
 
   const handleAddUser = (newUser: UserProfile) => {
-    setUsers(prev => {
-      const updated = [newUser, ...prev];
-      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
-      return updated;
-    });
+    setUsers(prev => [newUser, ...prev]);
   };
 
   const handleUpdateUser = (updatedUser: UserProfile) => {
-    setUsers(prev => {
-      const updated = prev.map(u => u.id === updatedUser.id ? updatedUser : u);
-      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
-      return updated;
-    });
+    setUsers(prev => prev.map(u => u.id === updatedUser.id ? updatedUser : u));
     if (currentUser.id === updatedUser.id) {
       setCurrentUser(updatedUser);
     }
   };
 
   const handleDeleteUser = (userId: string) => {
-    setUsers(prev => {
-      const updated = prev.filter(u => u.id !== userId);
-      try { localStorage.setItem('ansa_lab_users', JSON.stringify(updated)); } catch (e) {}
-      return updated;
-    });
+    setUsers(prev => prev.filter(u => u.id !== userId));
   };
 
   // Global Atom Sync Loader & Toast Feedback State
@@ -290,22 +264,12 @@ export function App() {
     setTimeout(() => setGlobalToastMsg(null), 3500);
   };
 
-  // Persistent PO state with clean initial fallback
+  // Persistent PO state (100% Cloud-First)
   const [pos, setPos] = useState<PurchaseOrder[]>(() => {
-    let initialList: PurchaseOrder[] = INITIAL_POS;
-    const saved = localStorage.getItem('ansa_lab_pos');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          initialList = parsed.filter((p: any) => p.id !== 'po-tdk-001' && p.id !== 'po-sandbox-all-in-one');
-        }
-      } catch (e) { console.error(e); }
-    }
-    return deduplicatePOs(migrateCanonicalTestCodes(migrateStandardizeDsUu(migrateEnsureAllSampleTestStatuses(migrateRemoveSumartadji(migrateATTtoATB(initialList))))));
+    return deduplicatePOs(migrateCanonicalTestCodes(migrateStandardizeDsUu(migrateEnsureAllSampleTestStatuses(migrateRemoveSumartadji(migrateATTtoATB(INITIAL_POS))))));
   });
 
-  // Real-time Cross-Tab & Cross-Port Synchronization Listener (BroadcastChannel & Storage Event)
+  // Real-time Cross-Tab & Cross-Port Synchronization Listener (BroadcastChannel)
   useEffect(() => {
     const handleSync = (newPosData: PurchaseOrder[]) => {
       if (Array.isArray(newPosData) && newPosData.length > 0) {
@@ -347,158 +311,30 @@ export function App() {
       };
     }
 
-    const handleStorageEvent = (e: StorageEvent) => {
-      if (e.key === 'ansa_lab_pos' && e.newValue) {
-        try {
-          const parsed = JSON.parse(e.newValue);
-          handleSync(parsed);
-        } catch (err) {}
-      }
-    };
-    window.addEventListener('storage', handleStorageEvent);
-
     return () => {
       if (channel) channel.close();
-      window.removeEventListener('storage', handleStorageEvent);
     };
   }, []);
 
-  // Persistent Document Explorer state with auto deduplication
+  // Persistent Document Explorer state with auto deduplication (100% Cloud-First)
   const [documents, setDocuments] = useState<DocumentItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_docs');
-    if (saved) {
-      try { return deduplicateDocuments(JSON.parse(saved)); } catch (e) { console.error(e); }
-    }
     return deduplicateDocuments(INITIAL_DOCUMENTS);
   });
 
-  // Dynamic Test Catalogue (persisted to localStorage)
-  const [testCatalogue, setTestCatalogue] = useState<MatrixTestInfo[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_test_catalogue');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          const physList = ['SG','MC','UW','ATB','SVE-HYD','Sieve-Hydro','S&H','CMP-STD','CMP-MOD','PRM','PB','PERM','PREP','BD-DD','SND-CONE','SWELLING','SHRINKAGE','PH','CHLORID','SULFAT','CARBONAT','RESISTIVITY'];
-          return parsed.map((item: MatrixTestInfo) => {
-            const canonicalMatch = MATRIX_TEST_CATALOGUE.find(m => normalizeTestCode(m.code) === normalizeTestCode(item.code));
-            if (canonicalMatch) {
-              return {
-                ...canonicalMatch,
-                ...item,
-                code: canonicalMatch.code,
-                label: canonicalMatch.label,
-                fullNameIndo: canonicalMatch.fullNameIndo,
-                fullNameEn: canonicalMatch.fullNameEn,
-                sniStandard: canonicalMatch.sniStandard,
-                category: canonicalMatch.category
-              };
-            }
-            const norm = normalizeTestCode(item.code);
-            return {
-              ...item,
-              code: norm,
-              label: norm,
-              category: item.category || (physList.includes(norm.toUpperCase()) ? 'physical' : 'mechanical')
-            };
-          });
-        }
-      } catch (e) { console.error(e); }
-    }
-    return MATRIX_TEST_CATALOGUE;
-  });
+  // Dynamic Test Catalogue (100% Cloud-First)
+  const [testCatalogue, setTestCatalogue] = useState<MatrixTestInfo[]>(() => MATRIX_TEST_CATALOGUE);
 
-  // ISO 17025 Workflow States (Persisted to localStorage)
-  const [quotations, setQuotations] = useState<Quotation[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_quotations');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return INITIAL_QUOTATIONS;
-  });
+  // ISO 17025 Workflow States (100% Cloud-First)
+  const [quotations, setQuotations] = useState<Quotation[]>(() => INITIAL_QUOTATIONS);
+  const [sampleReceipts, setSampleReceipts] = useState<SampleReceipt[]>(() => INITIAL_SAMPLE_RECEIPTS);
+  const [samplePrepReports, setSamplePrepReports] = useState<SamplePrepReport[]>(() => INITIAL_PREP_REPORTS);
+  const [subcontractNotices, setSubcontractNotices] = useState<SubcontractNotice[]>(() => INITIAL_SUBCONTRACT_NOTICES);
+  const [subcontractShippingLetters, setSubcontractShippingLetters] = useState<SubcontractShippingLetter[]>(() => INITIAL_SUBCONTRACT_LETTERS);
+  const [invoices, setInvoices] = useState<Invoice[]>(() => INITIAL_INVOICES);
 
-  const [sampleReceipts, setSampleReceipts] = useState<SampleReceipt[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_sample_receipts');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return INITIAL_SAMPLE_RECEIPTS;
-  });
-
-  const [samplePrepReports, setSamplePrepReports] = useState<SamplePrepReport[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_prep_reports');
-    let loaded: SamplePrepReport[] = INITIAL_PREP_REPORTS;
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) loaded = parsed;
-      } catch (e) {}
-    }
-    return ensurePrepReportsForPOs(loaded, pos);
-  });
-
-  const [subcontractNotices, setSubcontractNotices] = useState<SubcontractNotice[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_subcontract_notices');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return INITIAL_SUBCONTRACT_NOTICES;
-  });
-
-  const [subcontractShippingLetters, setSubcontractShippingLetters] = useState<SubcontractShippingLetter[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_subcontract_letters');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return INITIAL_SUBCONTRACT_LETTERS;
-  });
-
-  const [invoices, setInvoices] = useState<Invoice[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_invoices');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return INITIAL_INVOICES;
-  });
-
-  // Master Data: Client & Lab Rekanan
-  const [clients, setClients] = useState<Client[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_clients');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
-      } catch (e) {}
-    }
-    return INITIAL_CLIENTS;
-  });
-  const [labRekanans, setLabRekanans] = useState<LabRekanan[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_lab_rekanans');
-    if (saved) { try { return JSON.parse(saved); } catch (e) {} }
-    return [];
-  });
-
-  // Safe LocalStorage setter with QuotaExceededError handling
-  const safeSetLocalStorage = (key: string, data: any) => {
-    try {
-      localStorage.setItem(key, JSON.stringify(data));
-    } catch (e: any) {
-      console.warn(`[LocalStorage Quota Warning] Failed to set "${key}":`, e);
-      if (key === 'ansa_lab_sample_receipts' && Array.isArray(data)) {
-        try {
-          const stripped = data.map(item => ({
-            ...item,
-            photos: item.photos?.map((p: any) => ({
-              ...p,
-              dataUrl: p.dataUrl && p.dataUrl.length > 50000 ? p.dataUrl.substring(0, 250) + '...' : p.dataUrl
-            }))
-          }));
-          localStorage.setItem(key, JSON.stringify(stripped));
-        } catch (err) {
-          console.error('Compressed fallback save failed:', err);
-        }
-      }
-    }
-  };
-
-  useEffect(() => { safeSetLocalStorage('ansa_lab_quotations', quotations); }, [quotations]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_sample_receipts', sampleReceipts); }, [sampleReceipts]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_prep_reports', samplePrepReports); }, [samplePrepReports]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_subcontract_notices', subcontractNotices); }, [subcontractNotices]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_subcontract_letters', subcontractShippingLetters); }, [subcontractShippingLetters]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_invoices', invoices); }, [invoices]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_clients', clients); }, [clients]);
-  useEffect(() => { safeSetLocalStorage('ansa_lab_lab_rekanans', labRekanans); }, [labRekanans]);
+  // Master Data: Client & Lab Rekanan (100% Cloud-First)
+  const [clients, setClients] = useState<Client[]>(() => INITIAL_CLIENTS);
+  const [labRekanans, setLabRekanans] = useState<LabRekanan[]>(() => []);
 
   // Selected PO & Sample for drill-down view
   const [selectedPOId, setSelectedPOId] = useState<string | undefined>(undefined);
@@ -511,28 +347,16 @@ export function App() {
   const [activeLHUModal, setActiveLHUModal] = useState<{ sample: Sample; po: PurchaseOrder; initialSelectedCodes?: LHUSheetCode[] } | null>(null);
   const [isSchemaModalOpen, setIsSchemaModalOpen] = useState(false);
 
-  // Save to localStorage whenever pos changes & auto-sync BA Preparasi
+  // Auto-sync BA Preparasi whenever pos changes
   useEffect(() => {
-    safeSetLocalStorage('ansa_lab_pos', pos);
     setSamplePrepReports(prev => {
       const updated = ensurePrepReportsForPOs(prev, pos);
       if (updated.length !== prev.length) {
-        safeSetLocalStorage('ansa_lab_prep_reports', updated);
         return updated;
       }
       return prev;
     });
   }, [pos]);
-
-
-
-  useEffect(() => {
-    safeSetLocalStorage('ansa_lab_docs', documents);
-  }, [documents]);
-
-  useEffect(() => {
-    safeSetLocalStorage('ansa_lab_test_catalogue', testCatalogue);
-  }, [testCatalogue]);
 
   // --- HANDLERS FOR TEST CATALOGUE ---
   const handleUpdateTestCatalogue = (updated: MatrixTestInfo[]) => {
@@ -545,21 +369,8 @@ export function App() {
     }
   };
 
-  // Dynamic Sample Types (persisted to localStorage)
-  const [sampleTypeCatalogue, setSampleTypeCatalogue] = useState<string[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_sample_types');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_SAMPLE_TYPES;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_sample_types', JSON.stringify(sampleTypeCatalogue));
-  }, [sampleTypeCatalogue]);
+  // Dynamic Sample Types (100% Cloud-First)
+  const [sampleTypeCatalogue, setSampleTypeCatalogue] = useState<string[]>(() => DEFAULT_SAMPLE_TYPES);
 
   const handleUpdateSampleTypeCatalogue = (updated: string[]) => {
     setSampleTypeCatalogue(updated);
@@ -571,64 +382,19 @@ export function App() {
     }
   };
 
-  // Dynamic Containers (persisted to Cloud & Local Cache)
-  const [containerCatalogue, setContainerCatalogue] = useState<ContainerItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_containers');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_CONTAINER_CATALOGUE;
-  });
+  // Dynamic Containers (100% Cloud-First)
+  const [containerCatalogue, setContainerCatalogue] = useState<ContainerItem[]>(() => DEFAULT_CONTAINER_CATALOGUE);
 
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_containers', JSON.stringify(containerCatalogue));
-  }, [containerCatalogue]);
-
-  // Dynamic Mold Compaction
-  const [moldCatalogue, setMoldCatalogue] = useState<MoldItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_molds');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_MOLD_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_molds', JSON.stringify(moldCatalogue));
-  }, [moldCatalogue]);
+  // Dynamic Mold Compaction (100% Cloud-First)
+  const [moldCatalogue, setMoldCatalogue] = useState<MoldItem[]>(() => DEFAULT_MOLD_CATALOGUE);
 
   const handleUpdateMoldCatalogue = (updated: MoldItem[]) => setMoldCatalogue(updated);
   const handleResetMoldCatalogue = () => {
     if (confirm('Reset katalog Mold Compaction ke default (Standard, Modified & CBR)?')) setMoldCatalogue(DEFAULT_MOLD_CATALOGUE);
   };
 
-  // Dynamic Reamer Compaction
-  const [reamerCatalogue, setReamerCatalogue] = useState<ReamerItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_reamers');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_REAMER_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_reamers', JSON.stringify(reamerCatalogue));
-  }, [reamerCatalogue]);
+  // Dynamic Reamer Compaction (100% Cloud-First)
+  const [reamerCatalogue, setReamerCatalogue] = useState<ReamerItem[]>(() => DEFAULT_REAMER_CATALOGUE);
 
   const handleUpdateReamerCatalogue = (updated: ReamerItem[]) => setReamerCatalogue(updated);
   const handleResetReamerCatalogue = () => {
@@ -645,21 +411,8 @@ export function App() {
     }
   };
 
-  // Dynamic Rings (persisted to localStorage)
-  const [ringCatalogue, setRingCatalogue] = useState<RingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_RING_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_rings', JSON.stringify(ringCatalogue));
-  }, [ringCatalogue]);
+  // Dynamic Rings (100% Cloud-First)
+  const [ringCatalogue, setRingCatalogue] = useState<RingItem[]>(() => DEFAULT_RING_CATALOGUE);
 
   const handleUpdateRingCatalogue = (updated: RingItem[]) => {
     setRingCatalogue(updated);
@@ -671,21 +424,8 @@ export function App() {
     }
   };
 
-  // Dynamic Consolidation Rings (persisted to localStorage)
-  const [consolRingCatalogue, setConsolRingCatalogue] = useState<ConsolRingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_consol_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_CONSOL_RING_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_consol_rings', JSON.stringify(consolRingCatalogue));
-  }, [consolRingCatalogue]);
+  // Dynamic Consolidation Rings (100% Cloud-First)
+  const [consolRingCatalogue, setConsolRingCatalogue] = useState<ConsolRingItem[]>(() => DEFAULT_CONSOL_RING_CATALOGUE);
 
   const handleUpdateConsolRingCatalogue = (updated: ConsolRingItem[]) => {
     setConsolRingCatalogue(updated);
@@ -697,37 +437,11 @@ export function App() {
     }
   };
 
-  // Dynamic Direct Shear Rings (persisted to localStorage)
-  const [dsRingCatalogue, setDsRingCatalogue] = useState<DsRingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_ds_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_DS_RING_CATALOGUE;
-  });
+  // Dynamic Direct Shear Rings (100% Cloud-First)
+  const [dsRingCatalogue, setDsRingCatalogue] = useState<DsRingItem[]>(() => DEFAULT_DS_RING_CATALOGUE);
 
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_ds_rings', JSON.stringify(dsRingCatalogue));
-  }, [dsRingCatalogue]);
-
-  // Dynamic Direct Shear Proving Rings / Machines (persisted to localStorage)
-  const [dsProvingCatalogue, setDsProvingCatalogue] = useState<DsProvingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_ds_proving_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_DS_PROVING_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_ds_proving_rings', JSON.stringify(dsProvingCatalogue));
-  }, [dsProvingCatalogue]);
+  // Dynamic Direct Shear Proving Rings / Machines (100% Cloud-First)
+  const [dsProvingCatalogue, setDsProvingCatalogue] = useState<DsProvingItem[]>(() => DEFAULT_DS_PROVING_CATALOGUE);
 
   const handleUpdateDsProvingCatalogue = (updated: DsProvingItem[]) => {
     setDsProvingCatalogue(updated);
@@ -749,21 +463,8 @@ export function App() {
     }
   };
 
-  // Dynamic Triaxial TRX Proving Rings (persisted to localStorage)
-  const [trxRingCatalogue, setTrxRingCatalogue] = useState<TrxRingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_trx_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_TRX_RING_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_trx_rings', JSON.stringify(trxRingCatalogue));
-  }, [trxRingCatalogue]);
+  // Dynamic Triaxial TRX Proving Rings (100% Cloud-First)
+  const [trxRingCatalogue, setTrxRingCatalogue] = useState<TrxRingItem[]>(() => DEFAULT_TRX_RING_CATALOGUE);
 
   const handleUpdateTrxRingCatalogue = (updated: TrxRingItem[]) => {
     setTrxRingCatalogue(updated);
@@ -775,21 +476,8 @@ export function App() {
     }
   };
 
-  // Dynamic UCT Proving Rings (persisted to localStorage)
-  const [uctRingCatalogue, setUctRingCatalogue] = useState<UctRingItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_uct_rings');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_UCT_RING_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_uct_rings', JSON.stringify(uctRingCatalogue));
-  }, [uctRingCatalogue]);
+  // Dynamic UCT Proving Rings (100% Cloud-First)
+  const [uctRingCatalogue, setUctRingCatalogue] = useState<UctRingItem[]>(() => DEFAULT_UCT_RING_CATALOGUE);
 
   const handleUpdateUctRingCatalogue = (updated: UctRingItem[]) => {
     setUctRingCatalogue(updated);
@@ -801,21 +489,8 @@ export function App() {
     }
   };
 
-  // Dynamic Pycnometers (persisted to localStorage)
-  const [pycCatalogue, setPycCatalogue] = useState<PycnometerItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_pycs');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_PYCNOMETER_CATALOGUE;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_pycs', JSON.stringify(pycCatalogue));
-  }, [pycCatalogue]);
+  // Dynamic Pycnometers (100% Cloud-First)
+  const [pycCatalogue, setPycCatalogue] = useState<PycnometerItem[]>(() => DEFAULT_PYCNOMETER_CATALOGUE);
 
   const handleUpdatePycCatalogue = (updated: PycnometerItem[]) => {
     setPycCatalogue(updated);
@@ -827,17 +502,8 @@ export function App() {
     }
   };
 
-  // Dynamic Personnel Catalogue (persisted to localStorage)
-  const [personnelCatalogue, setPersonnelCatalogue] = useState<PersonnelItem[]>(() => {
-    const saved = localStorage.getItem('ansa_lab_personnels');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { console.error(e); }
-    }
-    return DEFAULT_PERSONNEL_CATALOGUE;
-  });
+  // Dynamic Personnel Catalogue (100% Cloud-First)
+  const [personnelCatalogue, setPersonnelCatalogue] = useState<PersonnelItem[]>(() => DEFAULT_PERSONNEL_CATALOGUE);
 
   // Auto-sync personnelCatalogue with users state so Master Personil & User Management stay in sync
   useEffect(() => {
@@ -873,10 +539,6 @@ export function App() {
       return [...synced, ...customItems];
     });
   }, [users]);
-
-  useEffect(() => {
-    localStorage.setItem('ansa_lab_personnels', JSON.stringify(personnelCatalogue));
-  }, [personnelCatalogue]);
 
   const [isCloudLoaded, setIsCloudLoaded] = useState<boolean>(false);
   // Timestamp kapan terakhir device INI melakukan save ke cloud
@@ -948,34 +610,8 @@ export function App() {
       try {
         const cloudState = await loadStateFromCloud();
         if (isMounted && cloudState) {
-          // Guard against overwriting newer local edits with older cloud snapshot
-          const localSaved = localStorage.getItem('ansa_lab_pos');
-          let localNewestTs = 0;
-          if (localSaved) {
-            try {
-              const parsed = JSON.parse(localSaved);
-              if (Array.isArray(parsed)) {
-                parsed.forEach((po: any) => {
-                  if (po.updatedAt) {
-                    const t = new Date(po.updatedAt).getTime();
-                    if (t > localNewestTs) localNewestTs = t;
-                  }
-                  (po.samples || []).forEach((s: any) => {
-                    if (s.updatedAt) {
-                      const st = new Date(s.updatedAt).getTime();
-                      if (st > localNewestTs) localNewestTs = st;
-                    }
-                  });
-                });
-              }
-            } catch (err) {}
-          }
-
-          const cloudTs = cloudState.updatedAt ? new Date(cloudState.updatedAt).getTime() : 0;
           if (Array.isArray(cloudState.pos) && cloudState.pos.length > 0) {
-            if (localNewestTs === 0 || cloudTs >= localNewestTs) {
-              setPos(cloudState.pos);
-            }
+            setPos(cloudState.pos);
           }
           if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
           if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
@@ -1076,9 +712,8 @@ export function App() {
 
   const handleUpdatePersonnelCatalogue = (updated: PersonnelItem[]) => {
     setPersonnelCatalogue(updated);
-    safeSetLocalStorage('ansa_lab_personnels', updated);
 
-    // Sync back into users state & localStorage so new personnel are created as User Accounts
+    // Sync back into users state so new personnel are created as User Accounts
     setUsers(prevUsers => {
       const userMap = new Map(prevUsers.map(u => [u.id, u]));
       const newUsersFromPersonnel: UserProfile[] = [];
@@ -1124,7 +759,6 @@ export function App() {
         ...newUsersFromPersonnel
       ];
 
-      safeSetLocalStorage('ansa_lab_users', nextUsers);
       return nextUsers;
     });
   };
@@ -1853,8 +1487,7 @@ export function App() {
   };
 
   const handleResetLocalData = () => {
-    localStorage.removeItem('ansa_lab_pos');
-    localStorage.removeItem('ansa_lab_docs');
+    purgeLegacyLocalStorage();
     setPos(INITIAL_POS);
     setDocuments(INITIAL_DOCUMENTS);
   };
