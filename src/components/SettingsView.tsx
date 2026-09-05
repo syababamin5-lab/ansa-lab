@@ -55,7 +55,8 @@ import {
   Image as ImageIcon,
   FileCheck,
   Eye,
-  DollarSign
+  DollarSign,
+  Building2
 } from 'lucide-react';
 import { getStoredMasterPrices, saveStoredMasterPrices, INITIAL_MASTER_PRICE_CATALOG, MasterPriceItem } from '../data/masterPriceCatalog';
 import { CompanyProfileSettingsView } from './settings/CompanyProfileSettingsView';
