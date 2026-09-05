@@ -478,7 +478,8 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
                     type="text"
                     value={formNo}
                     readOnly
-                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold bg-slate-100 text-slate-800 select-all cursor-not-allowed"
+                    tabIndex={-1}
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold bg-slate-100 text-slate-700 select-all cursor-not-allowed"
                   />
                 </div>
 

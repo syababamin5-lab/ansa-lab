@@ -534,8 +534,9 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
                   <input
                     type="text"
                     value={formNo}
-                    onChange={e => { setFormNo(e.target.value); setIsFormDirty(true); }}
-                    className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                    readOnly
+                    tabIndex={-1}
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-700 bg-slate-100 cursor-not-allowed select-all"
                     placeholder="COC.SMP.260905.001"
                   />
                   {editingReceiptId && (
@@ -581,20 +582,31 @@ export const SampleReceiptView: React.FC<SampleReceiptViewProps> = ({ receipts, 
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Nama Klien / Perusahaan</label>
-                  <input type="text" value={formClient} onChange={e => setFormClient(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-bold" />
+                  <input
+                    type="text"
+                    value={formClient}
+                    onChange={e => {
+                      const newClient = e.target.value;
+                      setFormClient(newClient);
+                      setIsFormDirty(true);
+                      if (!editingReceiptId && !selectedQuoId) {
+                        const matched = (clients || []).find(c => c.companyName.toLowerCase().trim() === newClient.toLowerCase().trim());
+                        const cCode = matched?.clientCode || '';
+                        setFormClientCode(cCode);
+                        setFormProjectCode(getNextCustomerPoNo(receipts.map(r => r.projectCode), cCode, formRawDate || new Date()));
+                      }
+                    }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-bold"
+                  />
                 </div>
                 <div>
                   <label className="font-bold text-slate-700 block mb-1">Nomor PO (Customer PO)</label>
                   <input
                     type="text"
                     value={formProjectCode}
-                    onChange={e => {
-                      setFormProjectCode(e.target.value);
-                      setIsFormDirty(true);
-                      const m = e.target.value.match(/^CPO\.([A-Z0-9]+)\./i);
-                      if (m && m[1]) setFormClientCode(m[1]);
-                    }}
-                    className="w-full p-2 border border-slate-300 rounded-lg font-mono font-bold text-slate-900 bg-white focus:ring-2 focus:ring-teal-400 focus:outline-none"
+                    readOnly
+                    tabIndex={-1}
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold text-slate-700 bg-slate-100 cursor-not-allowed select-all"
                     placeholder="CPO.TDK.260905.001"
                   />
                 </div>
