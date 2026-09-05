@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Quotation, QuotationItem, Client } from '../../types/workflowTypes';
 import { terbilang } from '../../utils/terbilang';
 import { getStoredMasterPrices, PriceCategoryKey } from '../../data/masterPriceCatalog';
-import { getNextDocNo } from '../../utils/docNumbering';
+import { getNextDocNo, getNextQuotationNo } from '../../utils/docNumbering';
 import { Plus, Printer, FileText, CheckCircle2, DollarSign, Building, Calendar, Edit3, Trash2, X, Download, Tag, Users, ChevronDown, AlertTriangle } from 'lucide-react';
 
 import { PersonnelItem } from '../../types';
@@ -26,6 +26,7 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
 
   // Form State
   const [formNo, setFormNo]               = useState('');
+  const [formClientCode, setFormClientCode] = useState<string>('');
   const [formClient, setFormClient]       = useState('');
   const [formAddress, setFormAddress]     = useState('');
   const [formContact, setFormContact]     = useState('');
@@ -48,7 +49,13 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
   const handleSelectClient = (clientId: string) => {
     setIsFormDirty(true);
     setSelectedClientId(clientId);
-    if (!clientId) return; // manual input, don't overwrite
+    if (!clientId) {
+      setFormClientCode('');
+      if (!editingQuoId) {
+        setFormNo(getNextQuotationNo(quotations.map(q => q.quotationNo), '', new Date()));
+      }
+      return; // manual input, don't overwrite
+    }
     const client = clients.find(c => c.id === clientId);
     if (!client) return;
     setFormClient(client.companyName);
@@ -56,6 +63,14 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
     setFormContact(client.contactPerson);
     setFormPhone(client.phone);
     setFormEmail(client.email || '');
+    const clientCode = client.clientCode || '';
+    setFormClientCode(clientCode);
+
+    // Otomatis sinkronkan nomor penawaran baru dengan singkatan/kode client
+    if (!editingQuoId) {
+      setFormNo(getNextQuotationNo(quotations.map(q => q.quotationNo), clientCode, new Date()));
+    }
+
     // Apply the client's default price tier
     setPriceTier(client.defaultPriceTier as PriceCategoryKey);
     // Re-price all existing items with new tier
@@ -75,8 +90,9 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
     setSelectedClientId('');
-    // Nomor urut dihitung dari data yang ADA — jika semua dihapus, mulai dari 001
-    const nextNo = getNextDocNo('Q', quotations.map(q => q.quotationNo));
+    setFormClientCode('');
+    // Format baru: Q-[KODE]-[000]-[MM]-[YY], auto nomor urut aman tanpa duplikasi
+    const nextNo = getNextQuotationNo(quotations.map(q => q.quotationNo), '', new Date());
     setFormNo(nextNo);
     setFormClient('');
     setFormAddress('');
@@ -97,7 +113,19 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
     setEditingQuoId(q.id);
     setIsFormDirty(false);
     setShowUnsavedConfirm(false);
-    setSelectedClientId('');
+    
+    // Sinkronkan data client jika terdaftar
+    const matchedClient = clients.find(c => c.companyName.toLowerCase().trim() === (q.clientName || '').toLowerCase().trim());
+    if (matchedClient) {
+      setSelectedClientId(matchedClient.id);
+      setFormClientCode(matchedClient.clientCode || '');
+    } else {
+      setSelectedClientId('');
+      // Ekstrak kode client dari nomor penawaran jika berformat Q-[KODE]-[000]...
+      const m = q.quotationNo.match(/^Q-([A-Z0-9]+)-\d{3}-/i);
+      setFormClientCode(m && m[1] ? m[1] : '');
+    }
+
     setFormNo(q.quotationNo);
     setFormClient(q.clientName || '');
     setFormAddress(q.clientAddress || '');
@@ -209,11 +237,28 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
     const vatAmount = Math.round(afterDiscount * (formDiscountPct > 0 ? 0.11 : 0));
     const grandTotal = afterDiscount + vatAmount;
 
+    // Pastikan nomor penawaran terisi dan dijamin 100% unik tanpa duplikasi
+    let finalQuotationNo = formNo.trim();
+    if (!finalQuotationNo) {
+      finalQuotationNo = getNextQuotationNo(quotations.map(q => q.quotationNo), formClientCode, new Date());
+    } else if (!editingQuoId) {
+      const isDuplicate = quotations.some(q => q.quotationNo.trim().toUpperCase() === finalQuotationNo.toUpperCase());
+      if (isDuplicate) {
+        finalQuotationNo = getNextQuotationNo(quotations.map(q => q.quotationNo), formClientCode, new Date());
+      }
+    } else {
+      const isDuplicate = quotations.some(q => q.id !== editingQuoId && q.quotationNo.trim().toUpperCase() === finalQuotationNo.toUpperCase());
+      if (isDuplicate) {
+        alert(`Nomor penawaran "${finalQuotationNo}" sudah digunakan pada penawaran lain. Nomor urut akan disesuaikan otomatis agar tidak terjadi duplikasi.`);
+        finalQuotationNo = getNextQuotationNo(quotations.map(q => q.quotationNo), formClientCode, new Date());
+      }
+    }
+
     const existingQuo = editingQuoId ? quotations.find(q => q.id === editingQuoId) : null;
 
     const newQuo: Quotation = {
       id: editingQuoId || `quo-${Date.now()}`,
-      quotationNo: formNo,
+      quotationNo: finalQuotationNo,
       date: existingQuo ? existingQuo.date : new Date().toISOString().split('T')[0],
       validUntil: existingQuo ? existingQuo.validUntil : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
       clientName: formClient,
@@ -426,33 +471,100 @@ export const QuotationView: React.FC<QuotationViewProps> = ({ quotations, client
               </div>
 
               {/* ── MANUAL FIELDS (auto-filled when client selected) ─────────────── */}
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <label className="font-bold text-slate-700 block mb-1">No. Penawaran</label>
-                  <input type="text" value={formNo} readOnly className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold bg-slate-50 text-slate-500 cursor-not-allowed select-none" />
+              {/* ── MANUAL FIELDS (auto-filled when client selected) ─────────────── */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div className="md:col-span-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-700">No. Penawaran</label>
+                    <span className="text-[10px] font-mono text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                      Otomatis
+                    </span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formNo}
+                    readOnly
+                    className="w-full p-2 border border-slate-200 rounded-lg font-mono font-bold bg-slate-100 text-slate-800 select-all cursor-not-allowed"
+                    title="Nomor penawaran dibuat otomatis: Q-[KODE]-[000]-[MM]-[YY]"
+                  />
+                  <div className="text-[10px] text-slate-400 mt-1 font-mono">Format: Q-[KODE]-[000]-[MM]-[YY]</div>
                 </div>
-                <div>
+
+                <div className="md:col-span-1">
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="font-bold text-slate-700">Singkatan / Kode Klien</label>
+                    <span className="text-[10px] text-slate-500 font-mono">e.g. TDK, TSK</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formClientCode}
+                    onChange={e => {
+                      const cleanCode = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+                      setFormClientCode(cleanCode);
+                      setIsFormDirty(true);
+                      if (!editingQuoId) {
+                        setFormNo(getNextQuotationNo(quotations.map(q => q.quotationNo), cleanCode, new Date()));
+                      }
+                    }}
+                    placeholder="TDK / TSK (opsional)"
+                    className="w-full p-2 border border-blue-300 rounded-lg font-mono font-bold uppercase bg-white text-blue-900 focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                  />
+                  <div className="text-[10px] text-blue-600 mt-1">Kosongkan jika tanpa kode singkatan</div>
+                </div>
+
+                <div className="md:col-span-1">
                   <label className="font-bold text-slate-700 block mb-1">PIC Klien (Bapak/Ibu)</label>
-                  <input type="text" value={formContact} onChange={e => setFormContact(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-bold" placeholder="Nama PIC klien" />
+                  <input
+                    type="text"
+                    value={formContact}
+                    onChange={e => { setFormContact(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-bold"
+                    placeholder="Nama PIC klien"
+                  />
                 </div>
-                <div>
+
+                <div className="md:col-span-1">
                   <label className="font-bold text-slate-700 block mb-1">No. Telp / HP PIC</label>
-                  <input type="text" value={formPhone} onChange={e => setFormPhone(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono" placeholder="08xxx-xxxx-xxxx" />
+                  <input
+                    type="text"
+                    value={formPhone}
+                    onChange={e => { setFormPhone(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-mono"
+                    placeholder="08xxx-xxxx-xxxx"
+                  />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <div className="col-span-1">
                   <label className="font-bold text-slate-700 block mb-1">Nama Perusahaan Klien</label>
-                  <input type="text" value={formClient} onChange={e => setFormClient(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-bold" placeholder="PT. Nama Perusahaan" />
+                  <input
+                    type="text"
+                    value={formClient}
+                    onChange={e => { setFormClient(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-bold"
+                    placeholder="PT. Nama Perusahaan"
+                  />
                 </div>
                 <div className="col-span-1">
                   <label className="font-bold text-slate-700 block mb-1">Alamat Klien</label>
-                  <input type="text" value={formAddress} onChange={e => setFormAddress(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg" placeholder="Jl. Alamat lengkap..." />
+                  <input
+                    type="text"
+                    value={formAddress}
+                    onChange={e => { setFormAddress(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-slate-300 rounded-lg"
+                    placeholder="Jl. Alamat lengkap..."
+                  />
                 </div>
                 <div className="col-span-1">
                   <label className="font-bold text-slate-700 block mb-1">No. PO Client (Opsional)</label>
-                  <input type="text" value={formPoNo} onChange={e => setFormPoNo(e.target.value)} className="w-full p-2 border border-slate-300 rounded-lg font-mono" placeholder="PO-2026-xxx" />
+                  <input
+                    type="text"
+                    value={formPoNo}
+                    onChange={e => { setFormPoNo(e.target.value); setIsFormDirty(true); }}
+                    className="w-full p-2 border border-slate-300 rounded-lg font-mono"
+                    placeholder="PO-2026-xxx"
+                  />
                 </div>
               </div>
 
