@@ -664,7 +664,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
                 className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
               >
                 <UserCheck className="w-4 h-4 text-blue-600" />
-                <span>Pilih Akun Demo / Pegawai Cepat (8 Akun)</span>
+                <span>Pilih Akun Cepat</span>
               </button>
             </div>
 
