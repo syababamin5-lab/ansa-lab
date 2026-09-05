@@ -6250,324 +6250,377 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
             <div className="bg-white rounded-xl p-1.5 border border-slate-200 shadow-2xs flex flex-col xl:flex-row xl:items-center justify-between gap-2">
               {/* SUB-TABS PENGUJIAN NAVIGATION BAR (SPACIOUS ELEGANT CATEGORIZED CONTAINERS) */}
               <div className="flex flex-col gap-2 w-full flex-1">
-                <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-12 gap-2 text-xs">
+                {(() => {
+                  const cat1Count = (isTestAssigned('PP') || isTestAssigned('SG') || isTestAssigned('MC') || isTestAssigned('UW') ? 1 : 0) +
+                    (isTestAssigned('ATB') ? 1 : 0) +
+                    (isTestAssigned('Sieve-Hydro') || isSieveHydroCode(activeTestSubTab) ? 1 : 0);
 
-                  {/* CATEGORY 1: SIFAT FISIK (PHYSICAL PROPERTIES) */}
-                  <div className="xl:col-span-3 bg-gradient-to-b from-blue-50/90 via-white to-blue-50/30 border border-blue-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
-                    <div className="text-[10px] font-black uppercase text-blue-900 tracking-wider flex items-center justify-between px-1 border-b border-blue-100/80 pb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <div className="p-1 rounded-lg bg-blue-600 text-white shadow-2xs">
-                          <Layers className="w-3 h-3 text-white" />
+                  const cat2Count = (isTestAssigned('PB') || isTestAssigned('PRM') ? 1 : 0) +
+                    (isTestAssigned('CNS') || isTestAssigned('CT') ? 1 : 0) +
+                    (isTestAssigned('CMP-STD') ? 1 : 0) +
+                    (isTestAssigned('CMP-MOD') ? 1 : 0) +
+                    (isTestAssigned('CBR-UNS') ? 1 : 0) +
+                    (isTestAssigned('CBR-SOK') ? 1 : 0);
+
+                  const cat3Count = (isTestAssigned('UCT') ? 1 : 0) +
+                    (isTestAssigned('TRX-UU') ? 1 : 0) +
+                    (isTestAssigned('TRX-CU') ? 1 : 0) +
+                    (isTestAssigned('TRX-CD') ? 1 : 0) +
+                    (isTestAssigned('DS-UU') || isTestAssigned('DS') || isTestAssigned('DSH-UU') ? 1 : 0) +
+                    (isTestAssigned('DS-CU') || isTestAssigned('DSH-CU') ? 1 : 0) +
+                    (isTestAssigned('DS-CD') || isTestAssigned('DSH-CD') ? 1 : 0) +
+                    (isTestAssigned('DS-CDR') || isTestAssigned('DS-CD-RES') || isTestAssigned('DS-RES') || isTestAssigned('DSH-CDR') ? 1 : 0);
+
+                  return (
+                    <div className="flex flex-wrap items-stretch gap-2.5 text-xs w-full">
+
+                      {/* CATEGORY 1: SIFAT FISIK */}
+                      {cat1Count > 0 && (
+                        <div className="flex-1 min-w-[240px] bg-gradient-to-b from-blue-50/90 via-white to-blue-50/30 border border-blue-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
+                          <div className="text-[10px] font-black uppercase text-blue-900 tracking-wider flex items-center justify-between px-1 border-b border-blue-100/80 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <div className="p-1 rounded-lg bg-blue-600 text-white shadow-2xs">
+                                <Layers className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="font-extrabold text-blue-950">Sifat Fisik</span>
+                            </span>
+                            <span className="text-[9px] font-mono text-blue-800 bg-blue-100/90 px-2 py-0.5 rounded-full font-extrabold border border-blue-200">
+                              {`${cat1Count} Uji`}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {(isTestAssigned('PP') || isTestAssigned('SG') || isTestAssigned('MC') || isTestAssigned('UW')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('PP'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'PP'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
+                                }`}
+                                title="Physical Properties (PP) — Specific Gravity, Moisture Content, Unit Weight"
+                              >
+                                {renderSubTabDot('PP')}
+                                <span>PP</span>
+                              </button>
+                            )}
+
+                            {isTestAssigned('ATB') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('ATB'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'ATB'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
+                                }`}
+                                title="Atterberg Limits (ATB) — Liquid Limit & Plastic Limit"
+                              >
+                                {renderSubTabDot('ATB')}
+                                <span>ATB</span>
+                              </button>
+                            )}
+
+                            {(isTestAssigned('Sieve-Hydro') || isSieveHydroCode(activeTestSubTab)) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('Sieve-Hydro'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  isSieveHydroCode(activeTestSubTab)
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
+                                }`}
+                                title="Sieve Analysis & Hydrometer (Sieve-Hydro)"
+                              >
+                                {renderSubTabDot('Sieve-Hydro')}
+                                <span>Sieve-Hydro</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-extrabold text-blue-950">1. Sifat Fisik</span>
-                      </span>
-                      <span className="text-[9px] font-mono text-blue-800 bg-blue-100/90 px-2 py-0.5 rounded-full font-extrabold border border-blue-200">
-                        {`${(isTestAssigned('PP') || isTestAssigned('SG') || isTestAssigned('MC') || isTestAssigned('UW') ? 1 : 0) + (isTestAssigned('ATB') ? 1 : 0) + (isTestAssigned('SVE-HYD') ? 1 : 0)} Uji`}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {(isTestAssigned('PP') || isTestAssigned('SG') || isTestAssigned('MC') || isTestAssigned('UW')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('PP'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'PP'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
-                          }`}
-                          title="Physical Properties (PP) — Specific Gravity, Moisture Content, Unit Weight"
-                        >
-                          {renderSubTabDot('PP')}
-                          <span>PP</span>
-                        </button>
                       )}
 
-                      {isTestAssigned('ATB') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('ATB'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'ATB'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
-                          }`}
-                          title="Atterberg Limits (ATB) — Liquid Limit & Plastic Limit"
-                        >
-                          {renderSubTabDot('ATB')}
-                          <span>ATB</span>
-                        </button>
-                      )}
+                      {/* CATEGORY 2: PEMADATAN & PERMEABILITAS */}
+                      {cat2Count > 0 && (
+                        <div className="flex-1 min-w-[260px] bg-gradient-to-b from-amber-50/90 via-white to-amber-50/30 border border-amber-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
+                          <div className="text-[10px] font-black uppercase text-amber-950 tracking-wider flex items-center justify-between px-1 border-b border-amber-100/80 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <div className="p-1 rounded-lg bg-amber-600 text-white shadow-2xs">
+                                <Gauge className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="font-extrabold text-amber-950">Pemadatan, Permeabilitas &amp; CBR</span>
+                            </span>
+                            <span className="text-[9px] font-mono text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-full font-extrabold border border-amber-200">
+                              {`${cat2Count} Uji`}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {(isTestAssigned('PB') || isTestAssigned('PRM')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('PB'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'PB' || activeTestSubTab === 'PRM'
+                                    ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 ring-2 ring-teal-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="Permeability Test (PB - Falling Head)"
+                              >
+                                {renderSubTabDot('PB')}
+                                <span>PB</span>
+                              </button>
+                            )}
 
-                      {(isTestAssigned('Sieve-Hydro') || isSieveHydroCode(activeTestSubTab)) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('Sieve-Hydro'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            isSieveHydroCode(activeTestSubTab)
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-blue-950 hover:bg-blue-50/80 border border-blue-200/70 shadow-2xs'
-                          }`}
-                          title="Sieve Analysis & Hydrometer (Sieve-Hydro)"
-                        >
-                          {renderSubTabDot('Sieve-Hydro')}
-                          <span>Sieve-Hydro</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                            {(isTestAssigned('CNS') || isTestAssigned('CT')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('CT'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'CT' || activeTestSubTab === 'CNS'
+                                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="Consolidation Test 1-D (CT / Consol)"
+                              >
+                                {renderSubTabDot('CT')}
+                                <span>CT</span>
+                              </button>
+                            )}
 
-                  {/* CATEGORY 2: PEMADATAN & PERMEABILITAS (COMPACTION & PERMEABILITY & CBR) */}
-                  <div className="xl:col-span-4 bg-gradient-to-b from-amber-50/90 via-white to-amber-50/30 border border-amber-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
-                    <div className="text-[10px] font-black uppercase text-amber-950 tracking-wider flex items-center justify-between px-1 border-b border-amber-100/80 pb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <div className="p-1 rounded-lg bg-amber-600 text-white shadow-2xs">
-                          <Gauge className="w-3 h-3 text-white" />
+                            {isTestAssigned('CMP-STD') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('CMP-STD'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'CMP-STD' || activeTestSubTab === 'CMP'
+                                    ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="Compaction Standard Proctor (CMP-STD)"
+                              >
+                                {renderSubTabDot('CMP-STD')}
+                                <span>CMP-STD</span>
+                              </button>
+                            )}
+
+                            {isTestAssigned('CMP-MOD') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('CMP-MOD'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'CMP-MOD'
+                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="Compaction Modified Proctor (CMP-MOD)"
+                              >
+                                {renderSubTabDot('CMP-MOD')}
+                                <span>CMP-MOD</span>
+                              </button>
+                            )}
+
+                            {isTestAssigned('CBR-UNS') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('CBR-UNS'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'CBR-UNS' || activeTestSubTab === 'CBR'
+                                    ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 ring-2 ring-teal-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="CBR Lab Unsoaked / Tanpa Perendaman (SNI 1744:2012)"
+                              >
+                                {renderSubTabDot('CBR-UNS')}
+                                <span>CBR-UNS</span>
+                              </button>
+                            )}
+
+                            {isTestAssigned('CBR-SOK') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('CBR-SOK'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'CBR-SOK'
+                                    ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
+                                }`}
+                                title="CBR Lab Soaked / Dengan Perendaman (SNI 1744:2012)"
+                              >
+                                {renderSubTabDot('CBR-SOK')}
+                                <span>CBR-SOK</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-extrabold text-amber-950">2. Pemadatan, Permeabilitas &amp; CBR</span>
-                      </span>
-                      <span className="text-[9px] font-mono text-amber-800 bg-amber-100/90 px-2 py-0.5 rounded-full font-extrabold border border-amber-200">
-                        {`${(isTestAssigned('PB') || isTestAssigned('PRM') ? 1 : 0) + (isTestAssigned('CT') || isTestAssigned('CNS') ? 1 : 0) + (isTestAssigned('CMP-STD') ? 1 : 0) + (isTestAssigned('CMP-MOD') ? 1 : 0) + (isTestAssigned('CBR-UNS') ? 1 : 0) + (isTestAssigned('CBR-SOK') ? 1 : 0)} Uji`}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {(isTestAssigned('PB') || isTestAssigned('PRM')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('PB'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'PB' || activeTestSubTab === 'PRM'
-                              ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 ring-2 ring-teal-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="Permeability Test (PB - Falling Head)"
-                        >
-                          {renderSubTabDot('PB')}
-                          <span>PB</span>
-                        </button>
                       )}
 
-                      {(isTestAssigned('CNS') || isTestAssigned('CT')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('CT'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'CT' || activeTestSubTab === 'CNS'
-                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="Consolidation Test 1-D (CT / Consol)"
-                        >
-                          {renderSubTabDot('CT')}
-                          <span>CT</span>
-                        </button>
-                      )}
+                      {/* CATEGORY 3: KUAT GESER & MEKANIS */}
+                      {cat3Count > 0 && (
+                        <div className="flex-1 min-w-[280px] bg-gradient-to-b from-indigo-50/90 via-white to-indigo-50/30 border border-indigo-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
+                          <div className="text-[10px] font-black uppercase text-indigo-950 tracking-wider flex items-center justify-between px-1 border-b border-indigo-100/80 pb-1.5">
+                            <span className="flex items-center gap-1.5">
+                              <div className="p-1 rounded-lg bg-indigo-600 text-white shadow-2xs">
+                                <Activity className="w-3 h-3 text-white" />
+                              </div>
+                              <span className="font-extrabold text-indigo-950">Kuat Geser &amp; Mekanis</span>
+                            </span>
+                            <span className="text-[9px] font-mono text-indigo-800 bg-indigo-100/90 px-2 py-0.5 rounded-full font-extrabold border border-indigo-200">
+                              {`${cat3Count} Uji`}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            {isTestAssigned('UCT') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('UCT'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'UCT'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Unconfined Compression Test (UCT)"
+                              >
+                                {renderSubTabDot('UCT')}
+                                <span>UCT</span>
+                              </button>
+                            )}
 
-                      {isTestAssigned('CMP-STD') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('CMP-STD'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'CMP-STD' || activeTestSubTab === 'CMP'
-                              ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md shadow-amber-600/30 ring-2 ring-amber-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="Compaction Standard Proctor (CMP-STD)"
-                        >
-                          {renderSubTabDot('CMP-STD')}
-                          <span>CMP-STD</span>
-                        </button>
-                      )}
+                            {isTestAssigned('TRX-UU') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-UU'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'TRX-UU' || activeTestSubTab === 'TRX'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Triaxial UU Test (TRX-UU)"
+                              >
+                                {renderSubTabDot('TRX-UU')}
+                                <span>TRX-UU</span>
+                              </button>
+                            )}
 
-                      {isTestAssigned('CMP-MOD') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('CMP-MOD'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'CMP-MOD'
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="Compaction Modified Proctor (CMP-MOD)"
-                        >
-                          {renderSubTabDot('CMP-MOD')}
-                          <span>CMP-MOD</span>
-                        </button>
-                      )}
+                            {isTestAssigned('TRX-CU') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-CU'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'TRX-CU'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Triaxial CU Multi-Stage Test (TRX-CU)"
+                              >
+                                {renderSubTabDot('TRX-CU')}
+                                <span>TRX-CU</span>
+                              </button>
+                            )}
 
-                      {isTestAssigned('CBR-UNS') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('CBR-UNS'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'CBR-UNS' || activeTestSubTab === 'CBR'
-                              ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-600/30 ring-2 ring-teal-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="CBR Lab Unsoaked / Tanpa Perendaman (SNI 1744:2012)"
-                        >
-                          {renderSubTabDot('CBR-UNS')}
-                          <span>CBR-UNS</span>
-                        </button>
-                      )}
+                            {isTestAssigned('TRX-CD') && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-CD'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'TRX-CD'
+                                    ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Triaxial Consolidated Drained Test (TRX-CD)"
+                              >
+                                {renderSubTabDot('TRX-CD')}
+                                <span>TRX-CD</span>
+                              </button>
+                            )}
 
-                      {isTestAssigned('CBR-SOK') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('CBR-SOK'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'CBR-SOK'
-                              ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-amber-950 hover:bg-amber-50/80 border border-amber-200/70 shadow-2xs'
-                          }`}
-                          title="CBR Lab Soaked / Dengan Perendaman (SNI 1744:2012)"
-                        >
-                          {renderSubTabDot('CBR-SOK')}
-                          <span>CBR-SOK</span>
-                        </button>
-                      )}
-                    </div>
-                  </div>
+                            {(isTestAssigned('DS-UU') || isTestAssigned('DS') || isTestAssigned('DSH-UU')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('DS-UU'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'DS-UU' || activeTestSubTab === 'DS' || activeTestSubTab === 'DSH-UU'
+                                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Direct Shear UU Test (DS-UU)"
+                              >
+                                {renderSubTabDot('DSH-UU')}
+                                <span>DS-UU</span>
+                              </button>
+                            )}
 
-                  {/* CATEGORY 3: KUAT GESER & MEKANIS (SHEAR STRENGTH & TRIAXIAL) */}
-                  <div className="xl:col-span-5 bg-gradient-to-b from-indigo-50/90 via-white to-indigo-50/30 border border-indigo-200/90 rounded-2xl p-2.5 flex flex-col gap-2 shadow-2xs relative overflow-hidden group">
-                    <div className="text-[10px] font-black uppercase text-indigo-950 tracking-wider flex items-center justify-between px-1 border-b border-indigo-100/80 pb-1.5">
-                      <span className="flex items-center gap-1.5">
-                        <div className="p-1 rounded-lg bg-indigo-600 text-white shadow-2xs">
-                          <Activity className="w-3 h-3 text-white" />
+                            {(isTestAssigned('DS-CU') || isTestAssigned('DSH-CU')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CU'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'DS-CU'
+                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Direct Shear Consolidated Undrained Test (DS-CU)"
+                              >
+                                {renderSubTabDot('DS-CU')}
+                                <span>DS-CU</span>
+                              </button>
+                            )}
+
+                            {(isTestAssigned('DS-CD') || isTestAssigned('DSH-CD')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CD'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'DS-CD'
+                                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Direct Shear CD Test (DS-CD)"
+                              >
+                                {renderSubTabDot('DS-CD')}
+                                <span>DS-CD</span>
+                              </button>
+                            )}
+
+                            {(isTestAssigned('DS-CDR') || isTestAssigned('DS-CD-RES') || isTestAssigned('DS-RES') || isTestAssigned('DSH-CDR')) && (
+                              <button
+                                onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CDR'))}
+                                className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
+                                  activeTestSubTab === 'DS-CDR' || activeTestSubTab === 'DS-CD-RES'
+                                    ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400/60 scale-[1.02]'
+                                    : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
+                                }`}
+                                title="Direct Shear CD Residual Test (DS-CDR)"
+                              >
+                                {renderSubTabDot('DS-CDR')}
+                                <span>DS-CDR</span>
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <span className="font-extrabold text-indigo-950">3. Kuat Geser &amp; Mekanis</span>
-                      </span>
-                      <span className="text-[9px] font-mono text-indigo-800 bg-indigo-100/90 px-2 py-0.5 rounded-full font-extrabold border border-indigo-200">
-                        {`${(isTestAssigned('UCT') ? 1 : 0) + (isTestAssigned('TRX-UU') ? 1 : 0) + (isTestAssigned('TRX-CU') ? 1 : 0) + (isTestAssigned('TRX-CD') ? 1 : 0) + (isTestAssigned('DS-UU') ? 1 : 0) + (isTestAssigned('DS-CU') ? 1 : 0) + (isTestAssigned('DS-CD') ? 1 : 0) + (isTestAssigned('DS-CD-RES') ? 1 : 0)} Uji + Summary`}
-                      </span>
+                      )}
+
+                      {/* DEDICATED SEPARATE TAB: SUMMARY HASIL UJI */}
+                      <div className="flex-initial min-w-[160px] bg-gradient-to-b from-emerald-50/90 via-white to-teal-50/30 border border-emerald-300/90 rounded-2xl p-2.5 flex flex-col justify-between shadow-2xs relative overflow-hidden group">
+                        <div className="text-[10px] font-black uppercase text-emerald-950 tracking-wider flex items-center justify-between px-1 border-b border-emerald-100/80 pb-1.5">
+                          <span className="flex items-center gap-1.5">
+                            <div className="p-1 rounded-lg bg-emerald-600 text-white shadow-2xs">
+                              <ThumbsUp className="w-3 h-3 text-white" />
+                            </div>
+                            <span className="font-extrabold text-emerald-950">Ringkasan Uji</span>
+                          </span>
+                          <span className="text-[9px] font-mono text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full font-extrabold border border-emerald-200">
+                            REKAP
+                          </span>
+                        </div>
+                        <div className="flex items-center pt-1">
+                          <button
+                            onClick={() => navigateSafely(() => setActiveTestSubTab('SUMMARY'))}
+                            className={`w-full px-3.5 py-1.5 rounded-xl text-[11px] font-black transition-all duration-200 flex items-center justify-center gap-1.5 cursor-pointer ${
+                              activeTestSubTab === 'SUMMARY'
+                                ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/60 scale-[1.02]'
+                                : 'bg-emerald-100/90 text-emerald-950 hover:bg-emerald-200 border border-emerald-300/80 shadow-2xs'
+                            }`}
+                            title="Lihat Ringkasan Hasil Uji Laboratorium (Summary)"
+                          >
+                            <ThumbsUp className="w-3.5 h-3.5" />
+                            <span>SUMMARY</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* NOTICE IF NO TESTS ASSIGNED AT ALL */}
+                      {cat1Count === 0 && cat2Count === 0 && cat3Count === 0 && (
+                        <div className="flex-1 flex items-center justify-center p-3 text-slate-500 text-xs italic bg-slate-50 rounded-2xl border border-dashed border-slate-300">
+                          Tidak ada parameter uji spesifik yang ditugaskan untuk sampel ini.
+                        </div>
+                      )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                      {isTestAssigned('UCT') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('UCT'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'UCT'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Unconfined Compression Test (UCT)"
-                        >
-                          {renderSubTabDot('UCT')}
-                          <span>UCT</span>
-                        </button>
-                      )}
-
-                      {isTestAssigned('TRX-UU') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-UU'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'TRX-UU' || activeTestSubTab === 'TRX'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Triaxial UU Test (TRX-UU)"
-                        >
-                          {renderSubTabDot('TRX-UU')}
-                          <span>TRX-UU</span>
-                        </button>
-                      )}
-
-                      {isTestAssigned('TRX-CU') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-CU'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'TRX-CU'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Triaxial CU Multi-Stage Test (TRX-CU)"
-                        >
-                          {renderSubTabDot('TRX-CU')}
-                          <span>TRX-CU</span>
-                        </button>
-                      )}
-
-                      {isTestAssigned('TRX-CD') && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('TRX-CD'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'TRX-CD'
-                              ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Triaxial Consolidated Drained Test (TRX-CD)"
-                        >
-                          {renderSubTabDot('TRX-CD')}
-                          <span>TRX-CD</span>
-                        </button>
-                      )}
-
-                      {(isTestAssigned('DS-UU') || isTestAssigned('DS') || isTestAssigned('DSH-UU')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('DS-UU'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'DS-UU' || activeTestSubTab === 'DS' || activeTestSubTab === 'DSH-UU'
-                              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Direct Shear UU Test (DS-UU)"
-                        >
-                          {renderSubTabDot('DSH-UU')}
-                          <span>DS-UU</span>
-                        </button>
-                      )}
-
-                      {(isTestAssigned('DS-CU') || isTestAssigned('DSH-CU')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CU'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'DS-CU'
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Direct Shear Consolidated Undrained Test (DS-CU)"
-                        >
-                          {renderSubTabDot('DS-CU')}
-                          <span>DS-CU</span>
-                        </button>
-                      )}
-
-                      {(isTestAssigned('DS-CD') || isTestAssigned('DSH-CD')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CD'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'DS-CD'
-                              ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md shadow-purple-600/30 ring-2 ring-purple-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Direct Shear CD Test (DS-CD)"
-                        >
-                          {renderSubTabDot('DS-CD')}
-                          <span>DS-CD</span>
-                        </button>
-                      )}
-
-                      {(isTestAssigned('DS-CDR') || isTestAssigned('DS-CD-RES') || isTestAssigned('DS-RES') || isTestAssigned('DSH-CDR')) && (
-                        <button
-                          onClick={() => navigateSafely(() => setActiveTestSubTab('DS-CDR'))}
-                          className={`px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                            activeTestSubTab === 'DS-CDR' || activeTestSubTab === 'DS-CD-RES'
-                              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md shadow-indigo-600/30 ring-2 ring-indigo-400/60 scale-[1.02]'
-                              : 'bg-white text-slate-700 hover:text-indigo-950 hover:bg-indigo-50/80 border border-indigo-200/70 shadow-2xs'
-                          }`}
-                          title="Direct Shear CD Residual Test (DS-CDR)"
-                        >
-                          {renderSubTabDot('DS-CDR')}
-                          <span>DS-CDR</span>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => navigateSafely(() => setActiveTestSubTab('SUMMARY'))}
-                        className={`px-3.5 py-1.5 rounded-xl text-[11px] font-black transition-all duration-200 flex items-center gap-1.5 cursor-pointer ${
-                          activeTestSubTab === 'SUMMARY'
-                            ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md shadow-emerald-600/30 ring-2 ring-emerald-400/60 scale-[1.02]'
-                            : 'bg-emerald-100/90 text-emerald-950 hover:bg-emerald-200 border border-emerald-300/80 shadow-2xs'
-                        }`}
-                        title="Ringkasan Hasil Uji Laboratorium (Summary)"
-                      >
-                        <ThumbsUp className="w-3.5 h-3.5" />
-                        <span>SUMMARY</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  );
+                })()}
               </div>
           </div>
         </div>
