@@ -3138,6 +3138,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         setDateTested(activeSample.dateTested || '');
         setDateTestedEnd(activeSample.dateTestedEnd || activeSample.dateTested || '');
       } else {
+        const currentNorm = normalizeTestCode(activeTestSubTab);
         const activeTest = (activeSample.tests || []).find(t => {
           const tNorm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
           if (currentNorm === 'PP') return ['SG', 'MC', 'UW', 'PP'].includes(tNorm);
