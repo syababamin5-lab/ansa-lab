@@ -863,7 +863,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <DollarSign className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-slate-900">1. Tarif &amp; Katalog Uji</h4>
+              <h4 className="text-xs font-extrabold text-slate-900">Tarif &amp; Katalog Uji</h4>
               <p className="text-[10px] text-slate-500 font-medium">3 Tier Harga, Standar SNI, Tipe Sampel</p>
             </div>
           </div>
@@ -886,7 +886,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <UserCheck className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-slate-900">2. Tim Lab &amp; TTD Digital</h4>
+              <h4 className="text-xs font-extrabold text-slate-900">Tim Lab &amp; TTD Digital</h4>
               <p className="text-[10px] text-slate-500 font-medium">Penguji, Analyst, Checker, TTD</p>
             </div>
           </div>
@@ -913,7 +913,7 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
               <Box className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-xs font-extrabold text-slate-900">3. Peralatan &amp; Kalibrasi</h4>
+              <h4 className="text-xs font-extrabold text-slate-900">Peralatan &amp; Kalibrasi</h4>
               <p className="text-[10px] text-slate-500 font-medium">Cawan, Ring Density, Consol, DS, TRX, UCT, Pikno, Mold, Reamer</p>
             </div>
           </div>
