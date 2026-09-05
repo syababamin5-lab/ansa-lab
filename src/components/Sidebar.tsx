@@ -62,14 +62,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const menuGroups = [
     {
       title: 'Alur Kerja Lab (ISO 17025)',
-      badge: '6 TAHAP',
+      badge: null,
       items: [
-        { id: 'quotation', label: '1. Penawaran Harga', icon: FileText, badge: 'T-1', badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-300/50 font-bold' },
-        { id: 'sample_receipt', label: '2. Tanda Terima Sampel', icon: PackageCheck, badge: 'T-2', badgeColor: 'bg-teal-100 text-teal-800 border border-teal-300/50 font-bold' },
-        { id: 'sample_prep', label: '3. Preparasi Sampel (BAP)', icon: Scissors, badge: 'T-3', badgeColor: 'bg-amber-100 text-amber-900 border border-amber-300/50 font-bold' },
-        { id: 'po_management', label: '4. Kelola PO & Sampel', icon: FolderKanban, badge: runningPOCount > 0 ? runningPOCount : null, badgeColor: 'bg-emerald-600 text-white font-extrabold shadow-2xs' },
-        { id: 'pp_worksheet', label: '5. Input Kertas Kerja Uji', icon: FileSpreadsheet, badge: 'T-5', badgeColor: 'bg-blue-100 text-blue-800 border border-blue-300/50 font-bold' },
-        { id: 'invoice', label: '6. Invoice & Tagihan', icon: CreditCard, badge: 'T-6', badgeColor: 'bg-emerald-100 text-emerald-800 border border-emerald-300/50 font-bold' },
+        { id: 'quotation', label: 'Penawaran Harga', icon: FileText, badge: null, badgeColor: '' },
+        { id: 'sample_receipt', label: 'Tanda Terima Sampel', icon: PackageCheck, badge: null, badgeColor: '' },
+        { id: 'sample_prep', label: 'Preparasi Sampel (BAP)', icon: Scissors, badge: null, badgeColor: '' },
+        { id: 'subcontract_notice', label: 'Subkontrak Lab Rekanan', icon: Building2, badge: null, badgeColor: '' },
+        { id: 'po_management', label: 'Kelola PO & Sampel', icon: FolderKanban, badge: runningPOCount > 0 ? runningPOCount : null, badgeColor: 'bg-emerald-600 text-white font-extrabold shadow-2xs' },
+        { id: 'pp_worksheet', label: 'Input Kertas Kerja Uji', icon: FileSpreadsheet, badge: null, badgeColor: '' },
+        { id: 'invoice', label: 'Invoice & Tagihan', icon: CreditCard, badge: null, badgeColor: '' },
       ]
     },
     {
@@ -77,7 +78,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
       badge: null,
       items: [
         { id: 'blank_worksheet', label: 'Form Cetak Teknisi', icon: Printer, badge: null, badgeColor: '' },
-        { id: 'subcontract_notice', label: 'Subkontrak Lab Rekanan', icon: Building2, badge: null, badgeColor: '' },
         { id: 'sandbox_test', label: 'Sandbox Kalkulator Uji', icon: FlaskConical, badge: 'TEST', badgeColor: 'bg-purple-100 text-purple-800 border border-purple-300/50 font-bold' },
         { id: 'public_verification', label: 'Verifikasi LHU (QR Portal)', icon: QrCode, badge: 'QR', badgeColor: 'bg-sky-100 text-sky-800 border border-sky-300/50 font-bold' },
       ]
