@@ -24,6 +24,7 @@ import { LHUReportModal } from './components/LHUReportModal';
 import { LHUSheetCode } from './types/lhuTypes';
 import { UserManagementView } from './components/UserManagementView';
 import { PublicReportVerificationView } from './components/PublicReportVerificationView';
+import { LHUVerificationAdminView } from './components/LHUVerificationAdminView';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
 // ISO 17025 Workflow Components & Types
@@ -1960,11 +1961,11 @@ export function App() {
   }
 
   // Public Verification Landing Page (Direct scan from mobile / guest without requiring prior login)
-  if (verifyParam || activeTab === 'public_verification') {
+  if (verifyParam) {
     return (
       <ErrorBoundary>
         <PublicReportVerificationView
-          initialReportNo={verifyParam || 'REP-2026-001'}
+          initialReportNo={verifyParam}
           pos={pos}
           personnelList={personnelCatalogue}
           onOpenLHU={(sample, po, sheetCode) => {
@@ -1973,6 +1974,12 @@ export function App() {
               po, 
               initialSelectedCodes: sheetCode ? [sheetCode] : undefined 
             });
+          }}
+          onBackToApp={() => {
+            setVerifyParam('');
+            if (typeof window !== 'undefined') {
+              window.history.replaceState({}, '', window.location.pathname);
+            }
           }}
         />
         {activeLHUModal && (
@@ -2440,6 +2447,22 @@ export function App() {
                 onDeleteUser={handleDeleteUser}
                 currentUser={currentUser}
                 onSwitchUser={(user) => setCurrentUser(user)}
+              />
+            </ErrorBoundary>
+          )}
+
+          {activeTab === 'public_verification' && (
+            <ErrorBoundary>
+              <LHUVerificationAdminView
+                pos={pos}
+                personnelList={personnelCatalogue}
+                onOpenLHU={(sample, po, sheetCode) => {
+                  setActiveLHUModal({ 
+                    sample, 
+                    po, 
+                    initialSelectedCodes: sheetCode ? [sheetCode] : undefined 
+                  });
+                }}
               />
             </ErrorBoundary>
           )}

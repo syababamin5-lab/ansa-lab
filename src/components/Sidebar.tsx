@@ -79,7 +79,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       items: [
         { id: 'blank_worksheet', label: 'Form Cetak Teknisi', icon: Printer, badge: null, badgeColor: '' },
         { id: 'sandbox_test', label: 'Sandbox Kalkulator Uji', icon: FlaskConical, badge: 'TEST', badgeColor: 'bg-purple-100 text-purple-800 border border-purple-300/50 font-bold' },
-        { id: 'public_verification', label: 'Verifikasi LHU (QR Portal)', icon: QrCode, badge: 'QR', badgeColor: 'bg-sky-100 text-sky-800 border border-sky-300/50 font-bold' },
+        { id: 'public_verification', label: 'Verifikasi & Audit LHU', icon: QrCode, badge: 'QR', badgeColor: 'bg-sky-100 text-sky-800 border border-sky-300/50 font-bold' },
       ]
     },
     {

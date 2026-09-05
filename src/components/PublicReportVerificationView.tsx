@@ -33,6 +33,7 @@ interface PublicReportVerificationViewProps {
   pos: PurchaseOrder[];
   personnelList: PersonnelItem[];
   onOpenLHU?: (sample: Sample, po: PurchaseOrder, sheetCode?: LHUSheetCode) => void;
+  onBackToApp?: () => void;
 }
 
 // Sheet code mapping helper
@@ -102,7 +103,8 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
   initialReportNo = '',
   pos,
   personnelList,
-  onOpenLHU
+  onOpenLHU,
+  onBackToApp
 }) => {
   const [searchQuery, setSearchQuery] = useState<string>(initialReportNo);
   const [activeQuery, setActiveQuery] = useState<string>(initialReportNo);
@@ -265,6 +267,17 @@ export const PublicReportVerificationView: React.FC<PublicReportVerificationView
               <ShieldCheck className="w-4 h-4 text-emerald-300" />
               <span>Sistem Validasi Resmi</span>
             </div>
+
+            {onBackToApp && (
+              <button
+                onClick={onBackToApp}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-white text-xs font-bold backdrop-blur-xs border border-white/30 transition cursor-pointer"
+                title="Kembali ke Dashboard LIMS"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                <span>Kembali ke LIMS</span>
+              </button>
+            )}
           </div>
         </div>
       </header>
