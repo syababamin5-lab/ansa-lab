@@ -602,7 +602,7 @@ interface PhysicalPropertiesViewProps {
   reamerCatalogue?: ReamerItem[];
   onBackToPO: () => void;
   onSaveSampleCalculation: (poId: string, sampleId: string, summaryData: any) => void;
-  onUpdateSamplePersonnel?: (poId: string, sampleId: string, testSubTab: string, technicianName: string) => void;
+  onUpdateSamplePersonnel?: (poId: string, sampleId: string, testSubTab: string, personnelData: any) => void;
 }
 
 const WATER_DENSITY_TABLE: { [temp: number]: { density: number; kFactor: number } } = {
@@ -6692,7 +6692,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                     setTestedBy(val);
                     markDirty();
                     if (onUpdateSamplePersonnel && activePO && activeSample) {
-                      onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, val);
+                      onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, { testedBy: val });
                     }
                   }}
                   personnelList={personnelCatalogue}
@@ -6705,7 +6705,13 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                   labelColor="text-amber-800"
                   icon={<CheckCircle2 className="w-3 h-3 text-amber-600" />}
                   value={checkedBy}
-                  onChange={val => { setCheckedBy(val); markDirty(); }}
+                  onChange={val => {
+                    setCheckedBy(val);
+                    markDirty();
+                    if (onUpdateSamplePersonnel && activePO && activeSample) {
+                      onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, { checkedBy: val });
+                    }
+                  }}
                   personnelList={personnelCatalogue}
                   roleFilter={['Analyst', 'Computed', 'Checker']}
                   accentColor="amber"
@@ -6716,7 +6722,13 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                   labelColor="text-emerald-800"
                   icon={<CheckCircle2 className="w-3 h-3 text-emerald-600" />}
                   value={approvedBy}
-                  onChange={val => { setApprovedBy(val); markDirty(); }}
+                  onChange={val => {
+                    setApprovedBy(val);
+                    markDirty();
+                    if (onUpdateSamplePersonnel && activePO && activeSample) {
+                      onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, { approvedBy: val });
+                    }
+                  }}
                   personnelList={personnelCatalogue}
                   roleFilter={['Approver']}
                   accentColor="emerald"
@@ -6731,10 +6743,14 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                     value={dateTested}
                     onChange={val => {
                       setDateTested(val);
+                      const nextEnd = (!dateTestedEnd || dateTestedEnd === dateTested) ? val : dateTestedEnd;
                       if (!dateTestedEnd || dateTestedEnd === dateTested) {
                         setDateTestedEnd(val);
                       }
                       markDirty();
+                      if (onUpdateSamplePersonnel && activePO && activeSample) {
+                        onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, { dateTested: val, dateTestedEnd: nextEnd });
+                      }
                     }}
                     accentColor="blue"
                   />
@@ -6744,7 +6760,13 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                   <ModernDatePicker
                     label="TANGGAL SELESAI PENGUJIAN"
                     value={dateTestedEnd || ''}
-                    onChange={val => { setDateTestedEnd(val); markDirty(); }}
+                    onChange={val => {
+                      setDateTestedEnd(val);
+                      markDirty();
+                      if (onUpdateSamplePersonnel && activePO && activeSample) {
+                        onUpdateSamplePersonnel(activePO.id, activeSample.id, activeTestSubTab, { dateTestedEnd: val });
+                      }
+                    }}
                     accentColor="emerald"
                   />
                 </div>

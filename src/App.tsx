@@ -1860,7 +1860,13 @@ export function App() {
     });
   };
 
-  const handleUpdateSamplePersonnel = (poId: string, sampleId: string, testCode: string, technicianName: string) => {
+  const handleUpdateSamplePersonnel = (
+    poId: string,
+    sampleId: string,
+    testCode: string,
+    payload: string | { testedBy?: string; checkedBy?: string; approvedBy?: string; dateTested?: string; dateTestedEnd?: string }
+  ) => {
+    const data = typeof payload === 'string' ? { testedBy: payload } : (payload || {});
     setPos(prevPOs => {
       const normPoId = (poId || '').trim().toLowerCase();
       const normSampleId = (sampleId || '').trim().toLowerCase();
@@ -1876,16 +1882,29 @@ export function App() {
                   const tNorm = normalizeTestCode(t.testTypeCode || t.testTypeId || '');
                   const isMatch = normTestCode === 'PP' ? ['SG', 'MC', 'UW', 'PP'].includes(tNorm) : (isSieveHydroCode(normTestCode) ? isSieveHydroCode(tNorm) : tNorm === normTestCode);
                   if (isMatch) {
+                    const nextTestedBy = data.testedBy !== undefined ? data.testedBy : t.technicianName;
+                    const nextCheckedBy = data.checkedBy !== undefined ? data.checkedBy : t.checkerName;
+                    const nextApprovedBy = data.approvedBy !== undefined ? data.approvedBy : t.approverName;
+                    const nextDateTested = data.dateTested !== undefined ? data.dateTested : t.dateTested;
+                    const nextDateTestedEnd = data.dateTestedEnd !== undefined ? data.dateTestedEnd : t.dateTestedEnd;
+
                     return {
                       ...t,
-                      technicianName,
-                      assignedTechnician: technicianName,
+                      technicianName: nextTestedBy || '',
+                      assignedTechnician: nextTestedBy || '',
+                      checkerName: nextCheckedBy || '',
+                      approverName: nextApprovedBy || '',
+                      dateTested: nextDateTested || '',
+                      dateTestedEnd: nextDateTestedEnd || '',
                       calculationData: {
                         ...(t.calculationData || {}),
                         inputValues: {
                           ...(t.calculationData?.inputValues || {}),
-                          testedBy: technicianName,
-                          assignedTechnician: technicianName,
+                          ...(data.testedBy !== undefined ? { testedBy: data.testedBy, assignedTechnician: data.testedBy } : {}),
+                          ...(data.checkedBy !== undefined ? { checkedBy: data.checkedBy } : {}),
+                          ...(data.approvedBy !== undefined ? { approvedBy: data.approvedBy } : {}),
+                          ...(data.dateTested !== undefined ? { dateStarted: data.dateTested, dateTested: data.dateTested } : {}),
+                          ...(data.dateTestedEnd !== undefined ? { dateCompleted: data.dateTestedEnd, dateTestedEnd: data.dateTestedEnd } : {}),
                         }
                       }
                     };
