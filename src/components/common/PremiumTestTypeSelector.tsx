@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { MatrixTestInfo } from '../../types';
-import { Search, ChevronDown, Check, Sparkles, Layers, Box, FlaskConical, Filter, X } from 'lucide-react';
+import { Search, ChevronDown, Check, FlaskConical, X } from 'lucide-react';
 
 export interface PremiumTestTypeOption {
   code: string;
@@ -139,51 +139,41 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
         </label>
       )}
 
-      {/* TRIGGER BUTTON (PREMIUM GLASS SELECTOR) */}
+      {/* TRIGGER BUTTON (CLEAN EXECUTIVE SELECTOR) */}
       <button
         type="button"
         disabled={disabled}
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-full text-left px-3.5 py-2.5 rounded-2xl border transition-all duration-200 flex items-center justify-between gap-2 cursor-pointer shadow-xs ${
+        className={`w-full text-left px-3 py-1.5 min-h-[36px] rounded-lg border transition-all duration-150 flex items-center justify-between gap-2 cursor-pointer ${
           isOpen
-            ? 'bg-white border-blue-600 ring-4 ring-blue-500/10'
+            ? 'bg-white border-slate-500 ring-2 ring-slate-500/10 shadow-xs'
             : selectedOption
-            ? 'bg-gradient-to-r from-slate-50 to-blue-50/30 border-blue-200 hover:border-blue-400'
-            : 'bg-slate-50 border-slate-200 hover:bg-white hover:border-slate-300'
+            ? 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
+            : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {selectedOption ? (
             <>
-              {(() => {
-                const badge = getTestTypeBadgeProps(selectedOption.code);
-                return (
-                  <span className={`px-2 py-0.5 rounded-lg text-[10.5px] font-black font-mono shadow-xs shrink-0 ${badge.bg} ${badge.text}`}>
-                    {selectedOption.code}
-                  </span>
-                );
-              })()}
-              <div className="min-w-0">
-                <span className="font-extrabold text-slate-900 text-xs truncate block leading-tight">
-                  {selectedOption.name}
-                </span>
-                <span className="text-[10px] text-slate-500 font-mono block truncate">
-                  {selectedOption.category} {selectedOption.standard ? `• ${selectedOption.standard}` : ''}
-                </span>
-              </div>
+              <span className="px-1.5 py-0.5 rounded text-[10.5px] font-mono font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                {selectedOption.code}
+              </span>
+              <span className="font-medium text-slate-800 text-xs truncate">
+                {selectedOption.name.replace(new RegExp(`\\s*\\(${selectedOption.code}\\)$`, 'i'), '')}
+              </span>
             </>
           ) : (
-            <span className="text-slate-400 font-medium text-xs flex items-center gap-1.5">
-              <FlaskConical className="w-4 h-4 text-slate-400" />
-              <span>{placeholder}</span>
+            <span className="text-slate-400 font-normal text-xs flex items-center gap-1.5">
+              <FlaskConical className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+              <span className="truncate">{placeholder}</span>
             </span>
           )}
         </div>
 
-        <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0 ${isOpen ? 'rotate-180 text-blue-600' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-150 shrink-0 ${isOpen ? 'rotate-180 text-slate-700' : ''}`} />
       </button>
 
-      {/* CENTERED POPUP MODAL DIALOG (Tampil di Tengah Layar, Tidak Nabrak Batas Modal) */}
+      {/* CENTERED POPUP MODAL DIALOG */}
       {isOpen && (
         <div
           className="fixed inset-0 z-[99999] bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-150"
@@ -191,54 +181,54 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
             if (e.target === e.currentTarget) setIsOpen(false);
           }}
         >
-          <div className="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[82vh] animate-in zoom-in-95 duration-150">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden flex flex-col max-h-[82vh] animate-in zoom-in-95 duration-150">
             
             {/* MODAL HEADER */}
-            <div className="p-4 sm:p-4.5 bg-gradient-to-r from-slate-50 to-blue-50/50 border-b border-slate-100 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
-                  <FlaskConical className="w-5 h-5" />
+            <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center shrink-0">
+                  <FlaskConical className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-slate-900 tracking-tight">Pilih Jenis Pengujian Laboratorium</h3>
-                  <p className="text-[11px] text-slate-500 font-medium">Katalog Resmi TIMES® ANSA LIMS ({allOptions.length} Parameter Uji)</p>
+                  <h3 className="text-xs font-bold text-slate-900">Pilih Parameter Pengujian</h3>
+                  <p className="text-[10.5px] text-slate-500 font-medium">Katalog Resmi TIMES® ANSA LIMS ({allOptions.length} Parameter)</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition cursor-pointer shrink-0"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* SEARCH INPUT HEADER */}
-            <div className="p-3 bg-slate-50 border-b border-slate-200/80 shrink-0">
+            <div className="p-3 bg-slate-50/70 border-b border-slate-100 shrink-0">
               <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Cari kode (mis. SG, MC, TRX) atau nama pengujian..."
-                  className="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-9 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-medium transition shadow-2xs"
+                  placeholder="Cari kode (mis. SG, MC) atau nama pengujian..."
+                  className="w-full bg-white border border-slate-200 rounded-lg pl-9 pr-8 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-slate-400 focus:ring-1 focus:ring-slate-300 font-medium transition shadow-2xs"
                   autoFocus
                 />
                 {searchQuery && (
                   <button
                     type="button"
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-700 cursor-pointer p-0.5"
+                    className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-600 cursor-pointer p-0.5"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
             </div>
 
             {/* OPTIONS LIST BY CATEGORY GROUPS */}
-            <div className="overflow-y-auto p-3 space-y-4 flex-1 text-xs">
+            <div className="overflow-y-auto p-3 space-y-3 flex-1 text-xs">
               {filteredOptions.length === 0 ? (
                 <div className="p-8 text-center text-slate-400 text-xs font-medium">
                   Tidak ada jenis pengujian yang cocok dengan "{searchQuery}"
@@ -249,22 +239,20 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                   if (items.length === 0) return null;
 
                   return (
-                    <div key={category} className="space-y-1.5">
+                    <div key={category} className="space-y-1">
                       {/* Category Group Title */}
-                      <div className="px-3 py-1.5 rounded-xl bg-slate-100/90 text-[11px] font-black uppercase tracking-wider text-slate-700 font-mono flex items-center justify-between border border-slate-200/80">
-                        <div className="flex items-center gap-2">
-                          <Box className="w-3.5 h-3.5 text-blue-600 shrink-0" />
-                          <span>{category}</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-bold">{items.length} uji</span>
+                      <div className="px-2 pt-2 pb-1 flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          {category}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-medium">{items.length} uji</span>
                       </div>
 
                       {/* Group Items */}
-                      <div className="space-y-1 pl-1">
+                      <div className="space-y-0.5">
                         {items.map(option => {
                           const isSelected = option.code.toUpperCase() === (value || '').toUpperCase();
                           const isAlreadyUsed = disabledCodes.some(dc => dc.toUpperCase() === option.code.toUpperCase()) && !isSelected;
-                          const badgeProps = getTestTypeBadgeProps(option.code);
 
                           return (
                             <div
@@ -274,24 +262,28 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                                 onChange(option.code);
                                 setIsOpen(false);
                               }}
-                              className={`p-2.5 rounded-xl transition flex items-center justify-between gap-3 ${
+                              className={`px-3 py-2 rounded-lg transition-all flex items-center justify-between gap-3 text-left ${
                                 isAlreadyUsed
-                                  ? 'opacity-40 cursor-not-allowed bg-slate-100/60 border border-slate-200/80 select-none'
+                                  ? 'opacity-40 cursor-not-allowed bg-slate-50 select-none'
                                   : isSelected
-                                  ? 'bg-blue-50/90 border border-blue-300 text-blue-950 font-bold shadow-2xs cursor-pointer'
-                                  : 'hover:bg-slate-50 border border-transparent hover:border-slate-200 text-slate-800 font-medium cursor-pointer'
+                                  ? 'bg-slate-900 text-white cursor-pointer shadow-xs'
+                                  : 'hover:bg-slate-100 text-slate-800 cursor-pointer'
                               }`}
                             >
-                              <div className="flex items-center gap-3 min-w-0 flex-1">
-                                <span className={`px-2.5 py-1 rounded-lg text-[10.5px] font-mono font-black shrink-0 tracking-wider shadow-2xs ${badgeProps.bg} ${badgeProps.text}`}>
+                              <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                                <span className={`px-2 py-0.5 rounded text-[10.5px] font-mono font-bold tracking-tight shrink-0 ${
+                                  isSelected
+                                    ? 'bg-white/20 text-white'
+                                    : 'bg-slate-100 text-slate-700 border border-slate-200'
+                                }`}>
                                   {option.code}
                                 </span>
                                 <div className="min-w-0 flex-1">
-                                  <div className="font-extrabold text-slate-900 text-xs leading-snug">
+                                  <div className={`text-xs font-semibold truncate ${isSelected ? 'text-white' : 'text-slate-800'}`}>
                                     {option.name}
                                   </div>
                                   {option.standard && (
-                                    <div className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                    <div className={`text-[10.5px] font-mono truncate mt-0.5 ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
                                       {option.standard}
                                     </div>
                                   )}
@@ -299,15 +291,13 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                               </div>
 
                               {isAlreadyUsed && (
-                                <span className="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 font-mono shrink-0">
+                                <span className="text-[10px] font-medium text-slate-400 bg-slate-200/60 px-2 py-0.5 rounded shrink-0">
                                   Sudah Dipilih
                                 </span>
                               )}
 
                               {isSelected && !isAlreadyUsed && (
-                                <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
-                                  <Check className="w-3.5 h-3.5" />
-                                </div>
+                                <Check className="w-4 h-4 text-white shrink-0" />
                               )}
                             </div>
                           );
@@ -320,23 +310,17 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
             </div>
 
             {/* FOOTER TOTAL COUNT & CLOSE */}
-            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-[11px] font-medium text-slate-500 flex items-center justify-between shrink-0">
-              <span className="flex items-center gap-1.5 text-slate-600 font-mono text-[10.5px]">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                TIMES® ANSA LIMS Test Catalogue
+            <div className="px-4 py-2.5 bg-slate-50 border-t border-slate-100 text-[11px] text-slate-500 flex items-center justify-between shrink-0">
+              <span className="text-slate-500 font-mono text-[10.5px]">
+                {filteredOptions.length} Parameter Uji Tersedia
               </span>
-              <div className="flex items-center gap-3">
-                <span className="text-blue-700 font-extrabold bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 font-mono text-[10.5px]">
-                  {filteredOptions.length} Jenis Uji Tersedia
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIsOpen(false)}
-                  className="px-3 py-1 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs transition cursor-pointer"
-                >
-                  Tutup
-                </button>
-              </div>
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="px-3 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-100 text-slate-700 font-medium text-xs transition cursor-pointer"
+              >
+                Tutup
+              </button>
             </div>
           </div>
         </div>
