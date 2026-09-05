@@ -898,6 +898,7 @@ export function App() {
     if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
     if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
     if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+    if (Array.isArray(cloudState.subcontractShippingLetters)) setSubcontractShippingLetters(cloudState.subcontractShippingLetters);
     if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
     if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
     if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
@@ -923,6 +924,7 @@ export function App() {
         if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
         if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
         if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+        if (Array.isArray(cloudState.subcontractShippingLetters)) setSubcontractShippingLetters(cloudState.subcontractShippingLetters);
         if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
         if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
         if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
@@ -982,6 +984,7 @@ export function App() {
           if (Array.isArray(cloudState.sampleReceipts)) setSampleReceipts(cloudState.sampleReceipts);
           if (Array.isArray(cloudState.prepReports)) setSamplePrepReports(cloudState.prepReports);
           if (Array.isArray(cloudState.subcontractNotices)) setSubcontractNotices(cloudState.subcontractNotices);
+          if (Array.isArray(cloudState.subcontractShippingLetters)) setSubcontractShippingLetters(cloudState.subcontractShippingLetters);
           if (Array.isArray(cloudState.invoices)) setInvoices(cloudState.invoices);
           if (Array.isArray(cloudState.documents)) setDocuments(cloudState.documents);
           if (Array.isArray(cloudState.containers) && cloudState.containers.length > 0) setContainerCatalogue(cloudState.containers);
@@ -1034,6 +1037,7 @@ export function App() {
       sampleReceipts,
       prepReports: samplePrepReports,
       subcontractNotices,
+      subcontractShippingLetters,
       invoices,
       documents,
       containers: containerCatalogue,
@@ -1058,6 +1062,7 @@ export function App() {
     sampleReceipts,
     samplePrepReports,
     subcontractNotices,
+    subcontractShippingLetters,
     invoices,
     documents,
     containerCatalogue,

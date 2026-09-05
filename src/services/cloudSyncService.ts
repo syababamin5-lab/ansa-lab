@@ -2,7 +2,7 @@
 // TIMES® ANSA LIMS — Official Vercel KV Realtime Database Engine
 // =====================================================================
 import { UserProfile, INITIAL_USERS } from '../types/userTypes';
-import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice, LabRekanan } from '../types/workflowTypes';
+import { Client, Quotation, SampleReceipt, SamplePrepReport, SubcontractNotice, Invoice, LabRekanan, SubcontractShippingLetter } from '../types/workflowTypes';
 import { PurchaseOrder, ContainerItem, RingItem, ConsolRingItem, PycnometerItem, MoldItem, ReamerItem, PersonnelItem, DocumentItem } from '../types';
 import {
   DEFAULT_CONTAINER_CATALOGUE,
@@ -29,6 +29,7 @@ export interface CloudDatabaseState {
   sampleReceipts: SampleReceipt[];
   prepReports: SamplePrepReport[];
   subcontractNotices: SubcontractNotice[];
+  subcontractShippingLetters?: SubcontractShippingLetter[];
   invoices: Invoice[];
   documents: DocumentItem[];
   containers: ContainerItem[];
@@ -52,6 +53,7 @@ export function getInitialMasterState(): CloudDatabaseState {
     sampleReceipts: [],
     prepReports: [],
     subcontractNotices: [],
+    subcontractShippingLetters: [],
     invoices: [],
     documents: [],
     containers: DEFAULT_CONTAINER_CATALOGUE,
@@ -126,6 +128,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           sampleReceipts: cloudData.sampleReceipts || [],
           prepReports: cloudData.prepReports || [],
           subcontractNotices: cloudData.subcontractNotices || [],
+          subcontractShippingLetters: cloudData.subcontractShippingLetters || [],
           invoices: cloudData.invoices || [],
           documents: cloudData.documents || []
         };
@@ -153,6 +156,7 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
           sampleReceipts: parsed.sampleReceipts || [],
           prepReports: parsed.prepReports || [],
           subcontractNotices: parsed.subcontractNotices || [],
+          subcontractShippingLetters: parsed.subcontractShippingLetters || [],
           invoices: parsed.invoices || [],
           documents: parsed.documents || []
         };
