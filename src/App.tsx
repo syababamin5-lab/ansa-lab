@@ -2215,6 +2215,9 @@ export function App() {
                     return [inv, ...prev];
                   });
                 }}
+                onDeleteInvoice={(id) => {
+                  setInvoices(prev => prev.filter(item => item.id !== id));
+                }}
               />
             </ErrorBoundary>
           )}

@@ -12,12 +12,14 @@ interface InvoiceViewProps {
   invoices: Invoice[];
   companyProfile?: CompanyProfile;
   onSaveInvoice: (inv: Invoice) => void;
+  onDeleteInvoice?: (id: string) => void;
 }
 
-export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfile = DEFAULT_COMPANY_PROFILE, onSaveInvoice }) => {
+export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfile = DEFAULT_COMPANY_PROFILE, onSaveInvoice, onDeleteInvoice }) => {
   const [selectedInv, setSelectedInv] = useState<Invoice | null>(null);
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+  const [editingInvId, setEditingInvId] = useState<string | null>(null);
 
   // Form State
   const [formNo, setFormNo] = useState('');
@@ -48,6 +50,7 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
   ]);
 
   const openNewForm = () => {
+    setEditingInvId(null);
     const nextNo = getNextDocNo('INV', invoices.map(inv => inv.invoiceNo));
     setFormNo(nextNo);
     setFormPoNo('');
@@ -64,6 +67,30 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
     setFormPph23Pct(2);
     setFormItems([]);
     setIsFormModalOpen(true);
+  };
+
+  const openEditForm = (inv: Invoice) => {
+    setEditingInvId(inv.id);
+    setFormNo(inv.invoiceNo);
+    setFormPoNo(inv.poNumber || '');
+    setFormReportNo(inv.reportNo || '');
+    setFormTerms(inv.terms || '14 Hari');
+    setFormDueDate(inv.dueDate || '');
+    setFormClient(inv.clientName || '');
+    setFormAddress(inv.clientAddress || '');
+    setFormProject(inv.projectName || '');
+    setFormDiscountPct(inv.discountPct || 0);
+    setFormPph23Pct(inv.pph23Pct !== undefined ? inv.pph23Pct : 2);
+    setFormItems(inv.items ? [...inv.items] : []);
+    setIsFormModalOpen(true);
+  };
+
+  const handleDeleteInv = (inv: Invoice) => {
+    if (confirm(`Apakah Anda yakin ingin menghapus Invoice "${inv.invoiceNo}" (${inv.clientName})?`)) {
+      if (onDeleteInvoice) {
+        onDeleteInvoice(inv.id);
+      }
+    }
   };
 
   const handleSelectMasterTest = (index: number, masterId: string) => {
@@ -138,10 +165,12 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
     const pph23Amount = Math.round(subtotalAfterDiscount * (formPph23Pct / 100));
     const grandTotal = subtotalAfterDiscount - pph23Amount;
 
+    const existingInv = editingInvId ? invoices.find(i => i.id === editingInvId) : null;
+
     const newInv: Invoice = {
-      id: `inv-${Date.now()}`,
+      id: editingInvId || `inv-${Date.now()}`,
       invoiceNo: formNo,
-      date: new Date().toISOString().split('T')[0],
+      date: existingInv?.date || new Date().toISOString().split('T')[0],
       terms: formTerms,
       dueDate: formDueDate,
       poNumber: formPoNo,
@@ -157,13 +186,13 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
       pph23Pct: formPph23Pct,
       pph23Amount,
       grandTotal,
-      bankAccountName: 'PT. TERRAFORMA GEOTEKNIK INDONESIA',
-      bankName: 'Bank Mandiri',
-      bankAccountNumber: '133 - 00 - 99 - 00 - 8823',
-      waConfirmationNo: '0811-2183-223',
-      taxNote: 'Bukti potong pajak pph 23 (2%) untuk dapat dikirim ke PT. Terraforma Geoteknik Indonesia',
-      status: 'Unpaid',
-      notes: 'Terima kasih atas kepercayaan dan kerja samanya, semoga kolaborasi baik ini dapat terus berlanjut secara berkelanjutan.'
+      bankAccountName: existingInv?.bankAccountName || 'PT. TERRAFORMA GEOTEKNIK INDONESIA',
+      bankName: existingInv?.bankName || 'Bank Mandiri',
+      bankAccountNumber: existingInv?.bankAccountNumber || '133 - 00 - 99 - 00 - 8823',
+      waConfirmationNo: existingInv?.waConfirmationNo || '0811-2183-223',
+      taxNote: existingInv?.taxNote || 'Bukti potong pajak pph 23 (2%) untuk dapat dikirim ke PT. Terraforma Geoteknik Indonesia',
+      status: existingInv?.status || 'Unpaid',
+      notes: existingInv?.notes || 'Terima kasih atas kepercayaan dan kerja samanya, semoga kolaborasi baik ini dapat terus berlanjut secara berkelanjutan.'
     };
 
     onSaveInvoice(newInv);
@@ -255,16 +284,37 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
                     </button>
                   </td>
                   <td className="py-3 px-4 text-center">
-                    <button
-                      onClick={() => {
-                        setSelectedInv(inv);
-                        setIsPreviewModalOpen(true);
-                      }}
-                      className="px-3 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1.5 mx-auto transition cursor-pointer"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      <span>Cetak Invoice PDF</span>
-                    </button>
+                    <div className="flex items-center justify-center gap-1.5">
+                      <button
+                        onClick={() => {
+                          setSelectedInv(inv);
+                          setIsPreviewModalOpen(true);
+                        }}
+                        className="px-2.5 py-1.5 bg-blue-900 hover:bg-blue-800 text-white rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Cetak Invoice PDF"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>Cetak PDF</span>
+                      </button>
+
+                      <button
+                        onClick={() => openEditForm(inv)}
+                        className="p-1.5 bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Edit Invoice ini"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+
+                      <button
+                        onClick={() => handleDeleteInv(inv)}
+                        className="p-1.5 bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded-lg text-[11px] font-bold flex items-center gap-1 transition cursor-pointer"
+                        title="Hapus Invoice ini"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Hapus</span>
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -273,14 +323,14 @@ export const InvoiceView: React.FC<InvoiceViewProps> = ({ invoices, companyProfi
         </div>
       </div>
 
-      {/* FORM CREATE MODAL */}
+      {/* FORM CREATE / EDIT MODAL */}
       {isFormModalOpen && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
           <div className="bg-white rounded-2xl border border-slate-200 w-full max-w-5xl max-h-[94vh] flex flex-col shadow-2xl overflow-hidden">
             <div className="p-4 bg-slate-900 text-white flex justify-between items-center border-b border-slate-800">
               <h3 className="font-extrabold text-sm flex items-center gap-2">
                 <CreditCard className="w-4 h-4 text-emerald-400" />
-                <span>Input Invoice Tagihan Baru (Auto Lookup Price)</span>
+                <span>{editingInvId ? `Edit Invoice Tagihan — ${formNo}` : 'Input Invoice Tagihan Baru (Auto Lookup Price)'}</span>
               </h3>
               <button onClick={() => setIsFormModalOpen(false)} className="text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
