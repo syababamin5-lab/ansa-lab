@@ -14,7 +14,6 @@ import {
   Search,
   Key,
   Loader2,
-  Star,
   ShieldCheck,
   ChevronRight
 } from 'lucide-react';
@@ -483,19 +482,14 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
           </div>
 
           {/* Inspirational Quote Frosted Banner */}
-          <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-md max-w-xl flex items-start gap-3 shadow-xl">
-            <div className="p-2 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/25 shrink-0 mt-0.5">
-              <Star className="w-4 h-4 fill-amber-400" />
-            </div>
-            <div>
-              <p className="text-xs sm:text-sm text-slate-200 italic font-medium leading-snug">
-                "{currentQuoteObj.quote}"
-              </p>
-              <div className="flex items-center gap-2 mt-2 flex-wrap text-[10.5px] font-mono text-slate-400">
-                <span className="text-amber-400 font-extrabold uppercase tracking-wide">— {currentQuoteObj.author}</span>
-                <span>•</span>
-                <span className="text-blue-300">{currentQuoteObj.tag}</span>
-              </div>
+          <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800/80 backdrop-blur-md max-w-xl shadow-xl space-y-2">
+            <p className="text-xs sm:text-sm text-slate-200 italic font-medium leading-snug">
+              "{currentQuoteObj.quote}"
+            </p>
+            <div className="flex items-center gap-2 flex-wrap text-[10.5px] font-mono text-slate-400">
+              <span className="text-amber-400 font-extrabold uppercase tracking-wide">— {currentQuoteObj.author}</span>
+              <span>•</span>
+              <span className="text-blue-300">{currentQuoteObj.tag}</span>
             </div>
           </div>
         </div>
