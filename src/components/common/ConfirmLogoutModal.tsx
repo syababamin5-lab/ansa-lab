@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { LogOut, X, ShieldAlert } from 'lucide-react';
 import { UserProfile, USER_ROLE_LABELS } from '../../types/userTypes';
 
@@ -28,9 +29,9 @@ export const ConfirmLogoutModal: React.FC<ConfirmLogoutModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalContent = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -134,4 +135,6 @@ export const ConfirmLogoutModal: React.FC<ConfirmLogoutModalProps> = ({
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };

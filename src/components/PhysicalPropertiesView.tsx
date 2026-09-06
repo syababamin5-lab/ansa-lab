@@ -6251,7 +6251,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
         <div className="xl:col-span-9 lg:col-span-9 space-y-4">
 
           {/* STICKY TOP HEADER CONTAINER FOR WORKSHEET (PINNED AT TOP-0 OF SCROLL CONTAINER) */}
-          <div className="sticky top-0 z-30 bg-slate-50/95 backdrop-blur-md pt-1 pb-2 -mx-2 px-2 border-b border-slate-200/80 shadow-xs">
+          <div className="sticky top-0 z-20 bg-slate-50/95 backdrop-blur-md pt-1 pb-2 -mx-2 px-2 border-b border-slate-200/80 shadow-xs">
             {/* COMPACT SUB-TABS & ACTION BUTTONS BAR */}
             <div className="bg-white rounded-xl p-1.5 border border-slate-200 shadow-2xs flex flex-col xl:flex-row xl:items-center justify-between gap-2">
               {/* SUB-TABS PENGUJIAN NAVIGATION BAR (SPACIOUS ELEGANT CATEGORIZED CONTAINERS) */}
