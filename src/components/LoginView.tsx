@@ -424,7 +424,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
               </span>
             </div>
             <p className="text-[11px] text-slate-400 font-medium">
-              PT. Terraforma Geoteknik Indonesia • Laboratorium Mekanika Tanah &amp; Batuan
+              Aplikasi Laboratorium Mekanika Tanah
             </p>
           </div>
         </div>
@@ -506,14 +506,10 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
             
             {/* Card Header */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center mb-3">
                 <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-800 text-[11px] font-mono font-extrabold border border-slate-200 inline-flex items-center gap-1.5">
                   <Lock className="w-3.5 h-3.5 text-blue-600" />
                   <span>Autentikasi Sistem</span>
-                </span>
-                <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-[11px] font-mono font-extrabold border border-blue-200 inline-flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                  <span>ISO 17025 Ready</span>
                 </span>
               </div>
 
@@ -643,7 +639,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4.5 h-4.5 text-white animate-spin" />
-                    <span>Memverifikasi Otorisasi ISO 17025...</span>
+                    <span>Memverifikasi Otorisasi...</span>
                   </>
                 ) : (
                   <>
@@ -666,7 +662,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
             </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>Sistem Terintegrasi ISO 17025</span>
+              <span>Sistem LIMS Terintegrasi</span>
               <span className="text-emerald-600 font-bold flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                 AES-256 TLS Encrypted
