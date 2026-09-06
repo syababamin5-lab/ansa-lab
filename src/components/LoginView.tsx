@@ -3,6 +3,7 @@ import { UserProfile } from '../types/userTypes';
 import {
   Lock,
   Mail,
+  User,
   Eye,
   EyeOff,
   UserCheck,
@@ -520,7 +521,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
                 Selamat Datang!
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Masuk dengan Email, NIP, atau Kode Analis Anda.
+                Masuk dengan username Anda.
               </p>
             </div>
 
@@ -565,15 +566,15 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
               {/* Identity Input */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-black uppercase text-slate-700 tracking-wider block">
-                  EMAIL / NIP / KODE ANALIS:
+                  USERNAME:
                 </label>
                 <div className="relative">
-                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                  <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                   <input
                     type="text"
                     value={identityInput}
                     onChange={e => setIdentityInput(e.target.value)}
-                    placeholder="mis. admin@ansalab.com atau SA-0001"
+                    placeholder="Masukkan username Anda"
                     className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-9 py-3 text-xs font-bold text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-blue-600 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono shadow-2xs"
                   />
                   {identityInput && (
