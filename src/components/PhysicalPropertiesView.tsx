@@ -6863,7 +6863,7 @@ export const PhysicalPropertiesView: React.FC<PhysicalPropertiesViewProps> = ({
                       className="w-3 h-3 rounded-full border border-slate-300 shadow-xs shrink-0"
                       style={{ backgroundColor: SOIL_COLOUR_CATALOGUE.find(c => c.code === soilColourCode)?.hex || '#E2E8F0' }}
                     />
-                    <span>WARNA TANAH USCS (BILINGUAL - KHUSUS PENGUJIAN {activeTestSubTab})</span>
+                    <span>WARNA TANAH USCS</span>
                   </label>
                   <span className="text-[9.5px] text-slate-400 font-mono">Standar USCS ASTM / SNI Laboratorium</span>
                 </div>
