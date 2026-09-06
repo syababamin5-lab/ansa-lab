@@ -805,7 +805,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
       {/* ===================================================================== */}
       <footer className="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 font-medium py-4 px-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
         <span className="font-bold">
-          © 2026 TIMES® ANSA LIMS • PT. Terraforma Geoteknik Indonesia • <span className="text-slate-300 font-normal">Geotechnical &amp; Rock Mechanics Laboratory System</span>
+          © 2026 TIMES® ANSA LIMS • <span className="text-slate-300 font-normal">Aplikasi Web Laboratorium Mekanika Tanah</span>
         </span>
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="flex items-center gap-1 text-slate-300">
