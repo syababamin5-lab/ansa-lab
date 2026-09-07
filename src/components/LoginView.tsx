@@ -412,9 +412,11 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
       <header className="max-w-7xl mx-auto w-full flex flex-col sm:flex-row items-center justify-between gap-4 z-20 px-6 py-4">
         {/* Left Logo & Org Name */}
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 border border-blue-400/40 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-blue-600/30">
-            AL
-          </div>
+          <img 
+            src="/ansa-icon.png" 
+            alt="ANSA Logo" 
+            className="w-10 h-10 object-contain drop-shadow-[0_0_12px_rgba(56,189,248,0.7)] shrink-0" 
+          />
           <div>
             <div className="flex items-center gap-2">
               <span className="text-base font-black tracking-tight text-white">TIMES® ANSA LIMS</span>

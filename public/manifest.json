@@ -1,23 +1,20 @@
 {
-  "short_name": "ANSA Mobile",
-  "name": "ANSA LIMS — Portal Teknisi Mobile",
-  "description": "Aplikasi Pengujian Laboratorium & Input Data Lapangan Teknisi Soil Mechanics",
+  "name": "ansa Digital Products",
+  "short_name": "ansa",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B0F19",
+  "theme_color": "#4F46E5",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "192x192 512x512"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
     },
     {
-      "src": "/logo.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
-  ],
-  "start_url": "/",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
-  "display": "standalone",
-  "orientation": "portrait",
-  "scope": "/"
+  ]
 }
