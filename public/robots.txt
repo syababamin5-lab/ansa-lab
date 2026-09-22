@@ -1,4 +1,4 @@
-﻿User-agent: *
+User-agent: *
 Allow: /
 
-Sitemap: https://annsa.site/sitemap.xml
+Sitemap: https://times.annsa.site/sitemap.xml
