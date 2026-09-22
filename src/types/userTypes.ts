@@ -100,7 +100,7 @@ export const INITIAL_USERS: UserProfile[] = [
   // ─── 4. KEPALA TEKNIS / KOORDINATOR TEKNISI ─────────────────────────
   {
     id: 'user-noval',
-    name: 'Rakean Dhafin Nouval, S.T.',
+    name: 'Muhammad Noval Fadli, S.T.',
     shortName: 'Noval',
     nip: 'KOR-0001',
     email: 'noval@ansalab.com',
@@ -164,15 +164,15 @@ export const INITIAL_USERS: UserProfile[] = [
   // ─── 8. TEKNISI / ANALIS LAB (AO#3) ────────────────────────────────
   {
     id: 'user-rasya',
-    name: 'Rasya, A.Md.',
-    shortName: 'Rasya',
+    name: 'Abud, A.Md.',
+    shortName: 'Abud',
     nip: 'AO-0003',
-    email: 'rasya@ansalab.com',
+    email: 'abud@ansalab.com',
     role: 'ANALYST',
     password: '1234',
     analyistCode: 'AO#3',
     specialization: 'Sieve Analysis, Hydrometer & Permeability',
-    avatarInitials: 'RS',
+    avatarInitials: 'AB',
     digitalSignatureLabel: 'Analis / Teknisi Lab',
     isActive: true,
   }

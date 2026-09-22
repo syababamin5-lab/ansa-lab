@@ -2032,8 +2032,8 @@ export const POManagementView: React.FC<POManagementViewProps> = ({
                   <option value="">Pilih Teknisi / Analyst Penanggung Jawab</option>
                   <option value="Rafi, A.Md. (AO#1)">Rafi, A.Md. (AO#1 - Penguji 1)</option>
                   <option value="Rizki, A.Md. (AO#2)">Rizki, A.Md. (AO#2 - Penguji 2)</option>
-                  <option value="Rasya, A.Md. (AO#3)">Rasya, A.Md. (AO#3 - Penguji 3)</option>
-                  <option value="Rakean Dhafin Nouval, S.T.">Rakean Dhafin Nouval, S.T. (Noval - Kepala Teknis)</option>
+                  <option value="Abud, A.Md. (AO#3)">Abud, A.Md. (AO#3 - Penguji 3)</option>
+                  <option value="Muhammad Noval Fadli, S.T.">Muhammad Noval Fadli, S.T. (Noval - Kepala Teknis)</option>
                   <option value="Ir. Alan Suherman, M.T.">Ir. Alan Suherman, M.T. (Pak Alan - Kepala Lab)</option>
                 </select>
               </div>

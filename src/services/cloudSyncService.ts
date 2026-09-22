@@ -109,10 +109,14 @@ export async function saveStateToCloud(state: CloudDatabaseState): Promise<boole
   }
 }
 
-/** Ambil data permanen 100% langsung dari Cloud Server Database (Vercel KV / Upstash Redis) */
-export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
-  const defaultState = getInitialMasterState();
+/** Reset total data operasional cloud ke state bersih awal dengan katalog master yang rapi */
+export async function resetCloudToCleanMaster(): Promise<boolean> {
+  const cleanState = getInitialMasterState();
+  return await saveStateToCloud(cleanState);
+}
 
+/** Ambil data permanen dengan validasi status koneksi aman (Safe Loading) */
+export async function loadStateFromCloudSafe(): Promise<{ success: boolean; data: CloudDatabaseState | null }> {
   try {
     const res = await fetch(VERCEL_KV_REST_API_URL, {
       method: 'POST',
@@ -125,35 +129,50 @@ export async function loadStateFromCloud(): Promise<CloudDatabaseState> {
 
     if (res.ok) {
       const responseJson = await res.json();
-      if (responseJson && responseJson.result) {
+      if (responseJson && responseJson.result !== undefined) {
+        if (responseJson.result === null) {
+          // Kunci Redis belum pernah diisi -> kembalikan state awal bersih
+          return { success: true, data: getInitialMasterState() };
+        }
         const rawString = responseJson.result;
         const cloudData = (typeof rawString === 'string' ? JSON.parse(rawString) : rawString) as CloudDatabaseState;
+        const defaultState = getInitialMasterState();
         
         return {
-          ...defaultState,
-          ...cloudData,
-          users: mergeUsers(cloudData.users),
-          containers: mergeContainers(cloudData.containers),
-          pos: cloudData.pos || [],
-          clients: cloudData.clients || [],
-          labRekanans: cloudData.labRekanans || [],
-          quotations: cloudData.quotations || [],
-          sampleReceipts: cloudData.sampleReceipts || [],
-          prepReports: cloudData.prepReports || [],
-          subcontractNotices: cloudData.subcontractNotices || [],
-          subcontractShippingLetters: cloudData.subcontractShippingLetters || [],
-          invoices: cloudData.invoices || [],
-          documents: cloudData.documents || [],
-          guestEntries: Array.isArray(cloudData.guestEntries) ? cloudData.guestEntries : [],
-          companyProfile: cloudData.companyProfile ? { ...DEFAULT_COMPANY_PROFILE, ...cloudData.companyProfile } : DEFAULT_COMPANY_PROFILE
+          success: true,
+          data: {
+            ...defaultState,
+            ...cloudData,
+            users: mergeUsers(cloudData.users),
+            containers: mergeContainers(cloudData.containers),
+            pos: Array.isArray(cloudData.pos) ? cloudData.pos : [],
+            clients: Array.isArray(cloudData.clients) ? cloudData.clients : [],
+            labRekanans: Array.isArray(cloudData.labRekanans) ? cloudData.labRekanans : [],
+            quotations: Array.isArray(cloudData.quotations) ? cloudData.quotations : [],
+            sampleReceipts: Array.isArray(cloudData.sampleReceipts) ? cloudData.sampleReceipts : [],
+            prepReports: Array.isArray(cloudData.prepReports) ? cloudData.prepReports : [],
+            subcontractNotices: Array.isArray(cloudData.subcontractNotices) ? cloudData.subcontractNotices : [],
+            subcontractShippingLetters: Array.isArray(cloudData.subcontractShippingLetters) ? cloudData.subcontractShippingLetters : [],
+            invoices: Array.isArray(cloudData.invoices) ? cloudData.invoices : [],
+            documents: Array.isArray(cloudData.documents) ? cloudData.documents : [],
+            guestEntries: Array.isArray(cloudData.guestEntries) ? cloudData.guestEntries : [],
+            companyProfile: cloudData.companyProfile ? { ...DEFAULT_COMPANY_PROFILE, ...cloudData.companyProfile } : DEFAULT_COMPANY_PROFILE
+          }
         };
       }
     }
+    console.warn('[Vercel KV Warning] Non-OK HTTP Status:', res.status);
+    return { success: false, data: null };
   } catch (e) {
-    console.warn('[Vercel KV Load Warning]: Failed to reach Vercel KV', e);
+    console.error('[Vercel KV Load Error]: Failed to reach Vercel KV', e);
+    return { success: false, data: null };
   }
+}
 
-  return defaultState;
+/** Ambil data permanen 100% langsung dari Cloud Server Database (Vercel KV / Upstash Redis) */
+export async function loadStateFromCloud(): Promise<CloudDatabaseState | null> {
+  const result = await loadStateFromCloudSafe();
+  return result.data;
 }
 
 export const GUEST_STORE_KEY = 'ansa_lab_guestbook_store_v1';
@@ -261,5 +280,13 @@ function mergeContainers(existing: ContainerItem[] | undefined): ContainerItem[]
 }
 function mergeUsers(existing: UserProfile[] | undefined): UserProfile[] {
   if (!existing || existing.length === 0) return INITIAL_USERS;
-  return existing; // DO NOT OVERWRITE EDITED USER PROFILES!
+  return existing.map(u => {
+    if (u.id === 'user-noval' && (u.name.toLowerCase().includes('rakean') || !u.name)) {
+      return { ...u, name: 'Muhammad Noval Fadli, S.T.', shortName: 'Noval' };
+    }
+    if (u.id === 'user-rasya' && (u.name.toLowerCase().includes('rasya') || !u.name)) {
+      return { ...u, name: 'Abud, A.Md.', shortName: 'Abud', email: 'abud@ansalab.com', avatarInitials: 'AB' };
+    }
+    return u;
+  });
 }

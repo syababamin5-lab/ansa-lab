@@ -97,7 +97,7 @@ export const LscpDashboardView: React.FC<LscpDashboardViewProps> = ({
   const sdmWorkload = [
     { id: 'ao-1', code: 'AO#1', name: 'Rafi', role: 'Penguji / Analis 1', bookedTcu: 7.5, maxTcu: 8.0, percent: 94, status: 'Full', badgeBg: 'bg-rose-600', barColor: 'from-rose-500 to-red-600', initials: 'RF', avatarBg: 'bg-blue-600' },
     { id: 'ao-2', code: 'AO#2', name: 'Rizki', role: 'Penguji / Analis 2', bookedTcu: 5.0, maxTcu: 8.0, percent: 63, status: 'Medium', badgeBg: 'bg-amber-500', barColor: 'from-amber-500 to-orange-500', initials: 'RZ', avatarBg: 'bg-teal-600' },
-    { id: 'ao-3', code: 'AO#3', name: 'Rasya', role: 'Penguji / Analis 3', bookedTcu: 2.5, maxTcu: 8.0, percent: 31, status: 'Available', badgeBg: 'bg-emerald-600', barColor: 'from-emerald-500 to-teal-500', initials: 'RS', avatarBg: 'bg-emerald-600' },
+    { id: 'ao-3', code: 'AO#3', name: 'Abud', role: 'Penguji / Analis 3', bookedTcu: 2.5, maxTcu: 8.0, percent: 31, status: 'Available', badgeBg: 'bg-emerald-600', barColor: 'from-emerald-500 to-teal-500', initials: 'AB', avatarBg: 'bg-emerald-600' },
     { id: 'ao-4', code: 'AO#4', name: 'Noval', role: 'Kepala Teknis', bookedTcu: 2.0, maxTcu: 8.0, percent: 25, status: 'Available', badgeBg: 'bg-emerald-600', barColor: 'from-emerald-500 to-teal-500', initials: 'NV', avatarBg: 'bg-indigo-600' },
     { id: 'ao-5', code: 'AO#5', name: 'Asisten Lab', role: 'Junior Analyst', bookedTcu: 3.0, maxTcu: 8.0, percent: 38, status: 'Available', badgeBg: 'bg-emerald-600', barColor: 'from-emerald-500 to-teal-500', initials: 'AL', avatarBg: 'bg-slate-700' },
   ];

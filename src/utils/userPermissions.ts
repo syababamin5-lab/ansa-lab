@@ -173,10 +173,10 @@ export function isTechnicianNameMatchingUser(assignedTech: string, user: UserPro
     distinctKeywords.push('rafly', 'rafil', 'ao#1', 'ao 0001');
   } else if (userShort === 'rizki' || userNameNorm.includes('rizki')) {
     distinctKeywords.push('riski', 'wiharyadi', 'ao#2', 'ao 0002');
-  } else if (userShort === 'rasya' || userNameNorm.includes('rasya')) {
-    distinctKeywords.push('ao#3', 'ao 0003');
+  } else if (userShort === 'abud' || userShort === 'rasya' || userNameNorm.includes('abud') || userNameNorm.includes('rasya')) {
+    distinctKeywords.push('abud', 'ao#3', 'ao 0003');
   } else if (userShort === 'noval' || userNameNorm.includes('noval') || userNameNorm.includes('nouval')) {
-    distinctKeywords.push('nouval', 'rakean', 'dhafin', 'kor 0001');
+    distinctKeywords.push('noval', 'nouval', 'fadli', 'kor 0001');
   } else if (userShort === 'alan' || userNameNorm.includes('alan')) {
     distinctKeywords.push('suherman', 'mng 0001');
   } else if (userShort === 'yustiaji' || userNameNorm.includes('yustiaji')) {

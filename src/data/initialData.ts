@@ -301,9 +301,9 @@ export const DEFAULT_PERSONNEL_CATALOGUE: PersonnelItem[] = [
   { id: 'user-super-admin', name: 'Super Admin', role: 'Approver', title: 'Super Administrator' },
   { id: 'user-yustiaji', name: 'Yustiaji, S.T., M.T.', role: 'Approver', title: 'Direktur Operasional' },
   { id: 'user-alan', name: 'Ir. Alan Suherman, M.T.', role: 'Approver', title: 'Kepala Laboratorium' },
-  { id: 'user-noval', name: 'Rakean Dhafin Nouval, S.T.', role: 'Analyst', title: 'Kepala Teknis / Koordinator' },
-  { id: 'user-syabaab', name: 'Syabaab, S.E.', role: 'Computed', title: 'Admin Finance & Marketing' },
+  { id: 'user-noval', name: 'Muhammad Noval Fadli, S.T.', role: 'Analyst', title: 'Kepala Teknis / Koordinator' },
+  { id: 'user-syabaab', name: 'Syabaab Amin Amanullah, S.E.', role: 'Computed', title: 'Admin Finance & Marketing' },
   { id: 'user-rafi', name: 'Rafi, A.Md.', role: 'Penguji', title: 'Penguji / Analis Lab (AO#1)' },
   { id: 'user-rizki', name: 'Rizki, A.Md.', role: 'Penguji', title: 'Penguji / Analis Lab (AO#2)' },
-  { id: 'user-rasya', name: 'Rasya, A.Md.', role: 'Penguji', title: 'Penguji / Analis Lab (AO#3)' },
+  { id: 'user-rasya', name: 'Abud, A.Md.', role: 'Penguji', title: 'Penguji / Analis Lab (AO#3)' },
 ];

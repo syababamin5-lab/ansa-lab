@@ -607,7 +607,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                     <option value="EXECUTIVE_DIRECTOR">Direktur Operasional (Pak Yustiaji)</option>
                     <option value="LAB_MANAGER">Kepala Lab (Pak Alan)</option>
                     <option value="QA_QC_COORDINATOR">Kepala Teknis / Koordinator (Noval)</option>
-                    <option value="ANALYST">Analis / Teknisi Lab (Rafi/Rizki/Rasya)</option>
+                    <option value="ANALYST">Analis / Teknisi Lab (Rafi/Rizki/Abud)</option>
                     <option value="ADMIN_FINANCE">Admin Finance &amp; Marketing (Syabaab)</option>
                   </select>
                 </div>

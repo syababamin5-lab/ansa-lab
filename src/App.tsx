@@ -40,7 +40,7 @@ import { ClientMasterView } from './components/workflow/ClientMasterView';
 import { WaktuPengujianView } from './components/WaktuPengujianView';
 import { FinancialAnalyticsView } from './components/FinancialAnalyticsView';
 import { MobileTechnicianApp } from './components/mobile/MobileTechnicianApp';
-import { saveStateToCloud, loadStateFromCloud, purgeLegacyLocalStorage, CloudDatabaseState } from './services/cloudSyncService';
+import { saveStateToCloud, loadStateFromCloud, loadStateFromCloudSafe, purgeLegacyLocalStorage, CloudDatabaseState } from './services/cloudSyncService';
 import { LoginView } from './components/LoginView';
 import { GuestBookView } from './components/guestbook/GuestBookView';
 import { CompanyProfile, DEFAULT_COMPANY_PROFILE } from './types/companyProfileTypes';
@@ -566,12 +566,13 @@ export function App() {
   // Lock: larang polling berjalan saat ada save in-flight (mencegah race condition)
   const isSavingRef = React.useRef<boolean>(false);
 
-  // Helper: terapkan cloud snapshot ke state HANYA jika cloud lebih baru dari data lokal
+  // Helper: terapkan cloud snapshot ke state dengan proteksi race condition yang aman
   const applyCloudSnapshot = React.useCallback((cloudState: CloudDatabaseState) => {
     const cloudTs = cloudState.updatedAt ? new Date(cloudState.updatedAt).getTime() : 0;
     const localTs = lastSavedAtRef.current;
-    // Jika data lokal lebih baru atau sama → TOLAK, jangan timpa state lokal
-    if (localTs > 0 && cloudTs <= localTs) return;
+    // Proteksi sementara: jika device INI baru saja menyimpan dalam 4 detik terakhir dan data cloud sama/lebih lama, tahan
+    if (localTs > 0 && (Date.now() - localTs < 4000) && cloudTs <= localTs) return;
+
     if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
     if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
     if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
@@ -596,8 +597,9 @@ export function App() {
   // Manual & Instant Cloud Refresh Handler (forced, abaikan timestamp guard)
   const handleManualSyncCloud = async () => {
     try {
-      const cloudState = await loadStateFromCloud();
-      if (cloudState) {
+      const cloudResult = await loadStateFromCloudSafe();
+      if (cloudResult.success && cloudResult.data) {
+        const cloudState = cloudResult.data;
         if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
         if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
         if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
@@ -619,6 +621,8 @@ export function App() {
         if (cloudState.companyProfile) setCompanyProfile(cloudState.companyProfile);
         if (Array.isArray(cloudState.guestEntries)) setGuestEntries(cloudState.guestEntries);
         showGlobalToast('⚡ Data Berhasil Disinkronkan dengan Server Cloud!');
+      } else {
+        showGlobalToast('⚠️ Gagal terhubung ke Cloud. Periksa jaringan Anda.');
       }
     } catch (e) {
       console.error('[Cloud Sync Error]:', e);
@@ -630,11 +634,10 @@ export function App() {
     let isMounted = true;
     async function initialFetch() {
       try {
-        const cloudState = await loadStateFromCloud();
-        if (isMounted && cloudState) {
-          if (Array.isArray(cloudState.pos) && cloudState.pos.length > 0) {
-            setPos(cloudState.pos);
-          }
+        const cloudResult = await loadStateFromCloudSafe();
+        if (isMounted && cloudResult.success && cloudResult.data) {
+          const cloudState = cloudResult.data;
+          if (Array.isArray(cloudState.pos)) setPos(cloudState.pos);
           if (Array.isArray(cloudState.clients)) setClients(cloudState.clients);
           if (Array.isArray(cloudState.labRekanans)) setLabRekanans(cloudState.labRekanans);
           if (Array.isArray(cloudState.users) && cloudState.users.length > 0) setUsers(cloudState.users);
@@ -655,11 +658,12 @@ export function App() {
           if (cloudState.companyProfile) setCompanyProfile(cloudState.companyProfile);
           if (Array.isArray(cloudState.guestEntries)) setGuestEntries(cloudState.guestEntries);
           if (cloudState.updatedAt) lastSavedAtRef.current = new Date(cloudState.updatedAt).getTime();
+          setIsCloudLoaded(true);
+        } else if (isMounted) {
+          console.warn('[Cloud DB Init Warning]: Gagal menghubungi Cloud Database. Menahan autosave untuk mencegah data tertimpa.');
         }
       } catch (e) {
         console.error('[Cloud DB Init Error]:', e);
-      } finally {
-        if (isMounted) setIsCloudLoaded(true);
       }
     }
     initialFetch();
