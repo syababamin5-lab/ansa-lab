@@ -145,6 +145,12 @@ export async function loadStateFromCloudSafe(): Promise<{ success: boolean; data
             ...cloudData,
             users: mergeUsers(cloudData.users),
             containers: mergeContainers(cloudData.containers),
+            rings: mergeRings(cloudData.rings),
+            consolRings: mergeConsolRings(cloudData.consolRings),
+            molds: mergeMolds(cloudData.molds),
+            reamers: mergeReamers(cloudData.reamers),
+            pycnometers: mergePycnometers(cloudData.pycnometers),
+            personnels: mergePersonnels(cloudData.personnels),
             pos: Array.isArray(cloudData.pos) ? cloudData.pos : [],
             clients: Array.isArray(cloudData.clients) ? cloudData.clients : [],
             labRekanans: Array.isArray(cloudData.labRekanans) ? cloudData.labRekanans : [],
@@ -275,18 +281,67 @@ export async function loadGuestEntriesFromCloud(): Promise<GuestEntry[]> {
 }
 
 function mergeContainers(existing: ContainerItem[] | undefined): ContainerItem[] {
-  if (!existing || existing.length === 0) return DEFAULT_CONTAINER_CATALOGUE;
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_CONTAINER_CATALOGUE;
   return existing; // Respect user edits, never overwrite calibrated weights!
 }
+
+function mergeRings(existing: any[] | undefined): RingItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_RING_CATALOGUE;
+  // If legacy schema detected (missing ringNo, or has id & ringWeight without ringNo)
+  const isLegacy = existing.some(r => !r || !r.ringNo || r.ringWeight !== undefined);
+  if (isLegacy) return DEFAULT_RING_CATALOGUE;
+  return existing;
+}
+
+function mergeConsolRings(existing: any[] | undefined): ConsolRingItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_CONSOL_RING_CATALOGUE;
+  // If legacy schema detected (has area or ringWeight instead of diameterMm and weightGrams)
+  const isLegacy = existing.some(r => !r || r.area !== undefined || r.ringWeight !== undefined || !r.diameterMm);
+  if (isLegacy) return DEFAULT_CONSOL_RING_CATALOGUE;
+  return existing;
+}
+
+function mergeMolds(existing: any[] | undefined): MoldItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_MOLD_CATALOGUE;
+  // If legacy schema detected (has moldId instead of kode)
+  const isLegacy = existing.some(m => !m || m.moldId !== undefined || !m.kode);
+  if (isLegacy) return DEFAULT_MOLD_CATALOGUE;
+  return existing;
+}
+
+function mergeReamers(existing: any[] | undefined): ReamerItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_REAMER_CATALOGUE;
+  // If legacy schema detected (has reamerId instead of kode)
+  const isLegacy = existing.some(r => !r || r.reamerId !== undefined || !r.kode);
+  if (isLegacy) return DEFAULT_REAMER_CATALOGUE;
+  return existing;
+}
+
+function mergePycnometers(existing: any[] | undefined): PycnometerItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_PYCNOMETER_CATALOGUE;
+  const isInvalid = existing.some(p => !p || !p.pycNo);
+  if (isInvalid) return DEFAULT_PYCNOMETER_CATALOGUE;
+  return existing;
+}
+
+function mergePersonnels(existing: any[] | undefined): PersonnelItem[] {
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return DEFAULT_PERSONNEL_CATALOGUE;
+  const isInvalid = existing.some(p => !p || !p.id || !p.name);
+  if (isInvalid) return DEFAULT_PERSONNEL_CATALOGUE;
+  return existing;
+}
+
 function mergeUsers(existing: UserProfile[] | undefined): UserProfile[] {
-  if (!existing || existing.length === 0) return INITIAL_USERS;
+  if (!existing || !Array.isArray(existing) || existing.length === 0) return INITIAL_USERS;
   return existing.map(u => {
-    if (u.id === 'user-noval' && (u.name.toLowerCase().includes('rakean') || !u.name)) {
+    const nameStr = (u.name || '').toLowerCase();
+    if (u.id === 'user-noval' && (nameStr.includes('rakean') || !u.name)) {
       return { ...u, name: 'Muhammad Noval Fadli, S.T.', shortName: 'Noval' };
     }
-    if (u.id === 'user-rasya' && (u.name.toLowerCase().includes('rasya') || !u.name)) {
+    if (u.id === 'user-rasya' && (nameStr.includes('rasya') || !u.name)) {
       return { ...u, name: 'Abud, A.Md.', shortName: 'Abud', email: 'abud@ansalab.com', avatarInitials: 'AB' };
     }
     return u;
   });
 }
+

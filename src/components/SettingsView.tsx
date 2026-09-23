@@ -786,11 +786,30 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
 
     return matchId || matchWeight;
   });
-  const filteredRings = ringCatalogue.filter(r => r.ringNo.toLowerCase().includes(ringSearch.toLowerCase()));
-  const filteredPycs = pycCatalogue.filter(p => p.pycNo.toLowerCase().includes(pycSearch.toLowerCase()));
-  const filteredTests = testCatalogue.filter(t => t.code.toLowerCase().includes(testSearch.toLowerCase()) || t.fullNameIndo.toLowerCase().includes(testSearch.toLowerCase()));
-  const filteredPersonnel = personnelCatalogue.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(personnelSearch.toLowerCase()) || (p.title || '').toLowerCase().includes(personnelSearch.toLowerCase());
+  const filteredRings = (ringCatalogue || []).filter(r => {
+    if (!r) return false;
+    const no = String(r.ringNo || (r as any).id || (r as any).kode || '');
+    return no.toLowerCase().includes((ringSearch || '').toLowerCase().trim());
+  });
+  const filteredPycs = (pycCatalogue || []).filter(p => {
+    if (!p) return false;
+    const no = String(p.pycNo || (p as any).id || '');
+    return no.toLowerCase().includes((pycSearch || '').toLowerCase().trim());
+  });
+  const filteredTests = (testCatalogue || []).filter(t => {
+    if (!t) return false;
+    const q = (testSearch || '').toLowerCase().trim();
+    if (!q) return true;
+    const code = String(t.code || '').toLowerCase();
+    const name = String(t.fullNameIndo || t.label || '').toLowerCase();
+    return code.includes(q) || name.includes(q);
+  });
+  const filteredPersonnel = (personnelCatalogue || []).filter(p => {
+    if (!p) return false;
+    const q = (personnelSearch || '').toLowerCase().trim();
+    const name = String(p.name || '').toLowerCase();
+    const title = String(p.title || '').toLowerCase();
+    const matchesSearch = !q || name.includes(q) || title.includes(q);
     const matchesRole = personnelRoleFilter === 'all' || p.role === personnelRoleFilter;
     return matchesSearch && matchesRole;
   });
@@ -1349,12 +1368,16 @@ export const SettingsView: React.FC<SettingsViewProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {masterPrices
-                  .filter(m => 
-                    m.name.toLowerCase().includes(priceSearch.toLowerCase()) || 
-                    m.code.toLowerCase().includes(priceSearch.toLowerCase()) ||
-                    m.standard.toLowerCase().includes(priceSearch.toLowerCase())
-                  )
+                {(masterPrices || [])
+                  .filter(m => {
+                    if (!m) return false;
+                    const q = (priceSearch || '').toLowerCase().trim();
+                    if (!q) return true;
+                    const name = String(m.name || '').toLowerCase();
+                    const code = String(m.code || '').toLowerCase();
+                    const standard = String(m.standard || '').toLowerCase();
+                    return name.includes(q) || code.includes(q) || standard.includes(q);
+                  })
                   .map((item, idx) => {
                     const isEditing = editingPriceId === item.id;
                     const editObj = isEditing && editingPriceData ? editingPriceData : item;
