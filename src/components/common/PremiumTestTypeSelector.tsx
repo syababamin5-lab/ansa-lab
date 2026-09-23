@@ -191,7 +191,7 @@ export const PremiumTestTypeSelector: React.FC<PremiumTestTypeSelectorProps> = (
                 </div>
                 <div>
                   <h3 className="text-xs font-bold text-slate-900">Pilih Parameter Pengujian</h3>
-                  <p className="text-[10.5px] text-slate-500 font-medium">Katalog Resmi TIMES® ANSA LIMS ({allOptions.length} Parameter)</p>
+                  <p className="text-[10.5px] text-slate-500 font-medium">Katalog Resmi TIMES® LIMS ({allOptions.length} Parameter)</p>
                 </div>
               </div>
               <button

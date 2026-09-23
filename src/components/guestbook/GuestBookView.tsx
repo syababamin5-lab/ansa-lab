@@ -476,7 +476,7 @@ export const GuestBookView: React.FC<GuestBookViewProps> = ({
         </table>
 
         <div class="footer">
-          <p>Dicetak secara otomatis dari Sistem TIMES® ANSA LIMS pada ${new Date().toLocaleString('id-ID')}</p>
+          <p>Dicetak secara otomatis dari Sistem TIMES® LIMS pada ${new Date().toLocaleString('id-ID')}</p>
         </div>
 
         <script>

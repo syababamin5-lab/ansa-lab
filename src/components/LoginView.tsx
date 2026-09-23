@@ -419,7 +419,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
           />
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-base font-black tracking-tight text-white">TIMES® ANSA LIMS</span>
+              <span className="text-base font-black tracking-tight text-white">TIMES® LIMS</span>
               <span className="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono text-[10px] font-extrabold border border-blue-400/30">
                 v2.0 Enterprise
               </span>
@@ -801,7 +801,7 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
       {/* ===================================================================== */}
       <footer className="max-w-7xl mx-auto w-full text-center text-xs text-slate-400 font-medium py-4 px-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 z-10">
         <span className="font-bold">
-          © 2026 TIMES® ANSA LIMS • <span className="text-slate-300 font-normal">Aplikasi Web Laboratorium Mekanika Tanah</span>
+          © 2026 TIMES® LIMS • <span className="text-slate-300 font-normal">Aplikasi Web Laboratorium Mekanika Tanah</span>
         </span>
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <span className="flex items-center gap-1 text-slate-300">

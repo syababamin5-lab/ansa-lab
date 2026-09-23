@@ -143,10 +143,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             {!isCollapsed && (
               <div className="whitespace-nowrap transition-opacity duration-200 overflow-hidden min-w-0">
                 <h1 className="font-extrabold text-slate-900 tracking-tight text-xs flex items-center gap-1">
-                  <span>ANSA LIMS</span>
-                  <span className="text-[8.5px] font-mono font-bold px-1 py-0.2 rounded-md bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-2xs tracking-wider shrink-0">
-                    TIMES®
-                  </span>
+                  <span>TIMES LIMS</span>
                 </h1>
                 <p className="text-[8.5px] text-slate-500 font-semibold tracking-tight truncate">PT. Terraforma Geoteknik Indonesia</p>
               </div>
@@ -259,7 +256,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <p className="text-[11px] text-slate-900 font-black leading-tight">
-            ANSA LIMS <span className="text-emerald-700 text-[9.5px] font-mono">v1.2</span>
+            TIMES LIMS <span className="text-emerald-700 text-[9.5px] font-mono">v1.2</span>
           </p>
           <p className="text-[10px] text-slate-600 font-semibold leading-tight mt-0.5">
             Lab Mekanika Tanah — TIMES® Engine
@@ -271,7 +268,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       ) : (
         <div 
           className="p-3 border-t border-slate-100 bg-slate-50/70 flex justify-center shrink-0" 
-          title="ANSA LIMS v1.2 — Lab Mekanika Tanah (TIMES® Engine) - © 2026 PT. Terraforma Geoteknik Indonesia"
+          title="TIMES LIMS v1.2 — Lab Mekanika Tanah (TIMES® Engine) - © 2026 PT. Terraforma Geoteknik Indonesia"
         >
           <div className="relative">
             <Layers className="w-4 h-4 text-emerald-600" />

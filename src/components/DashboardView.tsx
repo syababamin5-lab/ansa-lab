@@ -180,7 +180,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
         <div>
           <h2 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-2">
-            ANSA LIMS — Dashboard Monitoring Administrasi Lab Mekanika Tanah
+            TIMES LIMS — Dashboard Monitoring Administrasi Lab Mekanika Tanah
             <span className="px-2.5 py-0.5 text-xs font-extrabold rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
               TIMES® Engine
             </span>

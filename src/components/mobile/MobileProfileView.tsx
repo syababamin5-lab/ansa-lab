@@ -602,7 +602,7 @@ export const MobileProfileView: React.FC<MobileProfileViewProps> = ({
       <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-1">
         <div className="flex items-center justify-center gap-1 text-[11px] font-black text-slate-800">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
-          <span>TIMES® ANSA LIMS Mobile v2.0</span>
+          <span>TIMES® LIMS Mobile v2.0</span>
         </div>
         <p className="text-[10px] text-slate-400 font-mono">
           PT. Terraforma Geoteknik Indonesia • ISO/IEC 17025 Certified
