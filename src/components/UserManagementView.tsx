@@ -67,12 +67,16 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
     isActive: true,
   });
 
-  const filteredUsers = users.filter(u => 
-    u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.nip.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    USER_ROLE_LABELS[u.role].toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = (users || []).filter(u => {
+    if (!u) return false;
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return true;
+    const name = String(u.name || '').toLowerCase();
+    const nip = String(u.nip || '').toLowerCase();
+    const email = String(u.email || '').toLowerCase();
+    const roleLabel = String(USER_ROLE_LABELS[u.role] || u.role || '').toLowerCase();
+    return name.includes(q) || nip.includes(q) || email.includes(q) || roleLabel.includes(q);
+  });
 
   const handleOpenAddModal = () => {
     setEditingUser(null);
@@ -303,15 +307,17 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {filteredUsers.map(user => {
-                    const badge = USER_ROLE_BADGE[user.role];
+                    const defaultBadge = { bg: 'bg-slate-600', text: 'text-white', border: 'border-slate-700' };
+                    const badge = (user.role && USER_ROLE_BADGE[user.role]) ? USER_ROLE_BADGE[user.role] : defaultBadge;
                     const isCurrent = currentUser.id === user.id;
+                    const roleLabel = (user.role && USER_ROLE_LABELS[user.role]) ? USER_ROLE_LABELS[user.role] : (user.role || 'User');
                     return (
                       <tr key={user.id} className={`hover:bg-slate-50/80 transition ${isCurrent ? 'bg-teal-50/40' : ''}`}>
                         {/* Avatar & Name */}
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-3">
                             <div className={`w-9 h-9 rounded-full ${badge.bg} ${badge.text} flex items-center justify-center font-black text-xs border-2 ${badge.border} shadow-xs shrink-0`}>
-                              {user.avatarInitials}
+                              {user.avatarInitials || (user.name ? user.name.slice(0, 2).toUpperCase() : 'US')}
                             </div>
                             <div>
                               <div className="font-extrabold text-slate-900 text-xs flex items-center gap-1.5">
@@ -337,7 +343,7 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                         {/* Role Badge */}
                         <td className="py-3 px-4">
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${badge.bg} ${badge.text} border ${badge.border}`}>
-                            {USER_ROLE_LABELS[user.role]}
+                            {roleLabel}
                           </span>
                         </td>
 
@@ -439,11 +445,12 @@ export const UserManagementView: React.FC<UserManagementViewProps> = ({
                 <tr className="bg-slate-100/90 text-slate-800 font-extrabold border-b border-slate-200 text-[10px] uppercase tracking-wider">
                   <th className="py-3 px-4 w-72">Menu &amp; Fitur Sistem</th>
                   {ROLES_LIST.map(role => {
-                    const badge = USER_ROLE_BADGE[role];
+                    const defaultBadge = { bg: 'bg-slate-600', text: 'text-white', border: 'border-slate-700' };
+                    const badge = USER_ROLE_BADGE[role] || defaultBadge;
                     return (
                       <th key={role} className="py-3 px-3 text-center border-l border-slate-200 min-w-[110px]">
                         <span className={`px-2 py-0.5 rounded text-[9px] font-black block ${badge.bg} ${badge.text}`}>
-                          {USER_ROLE_LABELS[role]}
+                          {USER_ROLE_LABELS[role] || role}
                         </span>
                       </th>
                     );

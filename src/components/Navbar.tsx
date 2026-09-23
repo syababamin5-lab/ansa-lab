@@ -25,7 +25,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onToggleMobileMode,
 }) => {
   const [showLogoutModal, setShowLogoutModal] = useState(false);
-  const badge = USER_ROLE_BADGE[currentUser.role];
+  const defaultBadge = { bg: 'bg-purple-600', text: 'text-white', border: 'border-purple-700' };
+  const badge = (currentUser && currentUser.role && USER_ROLE_BADGE[currentUser.role]) ? USER_ROLE_BADGE[currentUser.role] : defaultBadge;
 
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between sticky top-0 z-30 shadow-xs">

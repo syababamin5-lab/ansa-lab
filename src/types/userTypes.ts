@@ -12,23 +12,33 @@ export type UserRole =
   | 'ADMIN_FINANCE';
 
 /** Label tampilan per role */
-export const USER_ROLE_LABELS: Record<UserRole, string> = {
+export const USER_ROLE_LABELS: Record<string, string> = {
   SUPER_ADMIN:         'Super Admin',
   EXECUTIVE_DIRECTOR:  'Direktur Operasional',
   LAB_MANAGER:         'Kepala Lab',
   QA_QC_COORDINATOR:   'Kepala Teknis / Koordinator',
   ANALYST:             'Analis / Teknisi Lab',
   ADMIN_FINANCE:       'Admin Finance & Marketing',
+  // Backward compatibility aliases
+  LAB_HEAD:            'Kepala Lab',
+  SECTION_HEAD:        'Kepala Teknis / Koordinator',
+  ADMIN_OPERATOR:      'Admin Finance & Marketing',
+  TECHNICIAN:          'Analis / Teknisi Lab',
 };
 
 /** Warna badge per role (Tailwind classes) */
-export const USER_ROLE_BADGE: Record<UserRole, { bg: string; text: string; border: string }> = {
+export const USER_ROLE_BADGE: Record<string, { bg: string; text: string; border: string }> = {
   SUPER_ADMIN:         { bg: 'bg-purple-600',  text: 'text-white', border: 'border-purple-700' },
   EXECUTIVE_DIRECTOR:  { bg: 'bg-indigo-600',  text: 'text-white', border: 'border-indigo-700' },
   LAB_MANAGER:         { bg: 'bg-teal-700',    text: 'text-white', border: 'border-teal-800' },
   QA_QC_COORDINATOR:   { bg: 'bg-emerald-600', text: 'text-white', border: 'border-emerald-700' },
   ANALYST:             { bg: 'bg-blue-600',    text: 'text-white', border: 'border-blue-700' },
   ADMIN_FINANCE:       { bg: 'bg-amber-600',   text: 'text-white', border: 'border-amber-700' },
+  // Backward compatibility aliases
+  LAB_HEAD:            { bg: 'bg-teal-700',    text: 'text-white', border: 'border-teal-800' },
+  SECTION_HEAD:        { bg: 'bg-emerald-600', text: 'text-white', border: 'border-emerald-700' },
+  ADMIN_OPERATOR:      { bg: 'bg-amber-600',   text: 'text-white', border: 'border-amber-700' },
+  TECHNICIAN:          { bg: 'bg-blue-600',    text: 'text-white', border: 'border-blue-700' },
 };
 
 /** Profil pengguna laboratorium */

@@ -331,17 +331,30 @@ function mergePersonnels(existing: any[] | undefined): PersonnelItem[] {
   return existing;
 }
 
+function normalizeUserRole(rawRole: any): UserRole {
+  if (rawRole === 'LAB_HEAD') return 'LAB_MANAGER';
+  if (rawRole === 'SECTION_HEAD') return 'QA_QC_COORDINATOR';
+  if (rawRole === 'ADMIN_OPERATOR') return 'ADMIN_FINANCE';
+  if (rawRole === 'TECHNICIAN') return 'ANALYST';
+  if (['SUPER_ADMIN', 'EXECUTIVE_DIRECTOR', 'LAB_MANAGER', 'QA_QC_COORDINATOR', 'ANALYST', 'ADMIN_FINANCE'].includes(rawRole)) {
+    return rawRole;
+  }
+  return 'ANALYST';
+}
+
 function mergeUsers(existing: UserProfile[] | undefined): UserProfile[] {
   if (!existing || !Array.isArray(existing) || existing.length === 0) return INITIAL_USERS;
   return existing.map(u => {
+    const role = normalizeUserRole(u.role);
     const nameStr = (u.name || '').toLowerCase();
+    let updated: UserProfile = { ...u, role };
     if (u.id === 'user-noval' && (nameStr.includes('rakean') || !u.name)) {
-      return { ...u, name: 'Muhammad Noval Fadli, S.T.', shortName: 'Noval' };
+      updated = { ...updated, name: 'Muhammad Noval Fadli, S.T.', shortName: 'Noval' };
     }
     if (u.id === 'user-rasya' && (nameStr.includes('rasya') || !u.name)) {
-      return { ...u, name: 'Abud, A.Md.', shortName: 'Abud', email: 'abud@ansalab.com', avatarInitials: 'AB' };
+      updated = { ...updated, name: 'Abud, A.Md.', shortName: 'Abud', email: 'abud@ansalab.com', avatarInitials: 'AB' };
     }
-    return u;
+    return updated;
   });
 }
 
