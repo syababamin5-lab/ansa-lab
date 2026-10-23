@@ -6,16 +6,12 @@ import {
   User,
   Eye,
   EyeOff,
-  UserCheck,
   AlertCircle,
   Sparkles,
   Clock,
   X,
-  Search,
-  Key,
   Loader2,
   ShieldCheck,
-  ChevronRight
 } from 'lucide-react';
 
 interface LoginViewProps {
@@ -259,14 +255,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Selected quick helper user card
-  const [selectedQuickUser, setSelectedQuickUser] = useState<UserProfile | null>(null);
-
-  // Quick account drawer/modal state
-  const [isQuickAccountsModalOpen, setIsQuickAccountsModalOpen] = useState(false);
-  const [userSearchQuery, setUserSearchQuery] = useState('');
-  const [activeRoleFilter, setActiveRoleFilter] = useState<'all' | 'admin' | 'management' | 'analyst'>('all');
-
   // Live Time Clock
   const [timeString, setTimeString] = useState('');
   useEffect(() => {
@@ -292,21 +280,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
   }, []);
 
   const currentQuoteObj = LAB_MOTIVATIONAL_QUOTES[quoteIndex];
-
-  // Quick fill user credentials
-  const handleSelectQuickAccount = (user: UserProfile) => {
-    setSelectedQuickUser(user);
-    setIdentityInput(user.email);
-    setPasswordInput(user.password || '1234');
-    setErrorMessage(null);
-    setIsQuickAccountsModalOpen(false);
-  };
-
-  const handleClearSelectedUser = () => {
-    setSelectedQuickUser(null);
-    setIdentityInput('');
-    setPasswordInput('');
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -361,43 +334,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
       setIsLoading(false);
       onLoginSuccess(matchedUser);
     }, 600);
-  };
-
-  const filteredQuickUsers = (users || []).filter(u => {
-    const q = userSearchQuery.toLowerCase().trim();
-    const matchesSearch =
-      !q ||
-      u.name.toLowerCase().includes(q) ||
-      u.email.toLowerCase().includes(q) ||
-      u.nip.toLowerCase().includes(q) ||
-      (u.analyistCode || '').toLowerCase().includes(q) ||
-      (u.digitalSignatureLabel || '').toLowerCase().includes(q);
-
-    if (!matchesSearch) return false;
-
-    if (activeRoleFilter === 'admin') return u.role === 'admin';
-    if (activeRoleFilter === 'management') return ['kepala_lab', 'manajer_teknis', 'penjamin_mutu'].includes(u.role);
-    if (activeRoleFilter === 'analyst') return ['analis_sifat_fisik', 'analis_mekanika', 'operator_lab', 'admin_administrasi'].includes(u.role);
-    return true;
-  });
-
-  const getRoleBadgeStyle = (role: string) => {
-    switch (role) {
-      case 'admin':
-        return { label: 'Super Admin Lab', style: 'bg-rose-50 text-rose-700 border-rose-200' };
-      case 'kepala_lab':
-        return { label: 'Kepala Laboratorium', style: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
-      case 'manajer_teknis':
-        return { label: 'Manajer Teknis ISO', style: 'bg-purple-50 text-purple-700 border-purple-200' };
-      case 'penjamin_mutu':
-        return { label: 'Quality Manager', style: 'bg-indigo-50 text-indigo-700 border-indigo-200' };
-      case 'analis_sifat_fisik':
-        return { label: 'Analis Sifat Fisik', style: 'bg-blue-50 text-blue-700 border-blue-200' };
-      case 'analis_mekanika':
-        return { label: 'Analis Mekanika Tanah', style: 'bg-amber-50 text-amber-700 border-amber-200' };
-      default:
-        return { label: 'Teknisi / Personel Lab', style: 'bg-slate-100 text-slate-700 border-slate-200' };
-    }
   };
 
   return (
@@ -517,33 +453,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
               </p>
             </div>
 
-            {/* Selected Quick User Chip */}
-            {selectedQuickUser && (
-              <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-2xl flex items-center justify-between gap-2 animate-in fade-in duration-150">
-                <div className="flex items-center gap-2.5 min-w-0">
-                  <div className="w-8 h-8 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center font-mono shrink-0">
-                    {selectedQuickUser.avatarInitials}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      <strong className="text-xs font-black text-slate-900 truncate">{selectedQuickUser.name}</strong>
-                      <span className="px-1.5 py-0.2 rounded bg-blue-100 text-blue-900 font-mono font-bold text-[9px]">
-                        {selectedQuickUser.nip}
-                      </span>
-                    </div>
-                    <p className="text-[10px] text-slate-500 font-medium truncate">{selectedQuickUser.digitalSignatureLabel || selectedQuickUser.role}</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleClearSelectedUser}
-                  className="p-1 text-slate-400 hover:text-slate-700 rounded-lg transition cursor-pointer"
-                  title="Batal Pilih Akun Ini"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            )}
 
             {/* ERROR ALERT */}
             {errorMessage && (
@@ -645,17 +554,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
               </button>
             </form>
 
-            {/* Quick Demo Account Selector Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={() => setIsQuickAccountsModalOpen(true)}
-                className="w-full py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-blue-50 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-blue-800 text-xs font-bold flex items-center justify-center gap-2 transition cursor-pointer"
-              >
-                <UserCheck className="w-4 h-4 text-blue-600" />
-                <span>Pilih Akun Cepat</span>
-              </button>
-            </div>
 
             <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-[10px] text-slate-400 font-mono">
               <span>Sistem LIMS Terintegrasi</span>
@@ -669,132 +567,6 @@ export const LoginView: React.FC<LoginViewProps> = ({ users, onLoginSuccess }) =
 
       </main>
 
-      {/* ===================================================================== */}
-      {/* QUICK ACCOUNTS MODAL DIALOG                                           */}
-      {/* ===================================================================== */}
-      {isQuickAccountsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-150">
-          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 text-slate-900 space-y-4 max-h-[90vh] flex flex-col">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-black uppercase text-slate-900 tracking-wider">
-                    PILIH AKUN PENGGUNA RESMI
-                  </h3>
-                  <p className="text-[11px] text-slate-500 font-medium">
-                    Pilih akun di bawah untuk mengisi identitas secara otomatis (Password: 1234)
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setIsQuickAccountsModalOpen(false)}
-                className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Search Bar & Filter */}
-            <div className="space-y-2">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3 pointer-events-none" />
-                <input
-                  type="text"
-                  value={userSearchQuery}
-                  onChange={e => setUserSearchQuery(e.target.value)}
-                  placeholder="Cari nama, NIP, email, atau divisi..."
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-4 py-2 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition"
-                />
-              </div>
-
-              <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                <button
-                  onClick={() => setActiveRoleFilter('all')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
-                    activeRoleFilter === 'all' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  Semua ({users.length})
-                </button>
-                <button
-                  onClick={() => setActiveRoleFilter('admin')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
-                    activeRoleFilter === 'admin' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  Admin (2)
-                </button>
-                <button
-                  onClick={() => setActiveRoleFilter('management')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
-                    activeRoleFilter === 'management' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  Manajemen (2)
-                </button>
-                <button
-                  onClick={() => setActiveRoleFilter('analyst')}
-                  className={`px-3 py-1 rounded-lg text-[11px] font-extrabold transition cursor-pointer ${
-                    activeRoleFilter === 'analyst' ? 'bg-blue-600 text-white shadow-xs' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  Analis (4)
-                </button>
-              </div>
-            </div>
-
-            {/* User Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 overflow-y-auto pr-1 flex-1">
-              {filteredQuickUsers.map(user => {
-                const badgeInfo = getRoleBadgeStyle(user.role);
-
-                return (
-                  <div
-                    key={user.id}
-                    onClick={() => handleSelectQuickAccount(user)}
-                    className="p-3.5 rounded-2xl border border-slate-200 hover:border-blue-400 hover:bg-blue-50/40 hover:shadow-md transition-all duration-150 cursor-pointer active:scale-98 flex flex-col justify-between"
-                  >
-                    <div className="flex items-start gap-2.5 min-w-0">
-                      <div className="w-9 h-9 rounded-xl bg-slate-900 text-white font-black text-xs flex items-center justify-center shrink-0 font-mono border border-slate-800 shadow-2xs">
-                        {user.avatarInitials}
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          <strong className="text-xs font-black text-slate-900 truncate block">{user.name}</strong>
-                          {user.analyistCode && (
-                            <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-900 border border-amber-200 font-mono font-bold text-[9px] shrink-0">
-                              {user.analyistCode}
-                            </span>
-                          )}
-                        </div>
-                        <p className="text-[10px] text-slate-400 font-mono">NIP: {user.nip}</p>
-                      </div>
-                    </div>
-
-                    <div className="my-2">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[9.5px] inline-block border font-bold ${badgeInfo.style}`}>
-                        {badgeInfo.label}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 pt-2 border-t border-slate-100">
-                      <span className="truncate max-w-[140px]">{user.email}</span>
-                      <span className="text-blue-600 font-bold flex items-center gap-0.5 shrink-0">
-                        <span>Pilih</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* ===================================================================== */}
       {/* PAGE FOOTER                                                           */}
